@@ -1,0 +1,44 @@
+<view class="login-page">
+  <!-- 应用 Logo -->
+  <image src="../../assets/rsg.png" class="logo"></image>
+
+  <!-- 手机号快捷登录按钮 -->
+  <button
+    id="agree-btn"
+    class="login-btn"
+    open-type="{{canTriggerPhoneNumber ? 'getPhoneNumber|agreePrivacyAuthorization' : ''}}"
+    bindtap="onLoginTap"
+    bindagreeprivacyauthorization="handleAgreePrivacyAuthorization"
+    bindgetphonenumber="getPhoneNumber"
+  >
+    手机号快捷登录
+  </button>
+
+  <!-- 用户协议和隐私政策 -->
+  <view class="agreement">
+    <!-- <checkbox-group bindchange="onAgreementChange">
+      <checkbox class="checkbox" value="agree"></checkbox>
+    </checkbox-group> -->
+
+    <custom-checkbox 
+      label="" 
+      position="right" 
+      checked="{{isChecked}}"
+      bind:changechecked="onAgreementChange"
+      class="check"
+    >
+      我已阅读并同意
+      <text
+        class="link"
+        bindtap="viewServiceAgreement"
+      >《服务协议》</text>
+      和
+      <text
+        class="link"
+        bindtap="viewPrivacyPolicy"
+      >《隐私政策》</text>
+    </custom-checkbox>
+
+    
+  </view>
+</view>

@@ -1,0 +1,18 @@
+<view class="line"></view>
+<button
+  type="primary"
+  plain
+  open-type="getPhoneNumber"
+  bindgetphonenumber="getphonenumber"
+>快速验证组件</button>
+
+<button id="agree-btn1" open-type="getPhoneNumber|agreePrivacyAuthorization" bindgetphonenumber="handleGetPhoneNumber" bindagreeprivacyauthorization="handleAgreePrivacyAuthorization">同意隐私协议并授权手机号</button>
+
+<view class="line"></view>
+<button
+  type="warn"
+  plain
+  open-type="getRealtimePhoneNumber"
+  bindgetrealtimephonenumber="getrealtimephonenumber"
+>实时验证组件</button>
+<view class="line"></view>

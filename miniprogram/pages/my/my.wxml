@@ -1,0 +1,96 @@
+<!-- <view>
+  <button class="btn" open-type="chooseAvatar" bindchooseavatar="chooseavatar">
+    <image class="avatar" src="{{avatarUrl}}" mode=""/>
+  </button>
+</view>
+
+<form bindsubmit="onSubmit">
+  <input 
+    type="nickname" 
+    name="nickname" 
+    placeholder="请输入昵称" 
+  />
+  <button type="primary" plain form-type="submit">点击获取昵称</button>
+</form> -->
+
+
+<view class="user-center-page">
+  <!-- 顶部用户信息 -->
+  <block wx:if="{{isLoggedIn}}">
+    <!-- 已登录状态 -->
+    <view class="user-header">
+      <view class="user-avatar-section">
+        <image src="{{avatarUrl}}" class="user-avatar"></image>
+        <view class="user-info">
+          <text class="username">{{username}}</text>
+          <text class="user-status">新锐会员</text>
+        </view>
+      </view>
+      <view class="progress-bar">
+        <text class="progress-text">距离铜牌还差 980.00 元</text>
+        <view class="progress-container">
+          <view class="progress"></view>
+        </view>
+      </view>
+
+      <!-- 右上角图标 -->
+      <view class="header-icons">
+        <image 
+          src="../../assets/kf.png" 
+          class="icon" 
+          bindtap="contactCustomerService">
+        </image>
+        <image 
+          src="../../assets/sz.png" 
+          class="icon" 
+          bindtap="openSettings">
+        </image>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <!-- 未登录状态 -->
+    <view class="user-header">
+      <view class="user-avatar-section">
+        <image src="../../assets/yh.png" class="user-avatar"></image>
+        <view class="user-info">
+          <text class="username">用户昵称{{isLoggedIn}}</text>
+          <text class="login-register" bindtap="goToLogin">点击登录或注册</text>
+        </view>
+      </view>
+      <!-- 右上角图标 -->
+      <view class="header-icons">
+        <image 
+          src="../../assets/kf.png" 
+          class="icon" 
+          bindtap="contactCustomerService">
+        </image>
+        <image 
+          src="../../assets/sz.png" 
+          class="icon" 
+          bindtap="openSettings">
+        </image>
+      </view>
+    </view>
+  </block>
+
+  <!-- 菜单 -->
+  <view class="menu-section">
+    <view class="menu-item">
+      <image src="" class="menu-icon"></image>
+      <text class="menu-title">我的订单</text>
+      <image src="" class="menu-arrow"></image>
+    </view>
+    <view class="menu-item">
+      <image src="" class="menu-icon"></image>
+      <text class="menu-title">我的优惠券</text>
+      <image src="" class="menu-arrow"></image>
+    </view>
+    <view class="menu-item">
+      <image src="" class="menu-icon"></image>
+      <text class="menu-title">设置</text>
+      <image src="" class="menu-arrow"></image>
+    </view>
+  </view>
+</view>

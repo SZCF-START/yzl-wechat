@@ -1,0 +1,64 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/notice/notice",
+    "pages/classify/classify",
+    "pages/order/order",
+    "pages/my/my",
+    "pages/login/login"
+  ],
+  "window": {
+    "navigationBarTitleText": "测试11",
+    "navigationBarBackgroundColor": "#F9C80E",
+    "enablePullDownRefresh": true,
+    "backgroundColor": "#efefef",
+    "backgroundTextStyle":"dark"
+  },
+  "tabBar": {
+    "selectedColor": "#F9C80E",
+    "color": "#666",
+    "borderStyle":"black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "/assets/tabBar/front.png",
+        "selectedIconPath": "assets/tabBar/front-activate.png"
+      },
+      {
+        "pagePath": "pages/notice/notice",
+        "text": "须知",
+        "iconPath": "/assets/tabBar/notice.png",
+        "selectedIconPath": "/assets/tabBar/notice-activate.png"
+      },
+      {
+        "pagePath": "pages/classify/classify",
+        "text": "分类",
+        "iconPath": "/assets/tabBar/classify.png",
+        "selectedIconPath": "/assets/tabBar/classify-activate.png"
+      },
+      {
+        "pagePath": "pages/order/order",
+        "text": "订单",
+        "iconPath": "/assets/tabBar/order.png",
+        "selectedIconPath": "/assets/tabBar/order-activate.png"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "/assets/tabBar/mine.png",
+        "selectedIconPath": "/assets/tabBar/mine-activate.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "usingComponents": {
+    "custom-checkbox": "/components/custom-checkbox/custom-checkbox",
+    "van-image": "@vant/weapp/image/index",
+    "van-loading": "@vant/weapp/loading/index",
+    "van-button": "@vant/weapp/button/index",
+    "custom01": "/components/custom01/custom01"
+  },
+ "__usePrivacyCheck__": true
+}

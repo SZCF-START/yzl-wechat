@@ -1,0 +1,12 @@
+/**index.wxss**/
+page {
+  padding: 50rpx;
+  box-sizing: border-box;
+}
+.custom .custom-checkbox .wx-checkbox-input {
+  border: 1px solid lightseagreen !important;
+}
+
+.custom .custom-checkbox .wx-checkbox-input-checked {
+  background-color: lightseagreen !important;
+}

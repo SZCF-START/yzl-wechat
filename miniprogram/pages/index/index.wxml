@@ -1,0 +1,18 @@
+<custom-checkbox 
+  label="我已阅读并同意 用户协议 和 隐私协议" 
+  position="right" 
+  checked="{{isChecked}}"
+  bind:changechecked="getData"
+  class="check"
+>
+  我已阅读并同意 用户协议 和 隐私协议111
+</custom-checkbox>
+
+<view class="line"></view>
+
+<view class="custom">
+  <custom-checkbox label="匿名提交" position="left" >
+    匿名提交111
+  </custom-checkbox>  
+</view>
+
