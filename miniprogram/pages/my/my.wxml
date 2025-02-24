@@ -23,15 +23,26 @@
         <image src="{{avatarUrl}}" class="user-avatar"></image>
         <view class="user-info">
           <text class="username">{{username}}</text>
-          <text class="user-status">新锐会员</text>
+          <view class="user-status-container" bindtap="goToMembership">
+            <text class="user-status-text">普通用户</text>
+            <image src="../../assets/arrowicon.png" class="user-status-arrow"></image>
+          </view>
         </view>
       </view>
-      <view class="progress-bar">
+      <!-- <view class="progress-bar">
         <text class="progress-text">距离铜牌还差 980.00 元</text>
         <view class="progress-container">
           <view class="progress"></view>
         </view>
-      </view>
+      </view> -->
+      <!-- <view class="deposit-section">
+        <view class="deposit-info">
+          <text class="deposit-text">押金余额：</text>
+          <text class="deposit-amount">{{depositBalance}} 元</text>
+        </view>
+        <button class="withdraw-button" bindtap="withdrawDeposit">押金提现</button>
+      </view> -->
+
 
       <!-- 右上角图标 -->
       <view class="header-icons">
@@ -74,6 +85,17 @@
       </view>
     </view>
   </block>
+
+  <view class="quick-access">
+    <block wx:for="{{tags}}" wx:key="id">
+      <view class="access-item" bindtap="navigateToPage" data-url="{{item.url}}">
+        <image class="access-icon" src="{{item.icon}}"></image>
+        <text class="access-text">{{item.name}}</text>
+      </view>
+    </block>
+  </view>
+
+
 
   <!-- 菜单 -->
   <view class="menu-section">

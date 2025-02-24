@@ -25,17 +25,18 @@
       position="right" 
       checked="{{isChecked}}"
       bind:changechecked="onAgreementChange"
-      class="check"
     >
       我已阅读并同意
       <text
         class="link"
-        bindtap="viewServiceAgreement"
+        data-is-link="true" 
+        catchtap="viewServiceAgreement"
       >《服务协议》</text>
       和
       <text
         class="link"
-        bindtap="viewPrivacyPolicy"
+        data-is-link="true"
+        catchtap="viewPrivacyPolicy"
       >《隐私政策》</text>
     </custom-checkbox>
 

@@ -1,16 +1,25 @@
-// pages/my/my.js
+const loginCheck = require('../../behaviors/loginCheck.js');
 Page({
-
+  behaviors: [loginCheck],
   /**
    * 页面的初始数据
    */
   data: {
-    avatarUrl: '../../assets/rsg.png',
+    // avatarUrl: '../../assets/rsg.png',
     // showPrivacy: false
     isLoggedIn: wx.getStorageSync('isLoggedIn'), // 是否已登录
     needsReload: false,
-    username: wx.getStorageSync('username'),
-    avatarUrl: wx.getStorageSync('avatarUrl')
+    username: wx.getStorageSync('userInfo').wechatName,
+    avatarUrl: wx.getStorageSync('userInfo').avatar,
+
+    tags: [
+      { id: '1', name: '实名认证', icon: '../../assets/myquickaccess/smrz.png', url: '/pages/auth/auth' },
+      { id: '2', name: '出车记录', icon: '../../assets/myquickaccess/ccjl.png', url: '/pages/record/record' },
+      { id: '3', name: '出车管理', icon: '../../assets/myquickaccess/ccgl.png', url: '/pages/manage/manage' },
+      { id: '4', name: '属具记录', icon: '../../assets/myquickaccess/sjjl.png', url: '/pages/equipment/record' },
+      { id: '5', name: '属具管理', icon: '../../assets/myquickaccess/sjgl.png', url: '/pages/equipment/manage' },
+      { id: '6', name: '押金审核', icon: '../../assets/myquickaccess/yjsh.png', url: '/pages/deposit/review' }
+    ]
   },
 
   // chooseavatar(event) {
@@ -27,11 +36,18 @@ Page({
   // },
 
   goToLogin() {
+    const redirectUrl = '/pages/my/my'
     wx.navigateTo({
-      url: '/pages/login/login', // 跳转到登录页路径
+      url: `/pages/login/login?redirect=${encodeURIComponent(redirectUrl)}`, // 跳转到登录页路径
     });
   },
   
+  goToMembership() {
+    wx.navigateTo({
+      url: '/pages/membership/membership' // 替换成你的会员页面路径
+    });
+  },
+
   contactCustomerService() {
     wx.showToast({
       title: '联系客服功能',
@@ -40,10 +56,7 @@ Page({
   },
 
   openSettings() {
-    wx.showToast({
-      title: '设置功能',
-      icon: 'none',
-    });
+    if (!this.checkLogin('pages/settings/settings', {})) return;
     wx.navigateTo({
       url: '/pages/settings/settings', // 跳转到设置页路径
     });
@@ -68,9 +81,7 @@ Page({
    */
   onShow() {
     // 如果需要重新加载数据
-    if (this.data.needsReload) {
-      this.reloadData();
-    }
+    this.reloadData();
   },
 
   /**
@@ -111,8 +122,8 @@ Page({
   reloadData() {
     // 重新获取登录状态和用户信息
     const isLoggedIn = wx.getStorageSync('isLoggedIn');
-    const username = wx.getStorageSync('username') || '用户昵称';
-    const avatarUrl = wx.getStorageSync('avatarUrl') || '../../assets/yh.png';
+    const username = wx.getStorageSync('userInfo').wechatName || '用户昵称';
+    const avatarUrl = wx.getStorageSync('userInfo').avatar || '../../assets/yh.png';
 
     this.setData({
       isLoggedIn,
@@ -121,4 +132,16 @@ Page({
       needsReload: false // 重置标识
     });
   },
+
+  navigateToPage(e) {
+    
+    const url = e.currentTarget.dataset.url;
+    if (!this.checkLogin(url, {})) {
+      return
+    }else{
+      wx.navigateTo({
+        url: url
+      });
+    };
+  }
 })

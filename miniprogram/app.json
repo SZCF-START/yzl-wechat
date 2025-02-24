@@ -5,7 +5,19 @@
     "pages/classify/classify",
     "pages/order/order",
     "pages/my/my",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/auth/auth",
+    "pages/record/record",
+    "pages/manage/manage",
+    "pages/equipment/record",
+    "pages/equipment/manage",
+    "pages/deposit/review",
+    "pages/privacy-policy/privacy-policy",
+    "pages/service-agreement/service-agreement",
+    "pages/settings/settings",
+    "pages/profile/profile",
+    "pages/editNickname/editNickname",
+    "pages/membership/membership"
   ],
   "window": {
     "navigationBarTitleText": "测试11",

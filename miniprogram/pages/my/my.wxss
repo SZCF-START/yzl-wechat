@@ -47,16 +47,43 @@ input {
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   margin-right: 20px;
-  background-color: turquoise;
+  /* background-color: turquoise; */
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
+}
+
+.user-status-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;  /* 圆圈大小 */
+  height: 25px;
+  border-radius: 20px;  /* 让它变成圆角 */
+  border: 1px solid #ccc;  /* 圆圈边框 */
+  background-color: #f8f8f8; /* 轻微背景色，增强可点击感 */
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.user-status-container:active {
+  background-color: #e6e6e6; /* 按下时背景变化 */
+}
+
+.user-status-text {
+  margin-right: 5px;
+}
+
+.user-status-arrow {
+  width: 10px;
+  height: 12px;
 }
 
 .username {
@@ -74,7 +101,7 @@ input {
 }
 
 /* 进度条部分 */
-.progress-bar {
+/* .progress-bar {
   margin-top: 10px;
 }
 
@@ -92,11 +119,89 @@ input {
 }
 
 .progress {
-  width: 20%; /* 根据当前进度调整宽度 */
+  width: 20%; 
   height: 10px;
   background-color: #ff4500;
   border-radius: 5px;
+} */
+
+/* 押金余额部分整体容器 */
+.deposit-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 让提现按钮靠右 */
+  padding: 0 20px; /* 左右间距 */
+  margin-top: 10px;
 }
+
+/* 余额信息左对齐头像 */
+.deposit-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+/* "押金余额：" 文字样式 */
+.deposit-text {
+  font-size: 16px;
+  color: #666;
+}
+
+/* 余额金额样式，醒目 */
+.deposit-amount {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff4500;
+  margin-left: 5px;
+}
+
+/* 提现按钮 */
+.withdraw-button {
+  background-color: #ff4500;
+  color: #ffffff;
+  padding: 1px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  margin-left: auto; /* 按钮靠右 */
+}
+.withdraw-button:active {
+  background-color: #e63e00;
+}
+
+.quick-access {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4列布局 */
+  gap: 40rpx; /* 上下左右间距一致 */
+  padding: 20rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  justify-items: center; /* 水平居中对齐 */
+}
+
+.access-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.access-icon {
+  width: 70rpx;
+  height: 70rpx;
+}
+
+.access-text {
+  font-size: 26rpx;
+  color: #333;
+  margin-top: 20rpx; /* 文字与图标间距 */
+  text-align: center;
+}
+
+
+
 
 /* 菜单部分 */
 .menu-section {

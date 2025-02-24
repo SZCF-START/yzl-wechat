@@ -1,0 +1,75 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px; /* 上移头像区域 */
+}
+
+.header {
+  position: absolute;
+  top: 60px; /* 头像上移 */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: transparent; /* 移除背景 */
+  border: none !important; /* 去除边框 */
+  box-shadow: none !important; /* 去除阴影 */
+  padding: 0;
+  outline: none;
+}
+
+/* 处理小程序 button 可能默认带的边框 */
+button::after {
+  border: none !important;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.change-avatar-text {
+  font-size: 14px;
+  color: #007aff;
+  margin-top: 5px;
+}
+
+.info-list {
+  width: 100%;
+  margin-top: 180px; /* 让内容下移 */
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.label {
+  font-size: 16px;
+  color: #333;
+}
+
+.value {
+  font-size: 16px;
+  color: #666;
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+}
+
+.arrow-icon {
+  width: 12px;
+  height: 12px;
+  margin-left: 5px;
+}

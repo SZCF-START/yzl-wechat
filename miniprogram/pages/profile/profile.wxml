@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="header">
+    <!-- 头像区域，点击头像获取微信头像 -->
+    <button class="avatar-section" open-type="chooseAvatar" bind:chooseavatar="getUserAvatar">
+      <image class="avatar" src="{{avatarUrl || '../../assets/rsg.png'}}" />
+      <text class="change-avatar-text">更换头像</text>
+    </button>
+  </view>
+
+  <view class="info-list">
+    <view class="info-item">
+      <text class="label">会员名</text>
+      <text class="value">{{username}}</text>
+    </view>
+
+    <view class="info-item" bindtap="goToEditNickname">
+      <text class="label">昵称</text>
+      <view class="right-section">
+        <text class="value">{{nickname}}</text>
+        <image class="arrow-icon" src="../../assets/arrowicon.png" />
+      </view>
+    </view>
+
+    <view class="info-item" bindtap="selectGender">
+      <text class="label">性别</text>
+      <view class="right-section">
+        <text class="value">{{gender}}</text>
+        <image class="arrow-icon" src="../../assets/arrowicon.png" />
+      </view>
+    </view>
+  </view>
+</view>

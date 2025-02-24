@@ -3,7 +3,7 @@
   display: inline-block;
 }
 
-.custom-checkbox-box .custom-label{
+.custom-checkbox-box{
   display: flex;
   align-items: center;
 }

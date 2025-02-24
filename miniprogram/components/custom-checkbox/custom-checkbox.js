@@ -35,7 +35,7 @@ Component({
    * 组件的初始数据
    */
   data: {
-    isChecked: false
+    isChecked: false,
   },
 
   /**
@@ -43,35 +43,29 @@ Component({
    */
   methods: {
     
-    updateChecked() {
+    updateChecked(e) {
       const newChecked = !this.data.isChecked;
       this.setData({
         isChecked: newChecked
       })
-      // 调用 wx.onNeedPrivacyAuthorization 回调
-      // if (newChecked) {
-      //   console.log("1111111111111");
-      //   wx.onNeedPrivacyAuthorization((listener) => {
-      //     listener({
-      //       success: () => {
-      //         console.log("11111111111112");
-      //         this.triggerEvent('changechecked', { checked: true });
-      //       },
-      //       fail: () => {
-      //         console.log("11111111111113");
-      //         wx.showToast({
-      //           title: '您需要同意隐私政策才能继续',
-      //           icon: 'none',
-      //         });
-      //         this.setData({ checked: false });
-      //       },
-      //     });
-      //   });
-      // } else {
-      //   console.log("2222222222");
-      //   this.triggerEvent('changechecked', this.data.isChecked);
-      // }
       this.triggerEvent('changechecked',this.data.isChecked)
+    },
+    // 点击文字区域时触发
+    contentTap(e) {
+      // 如果点击目标是链接，则不做切换
+      if (e.target.dataset && e.target.dataset.isLink === 'true') {
+        return;
+      }
+      // 否则，切换选中状态
+      const newChecked = !this.data.isChecked;
+      this.setData({ isChecked: newChecked });
+      this.triggerEvent('changechecked', { value: newChecked });
+    },
+
+    // 可选：在组件内部也提供一个用于链接点击的处理函数，阻止事件冒泡
+    handleLinkTap(e) {
+      e.stopPropagation();
+      // 此处可以处理链接跳转或其他逻辑
     }
     
   }
