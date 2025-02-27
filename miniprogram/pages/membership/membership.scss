@@ -1,1 +1,108 @@
-/* pages/membership/membership.wxss */
+/* 全局容器 */
+.container {
+  background-color: #2C3E50;
+  min-height: 100vh;
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 会员卡（加长高度） */
+.member-card {
+  background: #48C6EF;
+  border-radius: 20rpx;
+  padding: 20rpx; /* 变长 */
+  color: white;
+  width: 90%;
+}
+
+.member-level {
+  display: flex;
+  justify-content: space-between;
+  font-size: 36rpx;
+}
+
+.level-title {
+  font-weight: bold;
+}
+
+.level-status {
+  font-size: 28rpx;
+  background: white;
+  color: #48C6EF;
+  padding: 4rpx 10rpx;
+  border-radius: 10rpx;
+}
+
+.valid-time {
+  font-size: 26rpx;
+}
+
+.growth-info {
+  font-size: 28rpx;
+  margin: 20rpx 0;
+}
+
+.growth-details {
+  color: white;
+  text-decoration: underline;
+  font-size: 28rpx;
+}
+
+/* 会员升级区域（宽度 100%，高度随内容变化，圆角，紧贴上方） */
+.upgrade-section {
+  background: #F5D76E;
+  width: 100vw; /* 确保宽度撑满屏幕 */
+  border-radius: 20rpx;
+  margin-top: -10rpx;
+  padding: 40rpx 20rpx; /* 左右留白，让内容不会撑满 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* 升级标题居中 */
+.upgrade-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+/* 升级描述 */
+.upgrade-description {
+  font-size: 28rpx;
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+/* 解锁权益白色背景框 */
+.upgrade-benefits {
+  background: white;
+  padding: 30rpx;
+  border-radius: 15rpx;
+  width: 90%; /* 限制宽度，避免撑满 */
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+  margin-top: 20rpx;
+  align-self: flex-start; /* 让它靠左 */
+}
+
+.upgrade-item {
+  font-size: 26rpx;
+  margin-bottom: 15rpx;
+  text-align: center;
+}
+
+/* 购买会员按钮 */
+.purchase-button {
+  width: 100%;
+  background: #E74C3C;
+  color: white;
+  font-size: 32rpx;
+  padding: 20rpx;
+  border-radius: 50rpx;
+  text-align: center;
+  margin-top: 20rpx;
+}

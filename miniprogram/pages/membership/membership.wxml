@@ -1,2 +1,34 @@
-<!--pages/membership/membership.wxml-->
-<text>pages/membership/membership.wxml</text>
+<view class="container">
+  <!-- 会员信息 -->
+  <view class="member-card">
+    <view class="member-level">
+      <text class="level-title">普通会员</text>
+      <text class="level-status">当前等级</text>
+    </view>
+    <text class="valid-time">永久有效</text>
+    <view class="growth-info">
+      <text>还需 <text class="highlight">100</text> 点成长值可升级为白银会员</text>
+    </view>
+    <view class="growth-details">
+      <text>查看成长值明细 ></text>
+    </view>
+  </view>
+
+  <!-- 会员升级区域 -->
+  <view class="upgrade-section">
+    <text class="upgrade-title">升级攻略</text>
+    <text class="upgrade-description">
+      还需消费 <text class="highlight">100元</text> 即可升级白银会员，升级后可解锁权益：
+    </text>
+
+    <!-- 解锁权益框 -->
+    <view class="upgrade-benefits">
+      <view class="upgrade-item">🎂 50元生日优惠</view>
+      <view class="upgrade-item">⭐ 会员积分 1:1.2</view>
+      <view class="upgrade-item">⛽ 无忧还车 +1</view>
+    </view>
+
+    <!-- 购买会员按钮 -->
+    <button class="purchase-button" bindtap="buyMembership">购买会员</button>
+  </view>
+</view>

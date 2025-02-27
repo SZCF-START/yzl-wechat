@@ -1,4 +1,4 @@
-// pages/login/login.js
+import config from '../../config/config.js'
 Page({
 
   /**
@@ -77,7 +77,7 @@ Page({
           if (res.code) {
             // 发送 code 到后端换取 openId 和手机号
             wx.request({
-              url: 'http://192.168.200.16:8991/jeecg-boot/wechat/carousel/yzlCarousel/login',
+              url: config.baseUrl + 'wechat/carousel/yzlCarousel/login',
               method: 'post',
               data: {
                 loginCode: res.code, // 登录 code
