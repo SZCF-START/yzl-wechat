@@ -8,13 +8,15 @@
   align-items: center;
 }
 
-/* 会员卡（加长高度） */
+/* 会员卡（固定大小） */
 .member-card {
   background: #48C6EF;
   border-radius: 20rpx;
-  padding: 20rpx; /* 变长 */
+  padding: 20rpx;
   color: white;
-  width: 90%;
+  width: 100%;
+  height: 300rpx; /* 固定高度，可根据实际需要调整 */
+  box-sizing: border-box;
 }
 
 .member-level {
@@ -50,13 +52,14 @@
   font-size: 28rpx;
 }
 
-/* 会员升级区域（宽度 100%，高度随内容变化，圆角，紧贴上方） */
+/* 会员升级区域（宽度 100%，高度随内容变化，圆角） */
 .upgrade-section {
   background: #F5D76E;
-  width: 100vw; /* 确保宽度撑满屏幕 */
+  width: 100vw; 
   border-radius: 20rpx;
-  margin-top: -10rpx;
-  padding: 40rpx 20rpx; /* 左右留白，让内容不会撑满 */
+  /* 原先可能是 margin-top: -10rpx，这里改小或改为正值让两块区域更贴近 */
+  margin-top: 1rpx; 
+  padding: 250rpx 20rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -83,26 +86,28 @@
   background: white;
   padding: 30rpx;
   border-radius: 15rpx;
-  width: 90%; /* 限制宽度，避免撑满 */
+  width: 90%;
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
   margin-top: 20rpx;
-  align-self: flex-start; /* 让它靠左 */
+  align-self: flex-start; 
 }
 
 .upgrade-item {
   font-size: 26rpx;
   margin-bottom: 15rpx;
-  text-align: center;
+  text-align: left;
 }
 
-/* 购买会员按钮 */
+/* 购买会员按钮固定在屏幕最下方 */
 .purchase-button {
-  width: 100%;
+  position: fixed;
+  bottom: 20rpx;
+  left: 20rpx;
+  right: 20rpx;
   background: #E74C3C;
   color: white;
   font-size: 32rpx;
   padding: 20rpx;
   border-radius: 50rpx;
   text-align: center;
-  margin-top: 20rpx;
 }

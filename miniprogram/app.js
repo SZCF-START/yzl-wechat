@@ -1,4 +1,9 @@
+import { initEid } from './mp_ecard_sdk/main';
 App({
+  onLaunch() {
+    initEid();
+    this.methods.updateManager()
+  },
   // globalData: {
   //   userInfo: null,
   //   token: wx.getStorageSync('token') || '',

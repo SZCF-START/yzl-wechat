@@ -1,0 +1,1 @@
+const getParameterByName=function(e,t){e=e.replace(/[\[\]]/g,"\\$&");e=new RegExp(`[?&]${e}(=([^&#]*)|&|#|$)`).exec(t);return e?e[2]?decodeURIComponent(e[2].replace(/\+/g," ")):"":null};export default getParameterByName;

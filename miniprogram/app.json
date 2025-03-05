@@ -17,7 +17,12 @@
     "pages/settings/settings",
     "pages/profile/profile",
     "pages/editNickname/editNickname",
-    "pages/membership/membership"
+    "pages/membership/membership",
+    "mp_ecard_sdk/index/index",
+    "mp_ecard_sdk/protocol/service/index",
+    "mp_ecard_sdk/protocol/privacy/index",
+    "mp_ecard_sdk/protocol/userAccredit/index",
+    "mp_ecard_sdk/protocol/eid/index",
   ],
   "window": {
     "navigationBarTitleText": "测试11",

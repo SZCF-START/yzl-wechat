@@ -2,33 +2,39 @@
   <!-- 会员信息 -->
   <view class="member-card">
     <view class="member-level">
-      <text class="level-title">普通会员</text>
+      <!-- 普通会员从后台查询 -->
+      <text class="level-title">{{memberInfo.level}}</text>
       <text class="level-status">当前等级</text>
     </view>
-    <text class="valid-time">永久有效</text>
-    <view class="growth-info">
+    <!-- 永久有效从后台查询 -->
+    <text class="valid-time">{{memberInfo.validTime}}</text>
+    <!-- <view class="growth-info">
       <text>还需 <text class="highlight">100</text> 点成长值可升级为白银会员</text>
     </view>
     <view class="growth-details">
       <text>查看成长值明细 ></text>
-    </view>
+    </view> -->
   </view>
 
   <!-- 会员升级区域 -->
   <view class="upgrade-section">
     <text class="upgrade-title">升级攻略</text>
+    <!-- 升级描述：改为需要购买￥{{price}} -->
     <text class="upgrade-description">
-      还需消费 <text class="highlight">100元</text> 即可升级白银会员，升级后可解锁权益：
+      需要购买 <text class="highlight">￥{{price}}</text> 即可升级白银会员，升级后可解锁权益：
     </text>
 
-    <!-- 解锁权益框 -->
+    <!-- 解锁权益框（图标可写死，文字从后台查询） -->
     <view class="upgrade-benefits">
-      <view class="upgrade-item">🎂 50元生日优惠</view>
-      <view class="upgrade-item">⭐ 会员积分 1:1.2</view>
-      <view class="upgrade-item">⛽ 无忧还车 +1</view>
+      <!-- 假设后台返回数组 benefits，每项含 icon 和 text -->
+      <block wx:for="{{benefits}}" wx:key="index">
+        <view class="upgrade-item">
+          <text>{{item.icon}}</text> <text>{{item.text}}</text>
+        </view>
+      </block>
     </view>
 
-    <!-- 购买会员按钮 -->
+    <!-- 购买会员按钮固定在屏幕最下方 -->
     <button class="purchase-button" bindtap="buyMembership">购买会员</button>
   </view>
 </view>
