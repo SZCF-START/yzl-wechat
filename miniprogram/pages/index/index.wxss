@@ -1,12 +1,224 @@
-/**index.wxss**/
-page {
-  padding: 50rpx;
-  box-sizing: border-box;
-}
-.custom .custom-checkbox .wx-checkbox-input {
-  border: 1px solid lightseagreen !important;
+/* 整体页面容器 */
+.page-container {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  background-color: #ffffff;
 }
 
-.custom .custom-checkbox .wx-checkbox-input-checked {
-  background-color: lightseagreen !important;
+/* 轮播图 */
+.swiper {
+  width: 100%;
+  height: 300rpx;
+  background-color: #ccc;
+}
+
+.swiper-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 租车卡片 */
+.rent-card {
+  position: absolute;
+  top: 285rpx; /* 根据Banner高度可做微调 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+  padding: 20rpx;
+}
+
+/* 卡片头部 */
+.rent-card-header {
+  background-color: #fff;
+  padding: 20rpx;
+  text-align: center;
+}
+
+/* 通用row */
+.row {
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 一行：城市 + 门店 */
+.row-city-store {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* 城市块、门店块各占一半 */
+.city-block,
+.store-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 可根据需求调整对齐方式 */
+}
+
+/* 上方提示，如“城市选择”“门店选择” */
+.upper-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 6rpx;
+}
+
+/* 显示城市/门店名 + 下角标 */
+.city-value,
+.store-value {
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  color: #333;
+}
+.subscript {
+  font-size: 20rpx;
+  color: #999;
+  margin-left: 6rpx;
+}
+
+/* 异地还车提示行 */
+.row-ydhc {
+  justify-content: flex-end;
+}
+.tip-ydhc {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 第二行：日期区间 */
+.row-date {
+  background-color: #fafafa;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  cursor: pointer;
+}
+.date-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+.date-text {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+.sub-text {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+.date-middle {
+  margin: 0 20rpx;
+}
+.days-text {
+  font-size: 28rpx;
+  color: #ff8c00;
+  font-weight: bold;
+}
+
+/* 第三行：提示+一键填写 */
+.row-tip {
+  justify-content: flex-start;
+}
+.preorder-tip {
+  font-size: 24rpx;
+  color: #666;
+  margin-right: 20rpx;
+}
+.fill-btn {
+  background-color: #fff;
+  border: 1rpx solid #ff8c00;
+  color: #ff8c00;
+  font-size: 24rpx;
+  border-radius: 8rpx;
+  padding: 8rpx 16rpx;
+}
+
+/* 第四行：checkbox */
+.row-checkbox {
+  justify-content: flex-start;
+}
+.send-checkbox {
+  margin-right: 10rpx;
+}
+.checkbox-label {
+  font-size: 24rpx;
+  color: #333;
+}
+
+/* 第五行：去选车按钮 */
+.row-button {
+  justify-content: center;
+}
+.go-select-btn {
+  width: 100%;
+  background-color: #ff8c00;
+  color: #fff;
+  font-size: 30rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  padding: 16rpx 0;
+}
+
+/* 金刚区 - 使用swiper分页 */
+.icon-swiper {
+  width: 100%;
+  height: 220rpx; /* 根据实际需求微调 */
+  margin-top: 480rpx; /* 留出空间给租车卡片 */
+  background-color: #ffffff;
+}
+
+/* 每页容器 */
+.icon-page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  /* 默认4个图标均分：space-around */
+  justify-content: space-around;
+  align-items: center;
+}
+
+/* 若当前页不足4个，则靠左排列 */
+.icon-page.left-align {
+  justify-content: flex-start;
+}
+
+/* 单个图标项：使用flex垂直居中 */
+.icon-item {
+  width: 25%; /* 4个刚好一行 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 10rpx 0;
+}
+
+.icon-img {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 8rpx;
+}
+
+.icon-text {
+  font-size: 24rpx;
+  color: #333;
+}
+
+
+/* 底部内容示例 */
+.bottom-area {
+  margin-top: 20rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+  padding: 20rpx;
 }

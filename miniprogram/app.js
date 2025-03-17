@@ -2,7 +2,7 @@ import { initEid } from './mp_ecard_sdk/main';
 App({
   onLaunch() {
     initEid();
-    this.methods.updateManager()
+    // this.methods.updateManager()
   },
   // globalData: {
   //   userInfo: null,

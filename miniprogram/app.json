@@ -23,6 +23,10 @@
     "mp_ecard_sdk/protocol/privacy/index",
     "mp_ecard_sdk/protocol/userAccredit/index",
     "mp_ecard_sdk/protocol/eid/index",
+    "pages/timeSelect/timeSelect"
+  ],
+  "requiredPrivateInfos": [
+    "getLocation"
   ],
   "window": {
     "navigationBarTitleText": "测试11",
@@ -75,7 +79,8 @@
     "van-image": "@vant/weapp/image/index",
     "van-loading": "@vant/weapp/loading/index",
     "van-button": "@vant/weapp/button/index",
-    "custom01": "/components/custom01/custom01"
+    "custom01": "/components/custom01/custom01",
+    "van-calendar": "@vant/weapp/calendar/index"
   },
  "__usePrivacyCheck__": true
 }

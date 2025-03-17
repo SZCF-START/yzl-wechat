@@ -1,4 +1,5 @@
 const loginCheck = require('../../behaviors/loginCheck.js');
+import config from '../../config/config.js'
 Page({
   behaviors: [loginCheck],
   /**
@@ -11,6 +12,7 @@ Page({
     needsReload: false,
     username: wx.getStorageSync('userInfo').wechatName,
     avatarUrl: wx.getStorageSync('userInfo').avatar,
+    eidToken: "",
 
     tags: [
       { id: '1', name: '实名认证', icon: '../../assets/myquickaccess/smrz.png', url: '/pages/auth/auth' },
@@ -66,7 +68,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-
+    this.getEidToken()
   },
 
   /**
@@ -136,12 +138,81 @@ Page({
   navigateToPage(e) {
     
     const url = e.currentTarget.dataset.url;
+    console.log(e.currentTarget);
     if (!this.checkLogin(url, {})) {
       return
-    }else{
+    }
+    // 如果是实名认证页面，先进行人脸核身
+    if (url === "/pages/auth/auth") {
+      if (!this.data.token) {
+        wx.showToast({
+          title: "获取 Token 失败，请稍后重试",
+          icon: "none"
+        });
+        return;
+      }
+
+      wx.showLoading({ title: "实名认证中..." });
+
+      startEid({
+        data: { token: this.data.token }, // 传入身份验证 Token
+        verifyCallback: (res) => {
+          wx.hideLoading();
+          const { verifyDone } = res;
+
+          if (verifyDone) {
+            wx.showToast({
+              title: "核身成功",
+              icon: "success"
+            });
+
+            // 核身成功后再跳转
+            wx.navigateTo({
+              url: url
+            });
+          } else {
+            wx.showToast({
+              title: "核身失败，请重试",
+              icon: "none"
+            });
+          }
+        }
+      });
+
+    } else {
+      // 普通页面直接跳转
       wx.navigateTo({
         url: url
       });
-    };
-  }
+    }
+  },  
+
+  // 🔹 获取 e 证通身份验证 Token
+  getEidToken() {
+    wx.request({
+      url: config.baseUrl + 'wechat/tencent/realnameauth/getEidToken', 
+      method: "GET",
+      data: {},
+      success: (res) => {
+        res.result.EidToken
+        if (res.result && res.result.EidToken) {
+          this.setData({ eidToken: res.result.EidToken });
+        }
+      }
+    });
+  },
+
+  goSDK(eidToken) {
+    startEid({
+        data: {
+          eidToken,
+        },
+        verifyDoneCallback(res) {  
+            const { token, verifyDone } = res;
+            console.log('收到核身完成的res:', res);
+            console.log('核身的token是:', token); 
+            console.log('是否完成核身:', verifyDone);          
+        },
+    });
+  },
 })

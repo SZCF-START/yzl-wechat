@@ -1,0 +1,14 @@
+<view class="calendar-demo-page">
+  <!-- 触发弹出日历的按钮或区域 -->
+  <button bindtap="showCalendar">选择日期</button>
+
+  <!-- Vant Weapp 日历组件 -->
+  <van-calendar
+    show="{{ showCalendar }}"
+    type="range"                  
+    min-date="{{ minDate }}"
+    max-date="{{ maxDate }}"
+    bind:confirm="onConfirm"
+    bind:cancel="onCancel"
+  />
+</view>
