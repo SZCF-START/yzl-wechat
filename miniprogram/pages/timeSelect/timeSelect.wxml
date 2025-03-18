@@ -1,14 +1,73 @@
-<view class="calendar-demo-page">
-  <!-- 触发弹出日历的按钮或区域 -->
-  <button bindtap="showCalendar">选择日期</button>
+<view class="page-container">
+  <!-- 顶部固定区域：显示取还车日期与星期 -->
+  <view class="top-fixed">
+    <view class="date-line">
+      <text class="date-text">{{ startDateDisplay || "取车日期" }}</text>
+      <image class="arrow-icon" src="/images/arrow.png" mode="widthFix" />
+      <text class="date-text">{{ endDateDisplay || "还车日期" }}</text>
+    </view>
+    <view class="sub-line">
+      <text>{{ startWeek || "请选择" }}</text>
+      <text class="sep"> - </text>
+      <text>{{ endWeek || "请选择" }}</text>
+    </view>
+  </view>
 
-  <!-- Vant Weapp 日历组件 -->
-  <van-calendar
-    show="{{ showCalendar }}"
-    type="range"                  
-    min-date="{{ minDate }}"
-    max-date="{{ maxDate }}"
-    bind:confirm="onConfirm"
-    bind:cancel="onCancel"
-  />
+  <!-- 中间区域：van‑calendar 日期区间选择（滚动区域） -->
+  <scroll-view class="calendar-scroll" scroll-y="true">
+    <view class="calendar-container">
+      <van-calendar
+        title=""
+        poppable="{{ false }}"
+        type="range"
+        color="#80c269"
+        min-date="{{ minDate }}"
+        max-date="{{ maxDate }}"
+        show-subtitle="{{ false }}"
+        show-mark="{{ false }}"
+        bind:select="onSelectDate"
+      />
+    </view>
+  </scroll-view>
+
+  <!-- 时间选择区域：固定在底部区域上方 -->
+  <view class="time-area">
+    <view class="time-block">
+      <text class="time-label">取车时间</text>
+      <scroll-view class="time-scroll" scroll-y="true">
+        <block wx:for="{{ timeList }}" wx:key="item">
+          <view class="time-item {{ item === startTimeRaw ? 'active' : '' }}"
+                data-time="{{ item }}"
+                bindtap="chooseStartTime">
+            {{ item }}
+          </view>
+        </block>
+      </scroll-view>
+    </view>
+    <view class="time-block">
+      <text class="time-label">还车时间</text>
+      <scroll-view class="time-scroll" scroll-y="true">
+        <block wx:for="{{ timeList }}" wx:key="item">
+          <view class="time-item {{ item === endTimeRaw ? 'active' : '' }}"
+                data-time="{{ item }}"
+                bindtap="chooseEndTime">
+            {{ item }}
+          </view>
+        </block>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 底部固定区域：总时长显示及操作按钮 -->
+  <view class="bottom-fixed">
+    <view class="duration-text">
+      <block wx:if="{{ totalDays || totalHours }}">
+        共{{ totalDays }}天{{ totalHours }}小时
+      </block>
+    </view>
+    <view class="btn-group">
+      <button class="clear-btn" bindtap="onClear">清空</button>
+      <button class="confirm-btn" bindtap="onConfirm">确定</button>
+    </view>
+  </view>
 </view>
