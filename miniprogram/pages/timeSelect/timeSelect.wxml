@@ -1,17 +1,28 @@
 <view class="page-container">
   <!-- 顶部固定区域：显示取还车日期与星期 -->
   <view class="top-fixed">
-    <view class="date-line">
-      <text class="date-text">{{ startDateDisplay || "取车日期" }}</text>
+    <view class="date-container">
+      <!-- 取车日期 -->
+      <view class="date-item">
+        <text class="date-text">{{ startDateDisplay || "取车日期" }}</text>
+        <view class="time-container">
+          <text class="week-text">{{ startWeek || "请选择" }}</text>
+          <text class="time-text">{{ startTimeRaw || "" }}</text>
+        </view>
+      </view>
+      <!-- 箭头图标 -->
       <image class="arrow-icon" src="/images/arrow.png" mode="widthFix" />
-      <text class="date-text">{{ endDateDisplay || "还车日期" }}</text>
-    </view>
-    <view class="sub-line">
-      <text>{{ startWeek || "请选择" }}</text>
-      <text class="sep"> - </text>
-      <text>{{ endWeek || "请选择" }}</text>
+      <!-- 还车日期 -->
+      <view class="date-item">
+        <text class="date-text">{{ endDateDisplay || "还车日期" }}</text>
+        <view class="time-container">
+          <text class="week-text">{{ endWeek || "请选择" }}</text>
+          <text class="time-text">{{ endTimeRaw || "" }}</text>
+        </view>
+      </view>
     </view>
   </view>
+
 
   <!-- 中间区域：van‑calendar 日期区间选择（滚动区域） -->
   <scroll-view class="calendar-scroll" scroll-y="true">
@@ -25,6 +36,7 @@
         max-date="{{ maxDate }}"
         show-subtitle="{{ false }}"
         show-mark="{{ false }}"
+        show-confirm="{{ false }}"
         bind:select="onSelectDate"
       />
     </view>
@@ -67,7 +79,10 @@
     </view>
     <view class="btn-group">
       <button class="clear-btn" bindtap="onClear">清空</button>
-      <button class="confirm-btn" bindtap="onConfirm">确定</button>
+      <!-- 根据 dateRangeComplete 状态控制按钮样式和禁用 -->
+      <button class="confirm-btn {{ !dateRangeComplete ? 'disabled' : '' }}" 
+              bindtap="onConfirm" 
+              disabled="{{ !dateRangeComplete }}">确定</button>
     </view>
   </view>
 </view>

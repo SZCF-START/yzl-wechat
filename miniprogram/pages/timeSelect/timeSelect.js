@@ -9,6 +9,7 @@ Page({
     endDateDisplay: '',
     startWeek: '',    // 顶部显示星期，如 "周二"
     endWeek: '',
+    dateRangeComplete: false, //是否已完整选择日期区间
 
     // 时间选择（自定义滚动列表，半小时一档）
     timeList: [],
@@ -42,14 +43,16 @@ Page({
 
   // van-calendar 日期区间选择回调
   onSelectDate(e) {
-    const dates = e.detail.date; // dates 为 Date 对象数组，长度为2时表示区间选择
-    if (dates && dates.length === 2) {
+    if (e.detail && e.detail[0] && e.detail[1]) {
       this.setData({
-        startDateVal: dates[0].getTime(),
-        endDateVal: dates[1].getTime()
+        startDateVal: e.detail[0].getTime(),
+        endDateVal: e.detail[1].getTime(),
+        dateRangeComplete: true
       });
       this.updateDateDisplay();
       this.computeDuration();
+    }else{
+      this.setData({ dateRangeComplete: false });
     }
   },
 
@@ -89,6 +92,8 @@ Page({
   // 计算总时长，结合日期与时间
   computeDuration() {
     const { startDateVal, endDateVal, startTimeRaw, endTimeRaw } = this.data;
+
+    console.log("111",startDateVal, endDateVal, startTimeRaw, endTimeRaw ,"222");
     if (!startDateVal || !endDateVal) {
       this.setData({ totalDays: 0, totalHours: 0 });
       return;
@@ -138,7 +143,8 @@ Page({
       startTimeRaw: '09:00',
       endTimeRaw: '07:30',
       totalDays: 0,
-      totalHours: 0
+      totalHours: 0,
+      dateRangeComplete: false
     });
   },
 
