@@ -80,7 +80,9 @@
     "van-loading": "@vant/weapp/loading/index",
     "van-button": "@vant/weapp/button/index",
     "custom01": "/components/custom01/custom01",
-    "van-calendar": "@vant/weapp/calendar/index"
+    "van-calendar": "@vant/weapp/calendar/index",
+    "van-popup": "@vant/weapp/popup/index",
+    "van-picker": "@vant/weapp/picker/index"
   },
  "__usePrivacyCheck__": true
 }
