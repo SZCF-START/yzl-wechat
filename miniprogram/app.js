@@ -4,6 +4,7 @@ App({
     initEid();
     // this.methods.updateManager()
   },
+  
   // globalData: {
   //   userInfo: null,
   //   token: wx.getStorageSync('token') || '',

@@ -1,5 +1,6 @@
 Page({
   data: {
+    formatter: null,
     // 日期区间选择（van-calendar）相关
     minDate: new Date().getTime(),
     maxDate: new Date().getTime() + 90 * 24 * 60 * 60 * 1000, // 90天后
@@ -26,6 +27,22 @@ Page({
     this.initTimeList();
     // 如有默认选择可以在这里设置
     this.updateDateDisplay();
+    this.setData({
+      formatter: this.formatterFunction, // 在 onLoad 里绑定
+    });
+  },
+
+  formatterFunction(day) {
+    if (day.type === 'start') {
+      day.bottomInfo = '取车'; // 修改开始的文本
+    }
+    if (day.type === 'end') {
+      day.bottomInfo = '还车'; // 修改结束的文本
+    }
+    if (day.type === 'start-end') {
+      day.bottomInfo = '取/还车'; // 适用于同一天取车还车
+    }
+    return day;
   },
 
   // 生成半小时增量的时间列表
@@ -85,6 +102,24 @@ Page({
   // 时间选择：还车时间点击
   chooseEndTime(e) {
     const time = e.currentTarget.dataset.time;
+    this.setData({ endTimeRaw: time });
+    this.computeDuration();
+  },
+
+  // 监听取车时间滚动
+  onStartTimeScroll(e) {
+    let scrollTop = e.detail.scrollTop;
+    let index = Math.floor(scrollTop / 50); // 50rpx 近似为每个 item 的高度
+    let time = this.data.timeList[index] || this.data.startTime;
+    this.setData({ startTimeRaw: time });
+    this.computeDuration();
+  },
+
+  // 监听还车时间滚动
+  onEndTimeScroll(e) {
+    let scrollTop = e.detail.scrollTop;
+    let index = Math.floor(scrollTop / 50);
+    let time = this.data.timeList[index] || this.data.endTime;
     this.setData({ endTimeRaw: time });
     this.computeDuration();
   },

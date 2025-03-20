@@ -37,6 +37,8 @@
         show-subtitle="{{ false }}"
         show-mark="{{ false }}"
         show-confirm="{{ false }}"
+        allow-same-day="{{ true }}"
+        formatter="{{formatter}}"
         bind:select="onSelectDate"
       />
     </view>
