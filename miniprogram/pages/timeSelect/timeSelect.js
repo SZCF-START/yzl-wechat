@@ -19,7 +19,14 @@ Page({
 
     // 总时长（天、小时）
     totalDays: 0,
-    totalHours: 0
+    totalHours: 0,
+
+    // 每行高度（单位统一，这里假设 60rpx 或 60px）
+    itemHeight: 60,
+    // 左侧（取车时间）的滚动位置
+    startScrollTop: 0,
+    // 右侧（还车时间）的滚动位置
+    endScrollTop: 0
   },
 
   onLoad() {
@@ -106,6 +113,28 @@ Page({
     this.computeDuration();
   },
 
+  onStartScrollEnd(e) {
+    // 获取当前滚动位置（注意：微信小程序 scroll-view 的 scrollTop 单位为 px，需要结合设计稿与机型进行换算，这里假设 1rpx=1px）
+    let scrollTop = e.detail.scrollTop;
+    let remainder = scrollTop % 60;
+    let adjustment = remainder < 30 ? -remainder : (60 - remainder);
+    // 自动校准到最近的整行
+    this.setData({
+      startScrollTop: scrollTop + adjustment,
+      startIndex: Math.round((scrollTop + adjustment) / 60)
+    });
+  },
+
+  onEndScrollEnd(e) {
+    let scrollTop = e.detail.scrollTop;
+    let remainder = scrollTop % 60;
+    let adjustment = remainder < 30 ? -remainder : (60 - remainder);
+    this.setData({
+      endScrollTop: scrollTop + adjustment,
+      endIndex: Math.round((scrollTop + adjustment) / 60)
+    });
+  },
+
   // 监听取车时间滚动
   onStartTimeScroll(e) {
     let scrollTop = e.detail.scrollTop;
@@ -122,6 +151,50 @@ Page({
     let time = this.data.timeList[index] || this.data.endTime;
     this.setData({ endTimeRaw: time });
     this.computeDuration();
+  },
+
+  // 左侧滚动过程中记录当前滚动位置
+  onStartTimeScrolling(e) {
+    this.setData({
+      startScrollTop: e.detail.scrollTop
+    });
+  },
+
+  // 右侧滚动过程中记录当前滚动位置
+  onEndTimeScrolling(e) {
+    this.setData({
+      endScrollTop: e.detail.scrollTop
+    });
+  },
+
+  // 左侧滚动结束后吸附到最近整行
+  onStartScrollTouchEnd(e) {
+    this.adjustScroll("start");
+  },
+
+  // 右侧滚动结束后吸附到最近整行
+  onEndScrollTouchEnd(e) {
+    this.adjustScroll("end");
+  },
+
+  // 自动吸附逻辑：根据当前 scrollTop 对齐到最近的整行
+  adjustScroll(type) {
+    let scrollTop = type === "start" ? this.data.startScrollTop : this.data.endScrollTop;
+    const { itemHeight, timeList } = this.data;
+    // 计算最近的行索引
+    const index = Math.round(scrollTop / itemHeight);
+    const finalIndex = Math.min(Math.max(index, 0), timeList.length - 1);
+    const finalScrollTop = finalIndex * itemHeight;
+
+    if (type === "start") {
+      this.setData({
+        startScrollTop: finalScrollTop
+      });
+    } else {
+      this.setData({
+        endScrollTop: finalScrollTop
+      });
+    }
   },
 
   // 计算总时长，结合日期与时间

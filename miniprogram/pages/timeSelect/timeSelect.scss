@@ -114,47 +114,95 @@
 
 
 /* 时间选择区域：固定在底部区域上方 */
+/* 外层容器：标题40rpx + 滚动区域180rpx = 220rpx */
 .time-area {
   position: fixed;
   left: 0;
+  bottom: 100rpx;
   width: 100%;
-  height: 230rpx; /* 明确固定高度 */
-  bottom: 100rpx; /* 紧挨着底部固定区域 */
-  background-color: #fff;
+  height: 220rpx;
   z-index: 10;
-  box-shadow: 0 -2rpx 6rpx rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-around;
-  padding: 10rpx 0;
+  background-color: #fff;
+  box-shadow: 0 -2rpx 6rpx rgba(0,0,0,0.05);
 }
-.time-block {
+
+/* 每个选择器容器 */
+.picker-block {
+  position: relative;
   width: 45%;
+  height: 220rpx;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  overflow: hidden;
 }
-.time-label {
+
+/* 标题区域 */
+.title {
+  height: 40rpx;
+  line-height: 40rpx;
   font-size: 26rpx;
-  color: #666;
-  margin-bottom: 10rpx;
-}
-.time-scroll {
-  width: 100%;
-  height: 200rpx; /* 内部滚动列表的高度，可根据需求调整 */
-  background-color: #fafafa;
-}
-.time-item {
-  width: 100%;
   text-align: center;
-  padding: 15rpx 0;
-  font-size: 26rpx;
-  color: #333;
+  color: #666;
   border-bottom: 1rpx solid #eee;
 }
-.time-item.active {
-  background-color: #ffe6b3;
-  color: #ff8c00;
+
+/* 滚动区域：设置固定高度，并增加上下内边距，使首尾项能居中 */
+.picker-scroller {
+  flex: 1;
+  width: 100%;
+  height: 180rpx;
+  // padding-top: 60rpx;
+  // padding-bottom: 60rpx;
 }
+
+/* 每个时间列表项 */
+.picker-item {
+  width: 100%;
+  height: 60rpx;
+  line-height: 60rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 遮罩层：遮住非选中区域 */
+.mask {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 60rpx;
+  background-color: rgba(255,255,255,0.7);
+  pointer-events: none;
+}
+
+.mask-top {
+  top: 40rpx;  /* 标题下方 */
+}
+
+.mask-bottom {
+  bottom: 0;   /* 底部区域 */
+  height: 60rpx;
+}
+
+/* 高亮线：标识中间选中区域的上下边界 */
+.highlight-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1rpx;
+  background-color: #ccc;
+}
+
+.line-top {
+  top: 100rpx; /* 标题40rpx + 第一行60rpx */
+}
+
+.line-bottom {
+  top: 160rpx; /* 标题40rpx + 两行60rpx */
+}
+
 
 /* 底部固定区域 */
 .bottom-fixed {

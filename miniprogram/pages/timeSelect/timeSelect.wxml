@@ -46,31 +46,56 @@
 
   <!-- 时间选择区域：固定在底部区域上方 -->
   <view class="time-area">
-    <view class="time-block">
-      <text class="time-label">取车时间</text>
-      <scroll-view class="time-scroll" scroll-y="true">
-        <block wx:for="{{ timeList }}" wx:key="item">
-          <view class="time-item {{ item === startTimeRaw ? 'active' : '' }}"
-                data-time="{{ item }}"
-                bindtap="chooseStartTime">
-            {{ item }}
-          </view>
-        </block>
-      </scroll-view>
-    </view>
-    <view class="time-block">
-      <text class="time-label">还车时间</text>
-      <scroll-view class="time-scroll" scroll-y="true">
-        <block wx:for="{{ timeList }}" wx:key="item">
-          <view class="time-item {{ item === endTimeRaw ? 'active' : '' }}"
-                data-time="{{ item }}"
-                bindtap="chooseEndTime">
-            {{ item }}
-          </view>
-        </block>
-      </scroll-view>
-    </view>
+  <!-- 左侧：取车时间 -->
+  <view class="picker-block">
+    <view class="title">取车时间</view>
+    <scroll-view
+      class="picker-scroller"
+      scroll-y
+      show-scrollbar="false"
+      scroll-with-animation
+      scroll-top="{{startScrollTop}}"
+      bindscroll="onStartTimeScrolling"
+      bindtouchend="onStartScrollTouchEnd"
+    >
+      <block wx:for="{{timeList}}" wx:key="index">
+        <view class="picker-item">
+          {{item}}
+        </view>
+      </block>
+    </scroll-view>
   </view>
+
+  <!-- 右侧：还车时间 -->
+  <view class="picker-block">
+    <view class="title">还车时间</view>
+    <scroll-view
+      class="picker-scroller"
+      scroll-y
+      show-scrollbar="false"
+      scroll-with-animation
+      scroll-top="{{endScrollTop}}"
+      bindscroll="onEndTimeScrolling"
+      bindtouchend="onEndScrollTouchEnd"
+    >
+      <block wx:for="{{timeList}}" wx:key="index">
+        <view class="picker-item">
+          {{item}}
+        </view>
+      </block>
+    </scroll-view>
+  </view>
+
+  <!-- 上下遮罩层以及中间高亮线 -->
+  <view class="mask mask-top"></view>
+  <view class="mask mask-bottom"></view>
+  <view class="highlight-line line-top"></view>
+  <view class="highlight-line line-bottom"></view>
+</view>
+
+
+
+
 
   <!-- 底部固定区域：总时长显示及操作按钮 -->
   <view class="bottom-fixed">
