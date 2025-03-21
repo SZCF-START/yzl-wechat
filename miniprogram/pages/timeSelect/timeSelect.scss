@@ -148,13 +148,11 @@
   border-bottom: 1rpx solid #eee;
 }
 
-/* 滚动区域：设置固定高度，并增加上下内边距，使首尾项能居中 */
+/* 滚动区域 */
 .picker-scroller {
   flex: 1;
   width: 100%;
   height: 180rpx;
-  // padding-top: 60rpx;
-  // padding-bottom: 60rpx;
 }
 
 /* 每个时间列表项 */
@@ -164,7 +162,7 @@
   line-height: 60rpx;
   text-align: center;
   font-size: 26rpx;
-  color: #999;
+  color: #333;
 }
 
 /* 遮罩层：遮住非选中区域 */
@@ -202,7 +200,6 @@
 .line-bottom {
   top: 160rpx; /* 标题40rpx + 两行60rpx */
 }
-
 
 /* 底部固定区域 */
 .bottom-fixed {

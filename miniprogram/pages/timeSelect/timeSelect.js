@@ -21,12 +21,18 @@ Page({
     totalDays: 0,
     totalHours: 0,
 
-    // 每行高度（单位统一，这里假设 60rpx 或 60px）
-    itemHeight: 60,
-    // 左侧（取车时间）的滚动位置
+    // 初始 scrollTop 值，默认选中中间项，比如第 0 项，也可以根据需要调整
     startScrollTop: 0,
-    // 右侧（还车时间）的滚动位置
-    endScrollTop: 0
+    endScrollTop: 0,
+    // 用于记录上次滚动位置
+    lastStartScrollTop: 0,
+    lastEndScrollTop: 0,
+    // 定时器引用
+    startScrollTimer: null,
+    endScrollTimer: null,
+    // 用于保存选中的时间 index
+    selectedStartIndex: 0,
+    selectedEndIndex: 0
   },
 
   onLoad() {
@@ -36,6 +42,14 @@ Page({
     this.updateDateDisplay();
     this.setData({
       formatter: this.formatterFunction, // 在 onLoad 里绑定
+    });
+    // 根据需要初始化选中时间，比如默认选中时间列表中间项
+    let defaultIndex = 0; // 或 Math.floor(this.data.timeList.length / 2)
+    this.setData({
+      startScrollTop: defaultIndex * 60,
+      endScrollTop: defaultIndex * 60,
+      selectedStartIndex: defaultIndex,
+      selectedEndIndex: defaultIndex
     });
   },
 
@@ -55,6 +69,7 @@ Page({
   // 生成半小时增量的时间列表
   initTimeList() {
     let times = [];
+    // times.push(''); // 前加空串
     for (let h = 0; h < 24; h++) {
       for (let m = 0; m < 60; m += 30) {
         let hh = h < 10 ? '0' + h : '' + h;
@@ -62,6 +77,7 @@ Page({
         times.push(`${hh}:${mm}`);
       }
     }
+    // times.push(''); // 后加空串
     this.setData({ timeList: times });
   },
 
@@ -153,48 +169,76 @@ Page({
     this.computeDuration();
   },
 
-  // 左侧滚动过程中记录当前滚动位置
+  // 取车时间滚动监听
   onStartTimeScrolling(e) {
-    this.setData({
-      startScrollTop: e.detail.scrollTop
-    });
-  },
-
-  // 右侧滚动过程中记录当前滚动位置
-  onEndTimeScrolling(e) {
-    this.setData({
-      endScrollTop: e.detail.scrollTop
-    });
-  },
-
-  // 左侧滚动结束后吸附到最近整行
-  onStartScrollTouchEnd(e) {
-    this.adjustScroll("start");
-  },
-
-  // 右侧滚动结束后吸附到最近整行
-  onEndScrollTouchEnd(e) {
-    this.adjustScroll("end");
-  },
-
-  // 自动吸附逻辑：根据当前 scrollTop 对齐到最近的整行
-  adjustScroll(type) {
-    let scrollTop = type === "start" ? this.data.startScrollTop : this.data.endScrollTop;
-    const { itemHeight, timeList } = this.data;
-    // 计算最近的行索引
-    const index = Math.round(scrollTop / itemHeight);
-    const finalIndex = Math.min(Math.max(index, 0), timeList.length - 1);
-    const finalScrollTop = finalIndex * itemHeight;
-
-    if (type === "start") {
-      this.setData({
-        startScrollTop: finalScrollTop
-      });
-    } else {
-      this.setData({
-        endScrollTop: finalScrollTop
-      });
+    const current = e.detail.scrollTop;
+    // 每次滚动时先清除之前的定时器
+    if (this.data.startScrollTimer) {
+      clearTimeout(this.data.startScrollTimer);
     }
+    // 记录当前滚动位置
+    this.setData({
+      lastStartScrollTop: current
+    });
+    // 延时判断滚动是否停止
+    this.data.startScrollTimer = setTimeout(() => {
+      // 如果延时后上次记录的位置和当前相同，则认为停止滚动
+      if (this.data.lastStartScrollTop === current) {
+        const snapped = this.getSnappedScrollTop(current);
+        this.setData({ startScrollTop: snapped });
+        let index = snapped / 30;
+        let time = this.data.timeList[index]
+        console.log("取车时间滚动停止，吸附到：", time);
+        this.setData({ startTimeRaw: time });
+        this.computeDuration();
+      }
+    }, 100);
+  },
+
+  // 还车时间滚动监听
+  onEndTimeScrolling(e) {
+    const current = e.detail.scrollTop;
+    if (this.data.endScrollTimer) {
+      clearTimeout(this.data.endScrollTimer);
+    }
+    this.setData({
+      lastEndScrollTop: current
+    });
+    this.data.endScrollTimer = setTimeout(() => {
+      if (this.data.lastEndScrollTop === current) {
+        const snapped = this.getSnappedScrollTop(current);
+        this.setData({ endScrollTop: snapped });
+        let index = snapped / 30;
+        let time = this.data.timeList[index]
+        console.log("还车时间滚动停止，吸附到：", time);
+        this.setData({ endTimeRaw: time });
+        this.computeDuration();
+      }
+    }, 100);
+  },
+
+  // 触摸结束时也触发吸附
+  onStartScrollTouchEnd(e) {
+    const current = e.detail.scrollTop;
+    const snapped = this.getSnappedScrollTop(current);
+    this.setData({ startScrollTop: snapped });
+  },
+  onEndScrollTouchEnd(e) {
+    const current = e.detail.scrollTop;
+    const snapped = this.getSnappedScrollTop(current);
+    this.setData({ endScrollTop: snapped });
+  },
+
+  // 自动吸附算法：计算最接近的 item 位置（item 高度 30rpx）
+  getSnappedScrollTop(scrollTop) {
+    const itemHeight = 30;
+    let index = Math.floor(scrollTop / itemHeight);
+    const remainder = scrollTop - index * itemHeight;
+    // 如果余数大于或等于15（即距离下一个 item 更近或等距），则吸附到下一个 item
+    if (remainder >= 15) {
+      index++;
+    }
+    return index * itemHeight;
   },
 
   // 计算总时长，结合日期与时间
