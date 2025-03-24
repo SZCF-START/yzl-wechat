@@ -115,60 +115,6 @@ Page({
     }
   },
 
-  // 时间选择：取车时间点击
-  chooseStartTime(e) {
-    const time = e.currentTarget.dataset.time;
-    this.setData({ startTimeRaw: time });
-    this.computeDuration();
-  },
-
-  // 时间选择：还车时间点击
-  chooseEndTime(e) {
-    const time = e.currentTarget.dataset.time;
-    this.setData({ endTimeRaw: time });
-    this.computeDuration();
-  },
-
-  onStartScrollEnd(e) {
-    // 获取当前滚动位置（注意：微信小程序 scroll-view 的 scrollTop 单位为 px，需要结合设计稿与机型进行换算，这里假设 1rpx=1px）
-    let scrollTop = e.detail.scrollTop;
-    let remainder = scrollTop % 60;
-    let adjustment = remainder < 30 ? -remainder : (60 - remainder);
-    // 自动校准到最近的整行
-    this.setData({
-      startScrollTop: scrollTop + adjustment,
-      startIndex: Math.round((scrollTop + adjustment) / 60)
-    });
-  },
-
-  onEndScrollEnd(e) {
-    let scrollTop = e.detail.scrollTop;
-    let remainder = scrollTop % 60;
-    let adjustment = remainder < 30 ? -remainder : (60 - remainder);
-    this.setData({
-      endScrollTop: scrollTop + adjustment,
-      endIndex: Math.round((scrollTop + adjustment) / 60)
-    });
-  },
-
-  // 监听取车时间滚动
-  onStartTimeScroll(e) {
-    let scrollTop = e.detail.scrollTop;
-    let index = Math.floor(scrollTop / 50); // 50rpx 近似为每个 item 的高度
-    let time = this.data.timeList[index] || this.data.startTime;
-    this.setData({ startTimeRaw: time });
-    this.computeDuration();
-  },
-
-  // 监听还车时间滚动
-  onEndTimeScroll(e) {
-    let scrollTop = e.detail.scrollTop;
-    let index = Math.floor(scrollTop / 50);
-    let time = this.data.timeList[index] || this.data.endTime;
-    this.setData({ endTimeRaw: time });
-    this.computeDuration();
-  },
-
   // 取车时间滚动监听
   onStartTimeScrolling(e) {
     const current = e.detail.scrollTop;
@@ -231,11 +177,22 @@ Page({
 
   // 自动吸附算法：计算最接近的 item 位置（item 高度 30rpx）
   getSnappedScrollTop(scrollTop) {
-    const itemHeight = 30;
+    console.log("scrollTop:" + scrollTop);
+
+    const systemInfo = wx.getWindowInfo();
+
+    console.log("systemInfo:" + systemInfo.windowHeight);
+    console.log("systemInfo:" + systemInfo.windowWidth);
+    
+    const rpxToPx = systemInfo.windowWidth / 750; // 1rpx 对应多少 px
+    console.log("rpxToPx:" + rpxToPx);
+    const itemHeight = 60 * rpxToPx; // 动态计算 item 高度
+    console.log("itemHeight:" + itemHeight);
+
     let index = Math.floor(scrollTop / itemHeight);
     const remainder = scrollTop - index * itemHeight;
     // 如果余数大于或等于15（即距离下一个 item 更近或等距），则吸附到下一个 item
-    if (remainder >= 15) {
+    if (remainder >= itemHeight / 2) {
       index++;
     }
     return index * itemHeight;

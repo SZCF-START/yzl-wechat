@@ -79,7 +79,7 @@
       scroll-with-animation
       scroll-top="{{endScrollTop}}"
       bindscroll="onEndTimeScrolling"
-      bindtouchend="onEndScrollTouchEnd"
+      bindscrollend="onEndScrollTouchEnd"
     >
       <!-- 上下预留空白 -->
       <view style="height:60rpx;"></view>
