@@ -19,10 +19,10 @@ Page({
     currentStore: '',
 
     // 时间相关（示例先用字符串，后续从timeSelect页带回）
-    startDate: '03月14日',
-    endDate: '03月16日',
-    startTime: '今天 20:00',
-    endTime: '周日 20:00',
+    pickupDate: '03月27日',
+    returnDate: '04月25日',
+    pickupTime: '今天 20:00',
+    returnTime: '周日 20:00',
     totalDays: 2, // 示例：2天
 
     // 是否勾选“上门送取”
@@ -105,7 +105,7 @@ Page({
     // 把当前选择的日期和时间传过去
     const { startDate, endDate, startTime, endTime } = this.data;
     wx.navigateTo({
-      url: `/pages/timeSelect/timeSelect?startDate=${startDate}&endDate=${endDate}&startTime=${startTime}&endTime=${endTime}`,
+      url: `/pages/timeSelect/timeSelect?pickupDate=${this.data.pickupDate}&returnDate=${this.data.returnDate}&pickupTime=${this.data.pickupTime}&returnTime=${this.data.returnTime}`,
     });
   },
 

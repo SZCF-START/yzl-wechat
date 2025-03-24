@@ -31,6 +31,7 @@
         title=""
         poppable="{{ false }}"
         type="range"
+        default-date="{{ dateRange }}"
         color="#80c269"
         min-date="{{ minDate }}"
         max-date="{{ maxDate }}"
@@ -104,7 +105,13 @@
   <view class="bottom-fixed">
     <view class="duration-text">
       <block wx:if="{{ totalDays || totalHours }}">
-        共{{ totalDays }}天{{ totalHours }}小时
+        <text>共</text>
+        <block wx:if="{{ totalDays > 0 }}">
+          <text>{{ totalDays }}天</text>
+        </block>
+        <block wx:if="{{ totalHours > 0 }}">
+          <text>{{ totalHours }}小时</text>
+        </block>
       </block>
     </view>
     <view class="btn-group">

@@ -42,7 +42,7 @@
 /* 日期（07月09日） */
 .date-text {
   font-size: 32rpx;
-  color: #333;
+  color: rgb(88, 86, 86);
   font-weight: bold;
 }
 
@@ -85,8 +85,8 @@
 */
 .calendar-scroll {
   position: absolute;
-  top: 280rpx;
-  bottom: 350rpx; /* 180rpx (time-area) + 100rpx (bottom-fixed) */
+  top: 260rpx;
+  bottom: 310rpx; /* 180rpx (time-area) + 100rpx (bottom-fixed) */
   left: 0;
   right: 0;
   overflow-y: auto;
@@ -120,7 +120,7 @@
   left: 0;
   bottom: 100rpx;
   width: 100%;
-  height: 220rpx;
+  height: 250rpx;
   z-index: 10;
   display: flex;
   justify-content: space-around;
@@ -142,10 +142,11 @@
 .title {
   height: 40rpx;
   line-height: 40rpx;
-  font-size: 26rpx;
+  font-size: 30rpx;
   text-align: center;
-  color: #666;
+  color: #333;
   border-bottom: 1rpx solid #eee;
+  font-weight: bold;
 }
 
 /* 滚动区域 */
@@ -181,7 +182,7 @@
 
 .mask-bottom {
   bottom: 0;   /* 底部区域 */
-  height: 60rpx;
+  height: 90rpx;
 }
 
 /* 高亮线：标识中间选中区域的上下边界 */
@@ -207,7 +208,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 50rpx; /* 明确固定高度 */
+  height: 60rpx; /* 明确固定高度 */
   background-color: #fff;
   z-index: 10;
   box-shadow: 0 -2rpx 6rpx rgba(0, 0, 0, 0.1);

@@ -48,15 +48,15 @@
     <!-- 第二行：日期区间选择 -->
     <view class="row row-date" bindtap="goTimeSelect">
       <view class="date-item">
-        <text class="date-text">{{ startDate }}</text>
-        <text class="sub-text">{{ startTime }}</text>
+        <text class="date-text">{{ pickupDate }}</text>
+        <text class="sub-text">{{ pickupTime }}</text>
       </view>
       <view class="date-middle">
         <text class="days-text">{{ totalDays }}天</text>
       </view>
       <view class="date-item">
-        <text class="date-text">{{ endDate }}</text>
-        <text class="sub-text">{{ endTime }}</text>
+        <text class="date-text">{{ returnDate }}</text>
+        <text class="sub-text">{{ returnTime }}</text>
       </view>
     </view>
 

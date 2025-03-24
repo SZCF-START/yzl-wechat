@@ -32,14 +32,50 @@ Page({
     endScrollTimer: null,
     // 用于保存选中的时间 index
     selectedStartIndex: 0,
-    selectedEndIndex: 0
+    selectedEndIndex: 0,
+    // 记录 px 中的单项高度
+    itemHeightPx: 0,
+    dateRange: [], // 用于回显的时间戳数组
   },
 
-  onLoad() {
+  onLoad(options) {
+    console.log(options,"44444444555555566");
     // 初始化时间列表（"00:00", "00:30", …, "23:30"）
     this.initTimeList();
-    // 如有默认选择可以在这里设置
+    // 如果从其他页面传入了取/还车日期和时间，则初始化数据
+
+    if (options.pickupDate && options.returnDate){
+      this.setData({
+        dateRange: [this.convertToTimestamp(options.pickupDate), this.convertToTimestamp(options.returnDate)],
+      })
+    }
+
+    if (options.pickupDate) {
+      // options.pickupDate 格式应为标准日期字符串
+      this.setData({ startDateVal: this.convertToTimestamp(options.pickupDate) });
+    }
+    if (options.returnDate) {
+      this.setData({ endDateVal: this.convertToTimestamp(options.returnDate) });
+    }
+    if (options.pickupTime) {
+      this.setData({ startTimeRaw: options.pickupTime });
+    }
+    if (options.returnTime) {
+      this.setData({ endTimeRaw: options.returnTime });
+    }
+    
+    // 根据已有数据更新顶部显示
     this.updateDateDisplay();
+    this.computeDuration();
+
+    // 如果没有传入，使用默认时间
+    if (!this.data.startTimeRaw) {
+      this.setData({ startTimeRaw: '09:00' });
+    }
+    if (!this.data.endTimeRaw) {
+      this.setData({ endTimeRaw: '07:30' });
+    }
+    
     this.setData({
       formatter: this.formatterFunction, // 在 onLoad 里绑定
     });
@@ -51,6 +87,28 @@ Page({
       selectedStartIndex: defaultIndex,
       selectedEndIndex: defaultIndex
     });
+    // 计算 1rpx = ?px
+    const systemInfo = wx.getSystemInfoSync();
+    // 1rpx = windowWidth / 750 px
+    const rpxToPx = systemInfo.windowWidth / 750;
+    // 每个 item 的高度是 60rpx，所以换算成 px
+    const itemHeightPx = Math.floor(60 * rpxToPx);
+    this.setData({ itemHeightPx });
+  },
+
+  // 转换函数
+  convertToTimestamp(dateStr) {
+    // 步骤1: 提取月份和日期（适配图片中的"03月14日"格式）
+    const [_, month, day] = dateStr.match(/(\d{2})月(\d{2})日/);
+    
+    // 步骤2: 获取当前年（根据图片隐含的当年时间）
+    const currentYear = new Date().getFullYear();
+    
+    // 步骤3: 创建Date对象（注意月份从0开始）
+    const dateObj = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+    
+    // 步骤4: 转换为时间戳（毫秒级）
+    return dateObj.getTime();
   },
 
   formatterFunction(day) {
@@ -87,6 +145,8 @@ Page({
       this.setData({
         startDateVal: e.detail[0].getTime(),
         endDateVal: e.detail[1].getTime(),
+        dateRange: [e.detail[0].getTime(), e.detail[1].getTime()],
+        showCalendar: true,
         dateRangeComplete: true
       });
       this.updateDateDisplay();
@@ -99,7 +159,10 @@ Page({
   // 更新顶部日期显示和星期信息
   updateDateDisplay() {
     const { startDateVal, endDateVal, startTimeRaw, endTimeRaw } = this.data;
+
+    
     if (startDateVal) {
+      console.log("444444445555555");
       let startObj = new Date(startDateVal);
       this.setData({
         startDateDisplay: this.formatMonthDay(startObj),
@@ -132,7 +195,7 @@ Page({
       if (this.data.lastStartScrollTop === current) {
         const snapped = this.getSnappedScrollTop(current);
         this.setData({ startScrollTop: snapped });
-        let index = snapped / 30;
+        let index = snapped / this.data.itemHeightPx;
         let time = this.data.timeList[index]
         console.log("取车时间滚动停止，吸附到：", time);
         this.setData({ startTimeRaw: time });
@@ -154,7 +217,7 @@ Page({
       if (this.data.lastEndScrollTop === current) {
         const snapped = this.getSnappedScrollTop(current);
         this.setData({ endScrollTop: snapped });
-        let index = snapped / 30;
+        let index = snapped / this.data.itemHeightPx;
         let time = this.data.timeList[index]
         console.log("还车时间滚动停止，吸附到：", time);
         this.setData({ endTimeRaw: time });
@@ -177,20 +240,23 @@ Page({
 
   // 自动吸附算法：计算最接近的 item 位置（item 高度 30rpx）
   getSnappedScrollTop(scrollTop) {
+    const itemHeight = this.data.itemHeightPx;
     console.log("scrollTop:" + scrollTop);
+    console.log("itemHeight:" + itemHeight);
 
     const systemInfo = wx.getWindowInfo();
-
     console.log("systemInfo:" + systemInfo.windowHeight);
     console.log("systemInfo:" + systemInfo.windowWidth);
     
-    const rpxToPx = systemInfo.windowWidth / 750; // 1rpx 对应多少 px
-    console.log("rpxToPx:" + rpxToPx);
-    const itemHeight = 60 * rpxToPx; // 动态计算 item 高度
-    console.log("itemHeight:" + itemHeight);
+    // const rpxToPx = systemInfo.windowWidth / 750; // 1rpx 对应多少 px
+    // console.log("rpxToPx:" + rpxToPx);
+    // const itemHeight = 60 * rpxToPx; // 动态计算 item 高度
+    // console.log("itemHeight:" + itemHeight);
 
     let index = Math.floor(scrollTop / itemHeight);
+    console.log("index:" + index);
     const remainder = scrollTop - index * itemHeight;
+    console.log("remainder:" + remainder);
     // 如果余数大于或等于15（即距离下一个 item 更近或等距），则吸附到下一个 item
     if (remainder >= itemHeight / 2) {
       index++;
@@ -204,7 +270,7 @@ Page({
 
     console.log("111",startDateVal, endDateVal, startTimeRaw, endTimeRaw ,"222");
     if (!startDateVal || !endDateVal) {
-      this.setData({ totalDays: 0, totalHours: 0 });
+      this.setData({ totalDays: 0, totalHours: 0, dateRangeComplete: false });
       return;
     }
     let startObj = new Date(startDateVal);
@@ -214,15 +280,26 @@ Page({
     let [eh, em] = endTimeRaw.split(':').map(Number);
     startObj.setHours(sh, sm, 0, 0);
     endObj.setHours(eh, em, 0, 0);
-    let diff = endObj.getTime() - startObj.getTime();
-    if (diff < 0) {
-      // 若结束时间早于开始时间，视为跨天：加一天
-      diff += 24 * 60 * 60 * 1000;
+
+    // 如果取还车是同一天，则只有当取车时间小于还车时间才有效
+    if (startObj.toDateString() === endObj.toDateString()) {
+      if (startObj.getTime() >= endObj.getTime()) {
+        // 不满足条件：同一天取车时间不小于还车时间
+        this.setData({ totalDays: 0, totalHours: 0, dateRangeComplete: false });
+        return;
+      }
+    } else {
+      // 如果跨天但出现结束时间小于开始时间，则认为跨天，自动加一天（可根据需求调整）
+      if (endObj.getTime() < startObj.getTime()) {
+        endObj.setDate(endObj.getDate() + 1);
+      }
     }
-    const totalHours = Math.floor(diff / (1000 * 60 * 60));
+
+    let diff = endObj.getTime() - startObj.getTime();
+    const totalHours = Math.ceil(diff / (1000 * 60 * 60));
     const days = Math.floor(totalHours / 24);
     const hours = totalHours % 24;
-    this.setData({ totalDays: days, totalHours: hours });
+    this.setData({ totalDays: days, totalHours: hours, dateRangeComplete: true });
   },
 
   // 工具方法：格式化日期为 "MM月DD日"
@@ -259,7 +336,7 @@ Page({
 
   // 底部按钮：确定后执行逻辑
   onConfirm() {
-    const { startDateDisplay, endDateDisplay, startWeek, endWeek, totalDays, totalHours } = this.data;
+    const { startDateVal, endDateVal, startTimeRaw, endTimeRaw, startDateDisplay, endDateDisplay, startWeek, endWeek, totalDays, totalHours } = this.data;
     if (!startDateDisplay || !endDateDisplay) {
       wx.showToast({ title: '请选择完整的日期区间', icon: 'none' });
       return;
@@ -269,9 +346,17 @@ Page({
       icon: 'none'
     });
     // 此处可传值给上一页或提交数据
-    // const pages = getCurrentPages();
-    // const prevPage = pages[pages.length - 2];
-    // prevPage.setData({ ... });
-    // wx.navigateBack();
+    // 回传数据给上一页
+    const pages = getCurrentPages();
+    const prevPage = pages[pages.length - 2];
+    if (prevPage) {
+      prevPage.setData({
+        pickupDate: startDateVal,    // 取车日期（时间戳）
+        pickupTime: startTimeRaw,      // 取车时间
+        returnDate: endDateVal,        // 还车日期（时间戳）
+        returnTime: endTimeRaw         // 还车时间
+      });
+    }
+    wx.navigateBack();
   }
 });
