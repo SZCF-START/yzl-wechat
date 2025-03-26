@@ -49,6 +49,83 @@ Page({
     this.initLocation();
     // 拆分金刚区数据，每页4个
     this.initIconPages();
+
+    this.setDefaultDateTime();
+  },
+
+  setDefaultDateTime() {
+    const now = new Date();
+
+    // 获取当天日期
+    const pickupDate = this.formatDate(now);
+
+    // 获取第二天日期
+    const returnDate = this.formatDate(new Date(now.getTime() + 24 * 60 * 60 * 1000));
+
+    // 计算取车时间（当前时间 + 4 小时）
+    let pickupTime = this.formatTime(now, 4);
+
+    // 归还时间与取车时间一致
+    let returnTime = pickupTime;
+
+    // 计算总天数
+    const totalDays = this.calculateDays(now, new Date(now.getTime() + 24 * 60 * 60 * 1000));
+
+    // 更新页面数据
+    this.setData({
+      pickupDate,
+      returnDate,
+      pickupTime,
+      returnTime,
+      totalDays
+    });
+  },
+
+  /**
+   * 格式化日期为 'MM月DD日' 格式
+   */
+  formatDate(date) {
+    const month = date.getMonth() + 1; // 月份从0开始
+    const day = date.getDate();
+    return `${month.toString().padStart(2, '0')}月${day.toString().padStart(2, '0')}日`;
+  },
+
+  /**
+   * 计算时间：当前时间 + n 小时，取最近的整点或半点
+   */
+  formatTime(date, hoursToAdd) {
+    let newTime = new Date(date.getTime() + hoursToAdd * 60 * 60 * 1000);
+    
+    let hours = newTime.getHours();
+    let minutes = newTime.getMinutes();
+
+    // 取最近的整点或半点
+    if (minutes > 30) {
+      hours += 1;
+      minutes = '00';
+    } else {
+      minutes = '30';
+    }
+
+    // 获取星期几
+    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    let weekDay = weekDays[newTime.getDay()];
+
+    return `${weekDay} ${hours}:${minutes}`;
+  },
+
+  /**
+   * 计算租赁天数，至少为1天
+   */
+  calculateDays(startDate, endDate) {
+    const startTime = startDate.getTime();
+    const endTime = endDate.getTime();
+    
+    // 计算时间差（单位：毫秒）
+    let diff = (endTime - startTime) / (1000 * 60 * 60 * 24);
+
+    // 不足一天按一天算
+    return Math.max(Math.ceil(diff), 1);
   },
 
   onShow() {
