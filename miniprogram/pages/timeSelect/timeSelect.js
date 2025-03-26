@@ -39,6 +39,14 @@ Page({
   },
 
   onLoad(options) {
+    // 计算 1rpx = ?px
+    const systemInfo = wx.getSystemInfoSync();
+    // 1rpx = windowWidth / 750 px
+    const rpxToPx = systemInfo.windowWidth / 750;
+    // 每个 item 的高度是 60rpx，所以换算成 px
+    const itemHeightPx = Math.floor(60 * rpxToPx);
+    this.setData({ itemHeightPx });
+
     console.log(options,"44444444555555566");
     // 初始化时间列表（"00:00", "00:30", …, "23:30"）
     this.initTimeList();
@@ -59,6 +67,13 @@ Page({
     }
     if (options.pickupTime) {
       this.setData({ startTimeRaw: options.pickupTime });
+
+      console.log("options.pickupTime" + options.pickupTime);
+      const index = this.data.timeList.indexOf(options.pickupTime) + 1;
+      console.log("index" + index + "|" + this.data.itemHeightPx);
+      const startScrollTop = index * this.data.itemHeightPx
+      console.log("startScrollTop" + startScrollTop);
+      this.setData({ startScrollTop: startScrollTop });
     }
     if (options.returnTime) {
       this.setData({ endTimeRaw: options.returnTime });
@@ -87,13 +102,6 @@ Page({
       selectedStartIndex: defaultIndex,
       selectedEndIndex: defaultIndex
     });
-    // 计算 1rpx = ?px
-    const systemInfo = wx.getSystemInfoSync();
-    // 1rpx = windowWidth / 750 px
-    const rpxToPx = systemInfo.windowWidth / 750;
-    // 每个 item 的高度是 60rpx，所以换算成 px
-    const itemHeightPx = Math.floor(60 * rpxToPx);
-    this.setData({ itemHeightPx });
   },
 
   // 转换函数
