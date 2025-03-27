@@ -1,0 +1,185 @@
+/* 整个页面容器 */
+.page {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 避免外层产生滚动条 */
+}
+
+/* 顶部搜索栏：固定在最上方 */
+.search-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 20rpx;
+  box-sizing: border-box;
+  border-bottom: 1rpx solid #eee;
+  z-index: 999;
+  background-color: #fff;
+}
+
+/* 搜索输入框容器 */
+.search-input-wrapper {
+  flex: 1;
+  height: 60rpx;
+  background-color: #f3f3f3;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* 输入框 */
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 28rpx;
+  padding: 0 20rpx;
+}
+
+/* 蓝色链接文字 */
+.search-link {
+  position: absolute;
+  right: 20rpx;
+  color: #409eff;
+  font-size: 24rpx;
+}
+
+/* 取消按钮 */
+.cancel-btn {
+  font-size: 28rpx;
+  color: #666;
+  margin-left: 10rpx;
+}
+
+/* 遮罩层：只覆盖搜索栏以下区域 */
+.mask {
+  position: fixed;
+  top: 100rpx; /* 与搜索栏高度一致 */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff; /* 用白色遮住下方 */
+  z-index: 998;
+}
+
+/* 主体内容区域：不产生滚动。内部 left-scroll 独立滚动 */
+.content-area {
+  position: relative;
+  flex: 1;
+  height: calc(100vh - 100rpx); /* 明确计算高度 */
+  margin-top: 100rpx; /* 预留搜索栏高度 */
+  display: flex;
+  background-color: #fff;
+  overflow: hidden; /* 不让content-area本身产生滚动条 */
+}
+
+/* 左侧scroll-view：单独滚动 */
+.left-scroll {
+  flex: 1;
+  height: 100%; /* 父容器有固定高度（flex:1 + margin-top:100rpx） */
+  overflow-y: scroll;  /* 明确只允许左侧滚动 */
+  box-sizing: border-box;
+  padding: 20rpx;
+  -webkit-overflow-scrolling: touch; /* 优化滚动 */
+}
+
+.letter-row {
+  scroll-margin-top: 20rpx;  /* 增加滚动定位偏移 */
+}
+/* 右侧导航栏：绝对定位在content-area内部 */
+.right-nav {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0; /* 增加底部对齐 */
+  width: 60rpx;
+  height: 100%; /* 跟content-area同高 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20rpx;
+  background-color: #fff;
+  border-left: 1rpx solid #eee;
+}
+
+/* 导航项 */
+.nav-item {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+  text-align: center;
+}
+
+/* 块 */
+.block {
+  margin-bottom: 30rpx;
+}
+.block-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+/* 当前/历史：一行3个 */
+.city-row {
+  display: flex;
+  justify-content: space-between;
+}
+.city-box {
+  flex: 0 0 32%;
+  height: 80rpx;
+  background-color: #fff;
+  border: 1rpx solid #ddd; /* 浅灰 */
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  color: #333;
+  box-sizing: border-box;
+}
+.location-box {
+  position: relative;
+}
+.loc-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-right: 5rpx;
+  vertical-align: middle;
+}
+
+/* 热门/全部城市：一行3个 */
+.city-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.city-box {
+  width: 32%;
+  margin-right: 2%;
+  margin-bottom: 20rpx;
+}
+.city-box:nth-child(3n) {
+  margin-right: 0;
+}
+
+/* 首字母行灰色 */
+.letter-row {
+  width: 100%;
+  background-color: #eee;
+  color: #333;
+  padding: 10rpx;
+  font-size: 26rpx;
+  margin-bottom: 10rpx;
+  border-radius: 6rpx;
+}

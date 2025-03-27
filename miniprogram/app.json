@@ -23,7 +23,8 @@
     "mp_ecard_sdk/protocol/privacy/index",
     "mp_ecard_sdk/protocol/userAccredit/index",
     "mp_ecard_sdk/protocol/eid/index",
-    "pages/timeSelect/timeSelect"
+    "pages/timeSelect/timeSelect",
+    "pages/citySelect/citySelect"
   ],
   "requiredPrivateInfos": [
     "getLocation"

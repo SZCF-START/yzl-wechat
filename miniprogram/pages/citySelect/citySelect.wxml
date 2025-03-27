@@ -1,0 +1,84 @@
+<view class="page">
+  <!-- 固定顶部搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input-wrapper">
+      <input
+        class="search-input"
+        placeholder="搜索城市或景点"
+        focus="{{searchFocus}}"
+        bindfocus="onSearchFocus"
+        bindinput="onSearchInput"
+        value="{{searchKeyword}}"
+      />
+      <text class="search-link" bindtap="onSearchLinkTap">定位到XX</text>
+    </view>
+    <view class="cancel-btn" wx:if="{{searchFocus}}" bindtap="onCancel">取消</view>
+  </view>
+
+  <!-- 遮罩层 -->
+  <view class="mask" wx:if="{{searchFocus}}" catchtouchmove="stopScroll"></view>
+
+  <!-- 内容区域：左右分区 -->
+  <view class="content-area">
+    <!-- 左侧滚动区域 -->
+    <scroll-view 
+      class="left-scroll" 
+      scroll-y 
+      scroll-top="{{scrollTop}}"
+      bindscroll="onScroll"
+      id="leftScroll"
+    >
+      <!-- 当前/历史 -->
+      <view class="block" id="anchor-history">
+        <view class="block-title">当前/历史</view>
+        <view class="city-row">
+          <view class="city-box location-box" bindtap="onGetLocation">
+            <image class="loc-icon" src="/assets/location.png" wx:if="{{currentCity}}"/>
+            <text wx:if="{{currentCity}}">{{currentCity}}</text>
+            <text wx:if="{{!currentCity}}">开启定位</text>
+          </view>
+          <block wx:for="{{historyCities}}" wx:key="cityName">
+            <view class="city-box" bindtap="onHistoryTap" data-city="{{item}}">
+              {{item.cityName}}
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 热门城市 -->
+      <view class="block" id="anchor-hot">
+        <view class="block-title">热门城市</view>
+        <view class="city-grid">
+          <block wx:for="{{hotCities}}" wx:key="cityName">
+            <view class="city-box" bindtap="onSelectCity" data-city="{{item}}">
+              {{item.cityName}}
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 全部城市分组 -->
+      <block wx:for="{{letters}}" wx:key="letter">
+        <view class="letter-row" id="anchor-{{item}}">
+          {{item}}
+        </view>
+        <view class="city-grid">
+          <block wx:for="{{citiesByLetter[item]}}" wx:key="cityName">
+            <view class="city-box" bindtap="onSelectCity" data-city="{{item}}">
+              {{item.cityName}}
+            </view>
+          </block>
+        </view>
+      </block>
+    </scroll-view>
+
+    <!-- 右侧固定导航栏 -->
+    <view class="right-nav">
+      <view class="nav-item" data-target="anchor-history" bindtap="onNavTap">历史</view>
+      <view class="nav-item" data-target="anchor-hot" bindtap="onNavTap">热门</view>
+      <block wx:for="{{letters}}" wx:key="letter">
+        <view class="nav-item" data-target="anchor-{{item}}" bindtap="onNavTap">{{item}}</view>
+      </block>
+    </view>
+  </view>
+</view>

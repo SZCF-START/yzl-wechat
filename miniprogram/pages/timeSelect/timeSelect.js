@@ -66,17 +66,12 @@ Page({
       this.setData({ endDateVal: this.convertToTimestamp(options.returnDate) });
     }
     if (options.pickupTime) {
-      this.setData({ startTimeRaw: options.pickupTime });
-
-      console.log("options.pickupTime" + options.pickupTime);
-      const index = this.data.timeList.indexOf(options.pickupTime) + 1;
-      console.log("index" + index + "|" + this.data.itemHeightPx);
-      const startScrollTop = index * this.data.itemHeightPx
-      console.log("startScrollTop" + startScrollTop);
-      this.setData({ startScrollTop: startScrollTop });
+      const pickupTime = this.extractTime(options.pickupTime);
+      this.setData({ startTimeRaw: pickupTime });
     }
     if (options.returnTime) {
-      this.setData({ endTimeRaw: options.returnTime });
+      const returnTime = this.extractTime(options.returnTime);
+      this.setData({ endTimeRaw: returnTime });
     }
     
     // 根据已有数据更新顶部显示
@@ -102,6 +97,28 @@ Page({
       selectedStartIndex: defaultIndex,
       selectedEndIndex: defaultIndex
     });
+  },
+
+  onReady() {
+    // 延时确保渲染完成
+    setTimeout(() => {
+      const startTimeIndex = this.data.timeList.indexOf(this.data.startTimeRaw);
+      if (startTimeIndex !== -1) {
+        const scrollTop = startTimeIndex * this.data.itemHeightPx;
+        this.setData({ startScrollTop: scrollTop });
+      }
+      const endTimeIndex = this.data.timeList.indexOf(this.data.endTimeRaw);
+      if (endTimeIndex !== -1) {
+        const scrollTop = endTimeIndex * this.data.itemHeightPx;
+        this.setData({ endScrollTop: scrollTop });
+      }
+    }, 100);
+  },
+
+  // 使用正则表达式提取时间部分
+  extractTime(str) {
+    const match = str.match(/\b\d{1,2}:\d{2}\b/); // 匹配 HH:mm 格式
+    return match ? match[0] : "时间未找到";
   },
 
   // 转换函数
