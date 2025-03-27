@@ -20,10 +20,12 @@ Page({
 
     // 时间相关（示例先用字符串，后续从timeSelect页带回）
     pickupDate: null,
+    pickupDateTimestamp: null,
     returnDate: null,
+    returnDateTimestamp: null,
     pickupTime: null,
     returnTime: null,
-    totalDays: 2, // 示例：2天
+    totalDays: 0, // 示例：2天
 
     // 是否勾选“上门送取”
     sendChecked: false,
@@ -54,13 +56,16 @@ Page({
 
   setDefaultDateTime() {
     const now = new Date();
-  
+    console.log("this.data.pickupDateTimestamp" + this.data.pickupDateTimestamp);
+    console.log("this.data.pickupDateTimestamp" + this.data.pickupDateTimestamp);
     // 如果 pickupDate 为空，则使用当前时间戳，否则使用已有数据
-    let pickupDateTime = this.data.pickupDate ? this.data.pickupDate : now.getTime();
-    let pickupDate = this.formatDate(new Date(pickupDateTime));
+    let pickupDateTimestamp = this.data.pickupDateTimestamp ? this.data.pickupDateTimestamp : now.getTime();
+    console.log("pickupDateTimestamp" + pickupDateTimestamp);
+    console.log("new Date(pickupDateTimestamp)" + new Date(pickupDateTimestamp));
+    let pickupDate = this.formatDate(new Date(pickupDateTimestamp));
     // 如果 returnDate 为空，则默认为 pickupDate 的后一天
-    let returnDateTime = this.data.returnDate ? this.data.returnDate : new Date(now.getTime() + 24 * 60 * 60 * 1000).getTime();
-    let returnDate = this.formatDate(new Date(returnDateTime));
+    let returnDateTimestamp = this.data.returnDateTimestamp ? this.data.returnDateTimestamp : new Date(now.getTime() + 24 * 60 * 60 * 1000).getTime();
+    let returnDate = this.formatDate(new Date(returnDateTimestamp));
   
     // 处理取车时间：如果为空则使用 formatTime 计算当前时间（不加小时）；如果有值则取其 "HH:mm" 部分，加上 pickupDate 对应的星期
     let pickupTime;
@@ -69,8 +74,8 @@ Page({
       pickupTime = this.formatTime(now, 0);
     } else {
       // 已有取车时间（格式为 "03:30"），需要添加星期（根据 pickupDate 计算）
-      const weekDay = this.getWeek(new Date(pickupDateTime));
-      pickupTime = `${weekDay} ${this.data.pickupTime}`;
+      const weekDay = this.getWeek(new Date(pickupDateTimestamp));
+      pickupTime = `${weekDay} ${this.extractTime(this.data.pickupTime)}`;
     }
   
     // 处理还车时间：如果为空，则默认为取车时间；如果有值，则添加 returnDate 对应的星期
@@ -78,16 +83,18 @@ Page({
     if (!this.data.returnTime) {
       returnTime = pickupTime;
     } else {
-      const weekDay = this.getWeek(new Date(returnDateTime));
-      returnTime = `${weekDay} ${this.data.returnTime}`;
+      const weekDay = this.getWeek(new Date(returnDateTimestamp));
+      returnTime = `${weekDay} ${this.extractTime(this.data.returnTime)}`;
     }
   
     // 计算租赁天数（至少 1 天）
-    const totalDays = this.calculateDays(pickupDateTime, returnDateTime,pickupTime,returnTime);
+    const totalDays = this.calculateDays(pickupDateTimestamp, returnDateTimestamp,pickupTime,returnTime);
   
     // 更新页面数据
     this.setData({
+      pickupDateTimestamp,
       pickupDate,
+      returnDateTimestamp,
       returnDate,
       pickupTime,
       returnTime,
@@ -218,7 +225,7 @@ Page({
     // 把当前选择的日期和时间传过去
     const { startDate, endDate, startTime, endTime } = this.data;
     wx.navigateTo({
-      url: `/pages/timeSelect/timeSelect?pickupDate=${this.data.pickupDate}&returnDate=${this.data.returnDate}&pickupTime=${this.data.pickupTime}&returnTime=${this.data.returnTime}`,
+      url: `/pages/timeSelect/timeSelect?pickupDate=${this.data.pickupDateTimestamp}&returnDate=${this.data.returnDateTimestamp}&pickupTime=${this.data.pickupTime}&returnTime=${this.data.returnTime}`,
     });
   },
 

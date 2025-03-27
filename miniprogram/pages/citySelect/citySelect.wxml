@@ -4,7 +4,7 @@
     <view class="search-input-wrapper">
       <input
         class="search-input"
-        placeholder="搜索城市或景点"
+        placeholder="搜索城市或门店"
         focus="{{searchFocus}}"
         bindfocus="onSearchFocus"
         bindinput="onSearchInput"

@@ -52,18 +52,20 @@ Page({
     this.initTimeList();
     // 如果从其他页面传入了取/还车日期和时间，则初始化数据
 
+    console.log("options.pickupDate:" + options.pickupDate);
+    console.log("options.returnDate:" + options.returnDate);
     if (options.pickupDate && options.returnDate){
       this.setData({
-        dateRange: [this.convertToTimestamp(options.pickupDate), this.convertToTimestamp(options.returnDate)],
+        dateRange: [Number(options.pickupDate), Number(options.returnDate)],
       })
     }
 
     if (options.pickupDate) {
       // options.pickupDate 格式应为标准日期字符串
-      this.setData({ startDateVal: this.convertToTimestamp(options.pickupDate) });
+      this.setData({ startDateVal: Number(options.pickupDate) });
     }
     if (options.returnDate) {
-      this.setData({ endDateVal: this.convertToTimestamp(options.returnDate) });
+      this.setData({ endDateVal: Number(options.returnDate) });
     }
     if (options.pickupTime) {
       const pickupTime = this.extractTime(options.pickupTime);
@@ -187,15 +189,14 @@ Page({
 
     
     if (startDateVal) {
-      console.log("444444445555555");
-      let startObj = new Date(startDateVal);
+      let startObj = new Date(Number(startDateVal));
       this.setData({
         startDateDisplay: this.formatMonthDay(startObj),
         startWeek: this.getWeek(startObj)
       });
     }
     if (endDateVal) {
-      let endObj = new Date(endDateVal);
+      let endObj = new Date(Number(endDateVal));
       this.setData({
         endDateDisplay: this.formatMonthDay(endObj),
         endWeek: this.getWeek(endObj)
@@ -376,9 +377,9 @@ Page({
     const prevPage = pages[pages.length - 2];
     if (prevPage) {
       prevPage.setData({
-        pickupDate: startDateVal,    // 取车日期（时间戳）
+        pickupDateTimestamp: startDateVal,    // 取车日期（时间戳）
         pickupTime: startTimeRaw,      // 取车时间
-        returnDate: endDateVal,        // 还车日期（时间戳）
+        returnDateTimestamp: endDateVal,        // 还车日期（时间戳）
         returnTime: endTimeRaw         // 还车时间
       });
     }
