@@ -267,27 +267,55 @@ Page({
   // 自动吸附算法：计算最接近的 item 位置（item 高度 30rpx）
   getSnappedScrollTop(scrollTop) {
     const itemHeight = this.data.itemHeightPx;
-    console.log("scrollTop:" + scrollTop);
-    console.log("itemHeight:" + itemHeight);
-
     const systemInfo = wx.getWindowInfo();
-    console.log("systemInfo:" + systemInfo.windowHeight);
-    console.log("systemInfo:" + systemInfo.windowWidth);
-    
-    // const rpxToPx = systemInfo.windowWidth / 750; // 1rpx 对应多少 px
-    // console.log("rpxToPx:" + rpxToPx);
-    // const itemHeight = 60 * rpxToPx; // 动态计算 item 高度
-    // console.log("itemHeight:" + itemHeight);
-
     let index = Math.floor(scrollTop / itemHeight);
-    console.log("index:" + index);
+    let sameDay = this.isSameDay(this.data.startDateVal,this.data.endDateVal);
+    if (sameDay){
+      let selectTime = this.data.timeList[index];
+      // 获取当前时间并计算最近的半小时时间
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      
+      // 处理分钟进位
+      if (minutes >= 30) {
+        hours += 1; // 超过30分钟进小时
+        minutes = 0;
+      } else {
+        minutes = 30; // 不足30分钟补到30分
+      }
+      // 处理小时溢出（如23:30进小时会变成24点）
+      if (hours >= 24) hours = 0;
+      
+      // 格式化成 HH:mm 字符串
+      const currentTime = 
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      
+      // 比较时间字符串（HH:mm格式可直接比较）
+      if (selectTime < currentTime) {
+        selectTime = currentTime; // 选择时间早于当前时间，使用当前时间
+      }
+      let finalIndex = this.data.timeList.indexOf(selectTime);
+      index = finalIndex;
+    }
+    
     const remainder = scrollTop - index * itemHeight;
-    console.log("remainder:" + remainder);
     // 如果余数大于或等于15（即距离下一个 item 更近或等距），则吸附到下一个 item
     if (remainder >= itemHeight / 2) {
       index++;
     }
     return index * itemHeight;
+  },
+
+  isSameDay(timestamp1, timestamp2) {
+    // 确保时间戳为毫秒（如为秒级则乘以1000）
+    const date1 = new Date(timestamp1);
+    const date2 = new Date(timestamp2);
+    return (
+        date1.getFullYear() === date2.getFullYear() &&
+        date1.getMonth() === date2.getMonth() &&
+        date1.getDate() === date2.getDate()
+    );
   },
 
   // 计算总时长，结合日期与时间

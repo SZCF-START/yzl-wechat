@@ -115,7 +115,7 @@
 /* 导航项 */
 .nav-item {
   font-size: 24rpx;
-  color: #666;
+  color: #409eff;
   margin-bottom: 10rpx;
   text-align: center;
 }
@@ -133,10 +133,11 @@
 /* 当前/历史：一行3个 */
 .city-row {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 .city-box {
-  flex: 0 0 32%;
+  flex: 0 0 29%;
   height: 80rpx;
   background-color: #fff;
   border: 1rpx solid #ddd; /* 浅灰 */

@@ -10,7 +10,7 @@
         bindinput="onSearchInput"
         value="{{searchKeyword}}"
       />
-      <text class="search-link" bindtap="onSearchLinkTap">定位到XX</text>
+      <!-- <text class="search-link" bindtap="onSearchLinkTap">定位到XX</text> -->
     </view>
     <view class="cancel-btn" wx:if="{{searchFocus}}" bindtap="onCancel">取消</view>
   </view>

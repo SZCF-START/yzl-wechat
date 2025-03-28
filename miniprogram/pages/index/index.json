@@ -1,5 +1,7 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "location-auth-dialog": "/components/location-auth-dialog/location-auth-dialog"
+  },
   "navigationBarTitleText": "首页",
   "navigationBarTextStyle": "black",
   "navigationBarBackgroundColor": "#fff"

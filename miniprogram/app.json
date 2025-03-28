@@ -26,6 +26,11 @@
     "pages/timeSelect/timeSelect",
     "pages/citySelect/citySelect"
   ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "将获取你的具体位置信息，用于获取您所在定位，为您推荐附件租车网点" 
+    }
+  },
   "requiredPrivateInfos": [
     "getLocation"
   ],
