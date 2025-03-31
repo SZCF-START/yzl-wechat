@@ -18,28 +18,36 @@ App({
 
   // 检测定位权限方法
   checkLocationPermission() {
-    const that = this
-    wx.getSetting({
+    const that = this;
+    wx.getPrivacySetting({
+      // 如有需要，可以传入需要查询的隐私设置项（依据具体 API 版本而定）
+      privacyKeys: ['scope.userLocation'],
       success(res) {
-        const status = res.authSetting['scope.userLocation']
-        console.log("status",!!status);
-        that.globalData.isLocationEnabled = !!status
-        
+        // 假设返回结果中隐私设置保存在 res.privacySetting 对象中
+        const status = res.privacySetting && res.privacySetting['scope.userLocation'];
+        console.log("status", !!status);
+        that.globalData.isLocationEnabled = !!status;
+  
         // 未授权时尝试请求权限
         if (status === undefined || status === false) {
           wx.authorize({
             scope: 'scope.userLocation',
             success() {
-              that.globalData.isLocationEnabled = true
+              that.globalData.isLocationEnabled = true;
             },
             fail() {
-              that.globalData.isLocationEnabled = false
+              that.globalData.isLocationEnabled = false;
             }
-          })
+          });
         }
+      },
+      fail(err) {
+        console.error("获取隐私设置失败", err);
+        // 根据需求，失败时可以进行额外处理
       }
-    })
+    });
   },
+  
 
   onLaunch() {
     console.log('App 启动');
