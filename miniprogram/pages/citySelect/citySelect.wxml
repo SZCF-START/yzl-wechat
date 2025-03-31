@@ -2,6 +2,7 @@
   <!-- 固定顶部搜索栏 -->
   <view class="search-bar">
     <view class="search-input-wrapper">
+      <image class="search-icon" src="/assets/search.png" />
       <input
         class="search-input"
         placeholder="搜索城市或门店"
@@ -16,7 +17,21 @@
   </view>
 
   <!-- 遮罩层 -->
-  <view class="mask" wx:if="{{searchFocus}}" catchtouchmove="stopScroll"></view>
+  <view class="mask" wx:if="{{searchFocus}}" catchtouchmove="stopScroll">
+    <!-- 搜索结果列表（先显示门店城市搜索结果，无结果时显示高德前10个地址） -->
+    <view class="search-result-container" wx:if="{{searchKeyword}}">
+      <block wx:for="{{searchResults}}" wx:key="id">
+        <view class="search-result-item" bindtap="onSelectSearchResult" data-item="{{item}}">
+          <!-- 高亮文字：使用 rich-text 显示处理过的 HTML 片段 -->
+          <rich-text class="search-result-text" nodes="{{item.highlightName}}"></rich-text>
+          <!-- 如果是高德结果，显示子标题（如地址） -->
+          <view wx:if="{{item.type === 'gaode'}}" class="search-result-sub">
+            {{item.address}}
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
 
   <!-- 内容区域：左右分区 -->
   <view class="content-area">

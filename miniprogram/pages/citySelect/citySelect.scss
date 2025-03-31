@@ -36,6 +36,12 @@
   position: relative;
 }
 
+.search-icon {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 16rpx;
+}
+
 /* 输入框 */
 .search-input {
   flex: 1;
@@ -44,6 +50,40 @@
   outline: none;
   font-size: 28rpx;
   padding: 0 20rpx;
+}
+
+/* 遮罩层上方的搜索结果列表容器 */
+.search-result-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* 由于 mask 已经是一个固定定位层，这里也可以用绝对定位；
+     如果你想滚动，可加一个 max-height 再 overflow-y: auto */
+  max-height: 80%;
+  overflow-y: auto;
+  background-color: #fff;
+  z-index: 9999; /* 确保在遮罩层之上 */
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+  padding: 0 20rpx;
+}
+
+.search-result-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+/* 高亮文字 */
+.search-result-text {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+}
+
+.search-result-sub {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 4rpx;
 }
 
 /* 蓝色链接文字 */
