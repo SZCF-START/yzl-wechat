@@ -1,7 +1,9 @@
+import config from '../../config/config.js'
 Page({
   data: {
     searchFocus: false,   // 是否点击搜索框
     searchKeyword: '',    // 搜索关键字
+    searchResults: [],    // 搜索结果
 
     // 当前城市（为空则显示“开启定位”）
     currentCity: '',
@@ -84,8 +86,144 @@ Page({
     this.setData({ searchFocus: true });
   },
   onSearchInput(e) {
-    this.setData({ searchKeyword: e.detail.value });
+    const keyword = e.detail.value.trim();
+    this.setData({ searchKeyword: keyword });
+
+    // 清空之前的定时器
+    clearTimeout(this.timer);
+
+    // 关键字为空则清空结果
+    if (!keyword) {
+      this.setData({ searchResults: [] });
+      return;
+    }
+    // 延迟 500 毫秒后再执行搜索逻辑
+    this.timer = setTimeout(() => {
+      // 1. 先搜索后端门店城市
+      this.mockSearchStoreCities(keyword).then(res => {
+        if (res && res.length > 0) {
+          // 找到门店城市结果
+          const processed = res.map(item => {
+            return {
+              id: item.id,
+              type: 'store',           // 标识这是门店城市结果
+              cityName: item.cityName,
+              // 高亮处理
+              highlightName: this.highlightText(item.cityName, keyword)
+            };
+          });
+          this.setData({ searchResults: processed });
+        } else {
+          // 2. 若无匹配城市，则调用高德 API
+          this.fetchCityFuzzySearch(keyword);
+        }
+      });
+    }, 500);  
   },
+
+  // 模拟后端接口：搜索门店城市列表
+  mockSearchStoreCities(keyword) {
+    return new Promise(resolve => {
+      // 假设后端存储了这些门店城市
+      const storeCities = [
+        { id: 1, cityName: '朝阳' },
+        { id: 2, cityName: '丹阳' },
+        { id: 3, cityName: '当阳' },
+        { id: 4, cityName: '东阳' },
+        { id: 5, cityName: '贵阳' },
+        { id: 6, cityName: '衡阳' },
+        { id: 7, cityName: '简阳' },
+        { id: 8, cityName: '洛阳' },
+        { id: 9, cityName: '南阳' },
+        { id: 10, cityName: '信阳' },
+        // ...
+      ];
+      // 模拟模糊搜索
+      const result = storeCities.filter(item => item.cityName.includes(keyword));
+      // 返回结果
+      resolve(result);
+    });
+  },
+
+  // 调用高德接口进行地址模糊搜索（取前10条）
+  fetchCityFuzzySearch(keyword) {
+    wx.request({
+      url: 'https://restapi.amap.com/v5/place/text',
+      data: {
+        key: config.AMAP_KEY,
+        keywords: keyword,
+        page_size: 10, 
+        page_num: 1
+      },
+      success: (res) => {
+        if (res.data && res.data.status === '1') {
+          const pois = res.data.pois || [];
+          // 只取前10条
+          const top10 = pois.slice(0, 10);
+          const processed = top10.map(poi => {
+            const address = `${poi.cityname}-${poi.adname}${
+              poi.adname !== poi.address ? `-${poi.address}` : ''
+            }`;
+            return {
+              id: poi.id,
+              type: 'gaode', // 标识这是高德结果
+              highlightName: this.highlightText(poi.name, keyword),
+              address: address
+            };
+          });
+          this.setData({ searchResults: processed });
+        } else {
+          // 搜索失败或无结果
+          this.setData({ searchResults: [] });
+        }
+      },
+      fail: () => {
+        this.setData({ searchResults: [] });
+        wx.showToast({
+          title: '请求高德API失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 关键词高亮函数：将匹配到的部分用 <span style="color:orange"> 包裹
+  highlightText(text, keyword) {
+    if (!keyword) return text;
+    // 使用正则全局匹配（不区分大小写可加 'i'）
+    const reg = new RegExp(`(${keyword})`, 'g');
+    // 将匹配部分替换为橙色高亮
+    const newText = text.replace(reg, `<span style="color:orange">$1</span>`);
+    // 注意：rich-text 需要的是 HTML 字符串
+    return newText;
+  },
+
+  // 点击搜索结果
+  onSelectSearchResult(e) {
+    const item = e.currentTarget.dataset.item;
+    if (item.type === 'store') {
+      // 门店城市结果：与原先selectCity逻辑一致
+      this.selectCity({ cityName: item.cityName });
+    } else {
+      // 高德地址结果，假设只取 name 作为城市名
+      // 若需要更准确的城市信息，需要从 poi 结构中解析
+      const cityObj = { cityName: this.stripHtml(item.highlightName) };
+      this.selectCity(cityObj);
+    }
+
+    // 选完收起搜索
+    this.setData({
+      searchFocus: false,
+      searchKeyword: '',
+      searchResults: []
+    });
+  },
+
+  // 去除 HTML 标签，仅保留文字
+  stripHtml(html) {
+    return html.replace(/<[^>]+>/g, '');
+  },
+
   onSearchLinkTap() {
     wx.showToast({
       title: '点击了蓝色链接',
