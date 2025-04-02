@@ -44,6 +44,9 @@ Page({
     // 当前swiper页索引
     iconCurrentPage: 0,
     autoPlayValue: false,
+
+    //用户是否同意隐私
+    isLocationEnabled: false,
   },
 
   onLoad(options) {
@@ -52,6 +55,35 @@ Page({
     // 拆分金刚区数据，每页4个
     this.initIconPages();
     // this.setDefaultDateTime();
+
+    const app = getApp()
+    // 检测定位状态
+    app.checkLocationPermission()
+    
+    // 使用全局状态
+    this.setData({
+      isLocationEnabled: app.globalData.isLocationEnabled
+    }, () => {
+      console.log('this.data.isLocationEnabled', this.data.isLocationEnabled);
+      if (this.data.isLocationEnabled) {
+        console.log('用户经纬度：', latitude, longitude);
+        wx.getLocation({
+          type: 'wgs84',
+          success: (res) => {
+            const { latitude, longitude } = res;
+            console.log('用户经纬度：', latitude, longitude);
+            // 可进一步调用逆地址解析 API 获取详细地址
+          },
+          fail: (error) => {
+            console.error('获取定位失败：', error);
+            wx.showToast({
+              title: '定位失败，请检查权限',
+              icon: 'none'
+            });
+          }
+        });
+      }
+    });
   },
 
   setDefaultDateTime() {
@@ -179,6 +211,24 @@ Page({
 
   // 初始化位置，演示逻辑：不做真实定位，仅设置默认值
   initLocation() {
+    if (this.data.isLocationEnabled) {
+      wx.getLocation({
+        type: 'wgs84', // 返回 wgs84 坐标，可以用于地图显示
+        success: (res) => {
+          const { latitude, longitude } = res;
+          console.log('用户经纬度：', latitude, longitude);
+          // 后续可以调用地图 API 或 wx.request 发起逆地址解析，
+          // 根据经纬度获取详细地址信息
+        },
+        fail: (error) => {
+          console.error('获取定位失败：', error);
+          wx.showToast({
+            title: '定位失败，请检查权限',
+            icon: 'none',
+          });
+        }
+      });
+    }
     this.setData({
       currentCity: this.data.defaultCity,
       currentStore: this.data.defaultStore,

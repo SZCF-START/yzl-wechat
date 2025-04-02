@@ -36,15 +36,6 @@ Page({
       currentCity: storedCity,
       historyCities: storedHistory
     });
-
-    const app = getApp()
-    // 检测定位状态
-    app.checkLocationPermission()
-    
-    // 使用全局状态
-    this.setData({
-      isLocationEnabled: app.globalData.isLocationEnabled
-    })
   },
 
   /* 初始化全部城市 */
