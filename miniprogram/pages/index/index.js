@@ -51,7 +51,7 @@ Page({
 
   onLoad(options) {
     // 这里可以检查地理位置授权、获取默认城市门店等
-    this.initLocation();
+    // this.initLocation();
     // 拆分金刚区数据，每页4个
     this.initIconPages();
     // this.setDefaultDateTime();
@@ -207,11 +207,13 @@ Page({
     // 可以通过 globalData 或 query 参数进行更新
     console.log("options.pickupDate:" + this.data.pickupDate);
     this.setDefaultDateTime();
+    this.initLocation();
   },
 
   // 初始化位置，演示逻辑：不做真实定位，仅设置默认值
   initLocation() {
-    if (this.data.isLocationEnabled) {
+    console.log("this.data.isLocationEnabled:" + this.data.isLocationEnabled);
+    if (true) {
       wx.getLocation({
         type: 'wgs84', // 返回 wgs84 坐标，可以用于地图显示
         success: (res) => {
