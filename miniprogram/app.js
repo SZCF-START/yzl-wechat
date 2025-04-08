@@ -1,8 +1,14 @@
 import { initEid } from './mp_ecard_sdk/main';
+const privacyStatusManager = require('./utils/privacyStatusManager');
 App({
   onLaunch() {
+    console.log('App 启动');
     initEid();
     // this.methods.updateManager()
+    
+    this.overridePage();
+    // 启动时检查一次隐私权限
+    // privacyStatusManager.initPrivacyCheck();
   },
   
   globalData: {
@@ -21,14 +27,9 @@ App({
     const that = this;
     wx.getPrivacySetting({
       success(res) {
-        if (res.needAuthorization) {
-          // 需要弹出隐私协议
-          this.setData({
-            isLocationEnabled: true
-          })
-        } else {
-          // 用户已经同意过隐私协议，所以不需要再弹出隐私协议，也能调用隐私接口
-        }
+        that.globalData.isLocationEnabled = res.needAuthorization;
+        // 触发全局事件（通知所有页面）
+        wx.eventBus.emit('privacyStatusChange', res.needAuthorization);
       },
       fail(err) {
         console.error("获取隐私设置失败", err);
@@ -37,12 +38,6 @@ App({
     });
   },
   
-
-  onLaunch() {
-    console.log('App 启动');
-    this.overridePage();
-  },
-
   overridePage() {
     const originalPage = Page; // 保存原始 Page 方法
 

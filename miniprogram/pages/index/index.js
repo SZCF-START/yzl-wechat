@@ -1,3 +1,4 @@
+const privacyStatusManager = require('../../utils/privacyStatusManager');
 Page({
   data: {
     // 模拟banner
@@ -51,39 +52,56 @@ Page({
 
   onLoad(options) {
     // 这里可以检查地理位置授权、获取默认城市门店等
-    // this.initLocation();
+    this.checkLocationPermission();
     // 拆分金刚区数据，每页4个
     this.initIconPages();
     // this.setDefaultDateTime();
 
-    const app = getApp()
-    // 检测定位状态
-    app.checkLocationPermission()
+    // 获取当前状态（同步，初始值可能不准确）
+    // this.setData({
+    //   isLocationEnabled: privacyStatusManager.getStatus()
+    // });
+
+    // // 注册监听器（权限状态变化时更新页面）
+    // privacyStatusManager.onChange((newStatus) => {
+    //   this.setData({
+    //     isLocationEnabled: newStatus
+    //   });
+    //   console.log("隐私权限变化：", newStatus);
+    // });
+
+    // // 主动检查一次（异步）
+    // privacyStatusManager.check().then(status => {
+    //   this.setData({ isLocationEnabled: status });
+    // });
     
-    // 使用全局状态
-    this.setData({
-      isLocationEnabled: app.globalData.isLocationEnabled
-    }, () => {
-      console.log('this.data.isLocationEnabled', this.data.isLocationEnabled);
-      if (this.data.isLocationEnabled) {
-        console.log('用户经纬度：', latitude, longitude);
-        wx.getLocation({
-          type: 'wgs84',
-          success: (res) => {
-            const { latitude, longitude } = res;
-            console.log('用户经纬度：', latitude, longitude);
-            // 可进一步调用逆地址解析 API 获取详细地址
-          },
-          fail: (error) => {
-            console.error('获取定位失败：', error);
-            wx.showToast({
-              title: '定位失败，请检查权限',
-              icon: 'none'
-            });
-          }
+  },
+
+  async checkLocationPermission() {
+    try {
+      const res = await privacyStatusManager.getPrivacyStatus();
+      if (res.needAuthorization) {
+        await privacyStatusManager.showPrivacyAuthorizationPopup({
+          scope: 'userLocation'
         });
       }
-    });
+      this.initLocation()
+    } catch (e) {
+      console.error('隐私弹窗处理失败：', e);
+    }
+    
+  },
+
+  // 用户点击按钮时调用隐私弹窗
+  onRequestPrivacyConsent() {
+    privacyStatusManager.requestUserPrivacyConsent()
+      .then(() => {
+        this.initLocation()
+        wx.showToast({ title: '已授权', icon: 'success' });
+      })
+      .catch(() => {
+        wx.showToast({ title: '你需要授权才能继续使用', icon: 'none' });
+      });
   },
 
   setDefaultDateTime() {
@@ -207,13 +225,12 @@ Page({
     // 可以通过 globalData 或 query 参数进行更新
     console.log("options.pickupDate:" + this.data.pickupDate);
     this.setDefaultDateTime();
-    this.initLocation();
+    // this.initLocation();
   },
 
   // 初始化位置，演示逻辑：不做真实定位，仅设置默认值
   initLocation() {
-    console.log("this.data.isLocationEnabled:" + this.data.isLocationEnabled);
-    if (true) {
+    
       wx.getLocation({
         type: 'wgs84', // 返回 wgs84 坐标，可以用于地图显示
         success: (res) => {
@@ -230,7 +247,7 @@ Page({
           });
         }
       });
-    }
+    
     this.setData({
       currentCity: this.data.defaultCity,
       currentStore: this.data.defaultStore,

@@ -28,7 +28,7 @@
   ],
   "permission": {
     "scope.userLocation": {
-      "desc": "将获取你的具体位置信息用于获取您所在定位为您推荐附件租车网点" 
+      "desc": "将获取你的具体位置信息用于为您推荐附近租车网点" 
     }
   },
   "requiredPrivateInfos": [
