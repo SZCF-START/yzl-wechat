@@ -193,10 +193,11 @@
   position: relative;
 }
 .loc-icon {
-  width: 24rpx;
-  height: 24rpx;
+  width: 30rpx;
+  height: 30rpx;
   margin-right: 5rpx;
   vertical-align: middle;
+  font-weight: bold; /* 添加这一行 */
 }
 
 /* 热门/全部城市：一行3个 */

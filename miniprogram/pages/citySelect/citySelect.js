@@ -25,7 +25,7 @@ Page({
     citiesByLetter: {}
   },
 
-  onLoad() {
+  onLoad(options) {
     // 1. 初始化全部城市（可换成后端请求）
     this.initAllCities();
 
@@ -36,6 +36,13 @@ Page({
       currentCity: storedCity,
       historyCities: storedHistory
     });
+    console.log("options.city",options.city);
+    if (options.city){
+      console.log("options.city222",options.city);
+      this.setData({
+        currentCity: options.city,
+      })
+    }
   },
 
   /* 初始化全部城市 */
@@ -233,10 +240,90 @@ Page({
 
   /* 获取定位 */
   onGetLocation() {
-    wx.showToast({
-      title: '定位功能未实现',
-      icon: 'none'
+    // wx.showToast({
+    //   title: '定位功能未实现',
+    //   icon: 'none'
+    // });
+    const that = this;
+    wx.openSetting({
+     
+      success (res) {
+        console.log(res.authSetting)
+        const hasLocationAuth = res.authSetting && res.authSetting['scope.userLocation'];
+        if (hasLocationAuth) {
+          console.log('✅ 用户已授权位置信息');
+          that.initLocation()
+        }else{
+          wx.showToast({
+            title: '您拒绝了定位授权,请重新授权',
+            icon: 'none'
+          });
+        }
+      },
+      fail: () => {
+        this._exitMiniProgram(reject, error)
+      }
     });
+  },
+
+  initLocation() {
+    wx.getLocation({
+      type: 'wgs84', // 返回 wgs84 坐标，可以用于地图显示
+      success: (res) => {
+        const { latitude, longitude } = res;
+        console.log('用户经纬度：', latitude, longitude);
+        // 根据经纬度获取详细地址信息
+        // 调用高德地图 API 获取地级市
+        const amapKey = config.AMAP_KEY; // 🔔 替换为你的高德地图 Web 服务 Key
+        const url = `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=${amapKey}&radius=1000&extensions=base`;
+
+        wx.request({
+          url: url,
+          method: 'GET',
+          success: (response) => {
+            const data = response.data;
+            if (data.status === '1') {
+              const addressComponent = data.regeocode.addressComponent;
+              console.log("addressComponent:",addressComponent);
+              let city = addressComponent.city;
+              let adcode = addressComponent.adcode;
+
+              // 直辖市的处理：city 可能是空，使用 province 替代
+              if (!city || (Array.isArray(city) && city.length === 0)) {
+                city = addressComponent.province;
+              }
+
+              console.log('获取的城市：', city);
+              // 去掉“市”字（如果有）
+              city = city.replace(/市$/, '');
+              
+              this.setData({
+                currentCity: city,
+              });
+            } else {
+              wx.showToast({
+                title: '获取城市失败',
+                icon: 'none',
+              });
+            }
+          },
+          fail: (err) => {
+            console.error('逆地理请求失败：', err);
+            wx.showToast({
+              title: '请求地址信息失败',
+              icon: 'none',
+            });
+          }
+        });
+      },
+      fail: (error) => {
+        console.error('获取定位失败：', error);
+        wx.showToast({
+          title: '定位失败，请检查权限',
+          icon: 'none',
+        });
+      }
+    });  
   },
 
   /* 点击历史城市 */
@@ -254,7 +341,7 @@ Page({
   /* 通用选城市逻辑 */
   selectCity(city) {
     // 设置当前城市
-    this.setData({ currentCity: city.cityName });
+    // this.setData({ currentCity: city.cityName });
     wx.setStorageSync('currentCity', city.cityName);
 
     // 更新历史城市（最多2个，右侧最新）

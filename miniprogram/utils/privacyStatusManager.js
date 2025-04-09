@@ -148,7 +148,8 @@ const privacyStatusManager = {
       }
       return true;
     } catch (e) {
-      throw this._formatError('scope_reject', e);
+      console.log("finalErr:",e);
+      throw this._formatError('scope_reject', e,scope);
     }
   },
 
@@ -179,7 +180,7 @@ const privacyStatusManager = {
     });
   },
 
-  _formatError(type, originalErr) {
+  _formatError(type, originalErr,scope) {
     const errorMap = {
       privacy_reject: {
         code: 1001,
@@ -188,6 +189,7 @@ const privacyStatusManager = {
       },
       scope_reject: {
         code: 1002,
+        scope: scope,
         msg: '用户拒绝权限申请',
         original: originalErr
       }

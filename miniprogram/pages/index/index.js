@@ -1,4 +1,5 @@
 const privacyStatusManager = require('../../utils/privacyStatusManager');
+import config from '../../config/config.js'
 Page({
   data: {
     // 模拟banner
@@ -12,8 +13,8 @@ Page({
     ],
 
     // 默认城市/门店
-    defaultCity: '太原',
-    defaultStore: '万象城店',
+    defaultCity: '长治',
+    defaultStore: '西二环瑞丰物流店',
 
     // 当前选择城市/门店
     currentCity: '',
@@ -87,7 +88,10 @@ Page({
       }
       this.initLocation()
     } catch (e) {
-      console.error('隐私弹窗处理失败：', e);
+      console.error(e.msg + '：', e);
+      if (e.scope === 'userLocation'){
+        this.initUnauthorizedLocation();
+      }
     }
     
   },
@@ -230,24 +234,73 @@ Page({
 
   // 初始化位置，演示逻辑：不做真实定位，仅设置默认值
   initLocation() {
-    
-      wx.getLocation({
-        type: 'wgs84', // 返回 wgs84 坐标，可以用于地图显示
-        success: (res) => {
-          const { latitude, longitude } = res;
-          console.log('用户经纬度：', latitude, longitude);
-          // 后续可以调用地图 API 或 wx.request 发起逆地址解析，
-          // 根据经纬度获取详细地址信息
-        },
-        fail: (error) => {
-          console.error('获取定位失败：', error);
-          wx.showToast({
-            title: '定位失败，请检查权限',
-            icon: 'none',
-          });
-        }
-      });
-    
+    wx.getLocation({
+      type: 'wgs84', // 返回 wgs84 坐标，可以用于地图显示
+      success: (res) => {
+        const { latitude, longitude } = res;
+        console.log('用户经纬度：', latitude, longitude);
+        // 根据经纬度获取详细地址信息
+        // 调用高德地图 API 获取地级市
+        const amapKey = config.AMAP_KEY; // 🔔 替换为你的高德地图 Web 服务 Key
+        const url = `https://restapi.amap.com/v3/geocode/regeo?location=${longitude},${latitude}&key=${amapKey}&radius=1000&extensions=base`;
+
+        wx.request({
+          url: url,
+          method: 'GET',
+          success: (response) => {
+            const data = response.data;
+            if (data.status === '1') {
+              const addressComponent = data.regeocode.addressComponent;
+              console.log("addressComponent:",addressComponent);
+              let city = addressComponent.city;
+              let adcode = addressComponent.adcode;
+
+              // 直辖市的处理：city 可能是空，使用 province 替代
+              if (!city || (Array.isArray(city) && city.length === 0)) {
+                city = addressComponent.province;
+              }
+
+              console.log('获取的城市：', city);
+              // 去掉“市”字（如果有）
+              city = city.replace(/市$/, '');
+              this.setData({
+                currentCity: city,
+                // 可根据城市设定默认门店等
+                currentStore: this.data.defaultStore,
+                isLocationEnabled: true,
+              });
+            } else {
+              wx.showToast({
+                title: '获取城市失败',
+                icon: 'none',
+              });
+            }
+          },
+          fail: (err) => {
+            console.error('逆地理请求失败：', err);
+            wx.showToast({
+              title: '请求地址信息失败',
+              icon: 'none',
+            });
+          }
+        });
+      },
+      fail: (error) => {
+        console.error('获取定位失败：', error);
+        wx.showToast({
+          title: '定位失败，请检查权限',
+          icon: 'none',
+        });
+
+        this.setData({
+          currentCity: this.data.defaultCity,
+          currentStore: this.data.defaultStore,
+        });
+      }
+    });  
+  },
+
+  initUnauthorizedLocation() {
     this.setData({
       currentCity: this.data.defaultCity,
       currentStore: this.data.defaultStore,
@@ -273,8 +326,14 @@ Page({
 
   // 跳转到城市选择页面
   goCitySelect() {
+    let url = '/pages/citySelect/citySelect';
+
+
+    if (this.data.isLocationEnabled) {
+      url += `?city=${this.data.currentCity}`;
+    }
     wx.navigateTo({
-      url: '/pages/citySelect/citySelect',
+      url: url,
     });
   },
 
