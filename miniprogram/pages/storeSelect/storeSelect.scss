@@ -1,0 +1,248 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* 顶部区域 */
+.header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #ffffff;
+  z-index: 1000;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+}
+
+/* 城市 + 搜索框区域 */
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #f5f5f5;
+  border-radius: 30rpx;
+  padding: 10rpx 20rpx;
+  margin-right: 20rpx;
+}
+
+.city-select {
+  display: flex;
+  align-items: center;
+  margin-right: 20rpx;
+}
+
+.city-text {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: bold;
+  margin-right: 6rpx;
+}
+
+.dropdown-icon {
+  width: 20rpx;
+  height: 20rpx;
+}
+
+.divider {
+  width: 1rpx;
+  height: 32rpx;
+  background-color: #ddd;
+  margin-right: 20rpx;
+}
+
+/* 搜索栏 */
+.search-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.search-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 10rpx;
+}
+
+.search-placeholder {
+  font-size: 24rpx;
+  color: #aaa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 地图按钮 */
+.map-btn {
+  color: #ff9900;
+  font-size: 26rpx;
+  flex-shrink: 0;
+}
+
+/* 蒙层样式 */
+.mask-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ffffff;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.search-input {
+  flex: 1;
+  height: 60rpx;
+  background-color: #f5f5f5;
+  border-radius: 30rpx;
+  padding: 0 20rpx;
+  font-size: 26rpx;
+}
+
+.cancel-btn {
+  margin-left: 20rpx;
+  font-size: 26rpx;
+  color: #333;
+}
+
+.map-container {
+  width: 100%;
+  height: 300rpx;
+  position: relative;
+}
+
+.map-area {
+  width: 100%;
+  height: 300rpx;
+}
+
+.map-overlay {
+  position: absolute;
+  bottom: 10rpx;
+  right: 10rpx;
+  z-index: 10;
+}
+
+.view-map-btn {
+  background-color: #f90;
+  border-radius: 10rpx;
+  padding: 10rpx 20rpx;
+  font-size: 28rpx;
+  color: white;
+}
+
+.store-section {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 400rpx);
+  overflow: hidden;
+}
+
+.area-list {
+  width: 180rpx;
+  background: #f5f5f5;
+}
+
+.area-item {
+  padding: 20rpx;
+  font-size: 26rpx;
+  color: #333;
+}
+
+.area-item.active {
+  background: #fff;
+  border-left: 6rpx solid #ffa400;
+  font-weight: bold;
+}
+
+.store-list {
+  flex: 1;
+  padding: 20rpx;
+  background: #fff;
+}
+
+.area-section {
+  margin-bottom: 40rpx;
+}
+
+.area-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+
+.store-card {
+  border: 1rpx solid #ffa400;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.store-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.store-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-right: 10rpx;
+}
+
+.tag {
+  padding: 4rpx 10rpx;
+  background: #f2f2f2;
+  border-radius: 6rpx;
+  font-size: 20rpx;
+  margin-right: 6rpx;
+  color: #888;
+}
+
+.tag.yellow {
+  background: #fff7e0;
+  color: #f4b500;
+}
+
+.tag.orange {
+  background: #ffe7e7;
+  color: #ff5000;
+}
+
+.store-addr,
+.store-time {
+  font-size: 24rpx;
+  margin-top: 10rpx;
+  color: #666;
+}
+
+.store-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20rpx;
+}
+
+.phone-btn,
+.guide-btn {
+  font-size: 24rpx;
+  padding: 10rpx 20rpx;
+  background: #f6f6f6;
+  border-radius: 6rpx;
+}

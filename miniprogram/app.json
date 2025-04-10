@@ -24,7 +24,8 @@
     "mp_ecard_sdk/protocol/userAccredit/index",
     "mp_ecard_sdk/protocol/eid/index",
     "pages/timeSelect/timeSelect",
-    "pages/citySelect/citySelect"
+    "pages/citySelect/citySelect",
+    "pages/storeSelect/storeSelect"
   ],
   "permission": {
     "scope.userLocation": {

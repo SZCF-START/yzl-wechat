@@ -336,6 +336,9 @@ Page({
   onSelectCity(e) {
     const city = e.currentTarget.dataset.city;
     this.selectCity(city);
+    wx.navigateTo({
+      url: `/pages/storeSelect/storeSelect?city=${city}`,
+    });
   },
 
   /* 通用选城市逻辑 */
