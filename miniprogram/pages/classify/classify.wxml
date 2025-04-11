@@ -1,2 +1,67 @@
-<!--pages/classify/classify.wxml-->
-<text>pages/classify/classify.wxml</text>
+<view class="container">
+  <!-- 顶部搜索栏 -->
+  <view class="header">
+    <view class="search-wrapper">
+      <view class="search-box">
+        <view class="city-select" bindtap="onCityTap">
+          <text class="city-text">{{ currentCity }} ▾</text>
+        </view>
+        <view class="divider"></view>
+        <view class="search-bar" bindtap="onSearchTap">
+          <image class="search-icon" src="/assets/search.png" />
+          <text class="search-placeholder">输入景点、地址寻找附近门店</text>
+        </view>
+      </view>
+      <view class="map-btn" bindtap="onMapTap">地图</view>
+    </view>
+  </view>
+
+  <!-- 地图区域 -->
+  <view class="map-container">
+    <map
+      id="storeMap"
+      latitude="{{latitude}}"
+      longitude="{{longitude}}"
+      scale="16"
+      show-location
+      markers="{{markers}}"
+      style="width: 100%; height: 100%;">
+    </map>
+  </view>
+
+  <!-- 门店列表双栏区 -->
+  <view class="store-section">
+    <!-- 左侧区域列表 -->
+    <scroll-view scroll-y class="area-list">
+      <block wx:for="{{areaList}}" wx:key="name">
+        <view
+          class="area-item {{selectedAreaIndex === index ? 'active' : ''}}"
+          data-index="{{index}}"
+          bindtap="onAreaTap"
+        >{{item.name}}</view>
+      </block>
+    </scroll-view>
+
+    <!-- 右侧门店展示 -->
+    <scroll-view scroll-y class="store-list">
+      <view class="area-section">
+        <block wx:for="{{selectedAreaStores}}" wx:key="name">
+          <view class="store-card">
+            <view class="store-header">
+              <text class="store-name">{{item.name}}</text>
+              <text class="tag" wx:if="{{item.supportSelfReturn}}">部分支持自助取还</text>
+              <text class="tag yellow" wx:if="{{item.beeBox}}">蜂巢柜</text>
+              <text class="tag orange" wx:if="{{item.orderableTomorrow}}">可下全天订单</text>
+            </view>
+            <view class="store-addr">地址：{{item.address}}</view>
+            <view class="store-time">营业时间：{{item.openTime}} - {{item.closeTime}}</view>
+            <view class="store-actions">
+              <button class="phone-btn">📞 电话</button>
+              <button class="guide-btn">📍 门店指引</button>
+            </view>
+          </view>
+        </block>
+      </view>
+    </scroll-view>
+  </view>
+</view>

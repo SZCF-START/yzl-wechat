@@ -6,11 +6,8 @@
     <view class="search-box">
       <view class="city-select" bindtap="onCityTap">
         <text class="city-text">{{ currentCity }} ▾</text>
-        <image src="/assets/arrow_down.png" class="dropdown-icon" />
       </view>
-
       <view class="divider"></view>
-
       <!-- 搜索框 -->
       <view class="search-bar" bindtap="onSearchTap">
         <image class="search-icon" src="/assets/search.png" />
@@ -30,6 +27,8 @@
     <text class="cancel-btn" bindtap="onCancelSearch">取消</text>
   </view>
 </view>
+
+<view class="header-placeholder"></view>
 
   <!-- 地图 -->
   <view class="map-container">

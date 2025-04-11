@@ -1,66 +1,37 @@
-// pages/classify/classify.js
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    currentCity: "太原",
+    latitude: 37.872,
+    longitude: 112.548,
+    markers: [
+      {
+        id: 1,
+        latitude: 37.872,
+        longitude: 112.548,
+        title: "门店 A"
+      }
+    ],
+    areaList: [
+      {
+        name: "迎泽区",
+        stores: [
+          {
+            name: "迎泽门店 A",
+            address: "迎泽南街 123 号",
+            openTime: "08:00",
+            closeTime: "20:00",
+            supportSelfReturn: true,
+            beeBox: true,
+            orderableTomorrow: true
+          }
+        ]
+      }
+    ],
+    selectedAreaIndex: 0
   },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad(options) {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
+  onAreaTap(e) {
+    this.setData({
+      selectedAreaIndex: e.currentTarget.dataset.index
+    });
   }
-})
+});
