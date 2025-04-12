@@ -63,6 +63,305 @@ Page({
             orderableTomorrow: false
           }
         ]
+      },
+      {
+        name: '芙蓉区1',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点1',
+            address: '芙蓉中路白沙广场停车场1',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点1',
+            address: '书院南路与南二环交汇处1',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区2',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点2',
+            address: '芙蓉中路白沙广场停车场2',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点2',
+            address: '书院南路与南二环交汇处2',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区3',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点3',
+            address: '芙蓉中路白沙广场停车场3',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点3',
+            address: '书院南路与南二环交汇处3',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区4',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点4',
+            address: '芙蓉中路白沙广场停车场4',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点4',
+            address: '书院南路与南二环交汇处4',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区5',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点5',
+            address: '芙蓉中路白沙广场停车场5',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点5',
+            address: '书院南路与南二环交汇处5',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区6',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点6',
+            address: '芙蓉中路白沙广场停车场6',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点6',
+            address: '书院南路与南二环交汇处6',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区7',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点7',
+            address: '芙蓉中路白沙广场停车场7',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点7',
+            address: '书院南路与南二环交汇处7',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区8',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点8',
+            address: '芙蓉中路白沙广场停车场8',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点8',
+            address: '书院南路与南二环交汇处8',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区9',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点9',
+            address: '芙蓉中路白沙广场停车场9',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点9',
+            address: '书院南路与南二环交汇处9',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区10',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点10',
+            address: '芙蓉中路白沙广场停车场10',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点10',
+            address: '书院南路与南二环交汇处10',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区11',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点11',
+            address: '芙蓉中路白沙广场停车场11',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点11',
+            address: '书院南路与南二环交汇处11',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区12',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点12',
+            address: '芙蓉中路白沙广场停车场12',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点12',
+            address: '书院南路与南二环交汇处12',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
+      },
+      {
+        name: '芙蓉区13',
+        stores: [
+          {
+            name: '贺龙体育馆便捷点13',
+            address: '芙蓉中路白沙广场停车场13',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          },
+          {
+            name: '新开铺送车点13',
+            address: '书院南路与南二环交汇处13',
+            openTime: '09:00',
+            closeTime: '19:00',
+            supportSelfReturn: false,
+            beeBox: false,
+            orderableTomorrow: false
+          }
+        ]
       }
     ]
   },

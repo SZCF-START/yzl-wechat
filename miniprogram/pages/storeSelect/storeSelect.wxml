@@ -1,5 +1,6 @@
 <view class="container">
   <!-- 固定顶部搜索区域 -->
+<view class="header1">
 <view class="header">
   <view class="search-wrapper">
     <!-- 城市选择 + 搜索框部分 -->
@@ -28,7 +29,7 @@
   </view>
 </view>
 
-<view class="header-placeholder"></view>
+<!-- <view class="header-placeholder"></view> -->
 
   <!-- 地图 -->
   <view class="map-container">
@@ -42,23 +43,26 @@
     style="width: 100%; height: 100%;">
   </map>
 
+
   <!-- 覆盖在地图上的按钮 -->
   <cover-view class="map-overlay">
     <cover-view class="view-map-btn" bindtap="onViewBigMap">看大地图</cover-view>
   </cover-view>
 </view>
-
+</view>
 
   <!-- 门店列表 -->
   <view class="store-section">
     <!-- 左侧区域列表 -->
     <scroll-view scroll-y class="area-list" bindtap="onAreaTap">
+    <view class="area1">
       <block wx:for="{{areaList}}" wx:key="name">
         <view
           class="area-item {{selectedAreaIndex === index ? 'active' : ''}}"
           data-index="{{index}}"
         >{{item.name}}</view>
       </block>
+    </view>
     </scroll-view>
 
     <!-- 右侧门店列表 -->
