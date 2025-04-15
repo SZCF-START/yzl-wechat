@@ -1,0 +1,37 @@
+<view class="container">
+  <!-- 顶部搜索栏 -->
+  <view class="search-bar">
+    <picker mode="selector" range="{{cities}}" bindchange="onCityChange">
+      <text class="city">{{selectedCity}}</text>
+    </picker>
+    <input placeholder="输入景点、地址寻找附近门店" />
+    <button class="list-btn" bindtap="onListTap">列表</button>
+  </view>
+
+  <!-- 地图区域 -->
+  <map
+    id="map"
+    longitude="{{longitude}}"
+    latitude="{{latitude}}"
+    scale="14"
+    markers="{{markers}}"
+    bindmarkertap="onMarkerTap"
+    show-location
+    class="map"
+  />
+
+  <!-- 门店详情卡片 -->
+  <view class="store-card" wx:if="{{selectedStore}}">
+    <view class="store-info">
+      <view class="store-name">{{selectedStore.name}}</view>
+      <view class="store-addr">📍 {{selectedStore.address}}</view>
+      <view class="store-time">🕒 {{selectedStore.openTime}}</view>
+    </view>
+    <view class="store-actions">
+      <button class="btn" bindtap="onPhoneCall">📞</button>
+      <button class="btn" bindtap="onGuideTap">📍</button>
+    </view>
+    <image src="{{selectedStore.logo}}" class="store-logo" mode="aspectFill" />
+    <button class="rent-btn" bindtap="onRentTap">租车</button>
+  </view>
+</view>

@@ -25,7 +25,8 @@
     "mp_ecard_sdk/protocol/eid/index",
     "pages/timeSelect/timeSelect",
     "pages/citySelect/citySelect",
-    "pages/storeSelect/storeSelect"
+    "pages/storeSelect/storeSelect",
+    "pages/mapGuide/mapGuide"
   ],
   "permission": {
     "scope.userLocation": {

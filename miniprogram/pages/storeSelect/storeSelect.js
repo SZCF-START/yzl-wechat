@@ -426,6 +426,9 @@ Page({
       title: '地图功能点击',
       icon: 'none'
     });
+    wx.navigateTo({
+      url: `/pages/mapGuide/mapGuide`,
+    });
   },
 
   onCancelSearch() {

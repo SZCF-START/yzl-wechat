@@ -17,7 +17,7 @@
     </view>
 
     <!-- 地图按钮 -->
-    <view class="map-btn" bindtap="onMapTap">地图</view>
+    <view class="map-btn" bindtap="onMapTap">地图1</view>
   </view>
 </view>
 
