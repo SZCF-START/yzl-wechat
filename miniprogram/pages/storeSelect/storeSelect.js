@@ -17,6 +17,7 @@ Page({
       }
     ],
     selectedAreaIndex: 0,
+    areaOffsets: [],
     areaList: [
       {
         name: '天心区',
@@ -28,7 +29,12 @@ Page({
             closeTime: '20:00',
             supportSelfReturn: true,
             beeBox: true,
-            orderableTomorrow: true
+            orderableTomorrow: true,
+            tags: [
+              { label: "高铁站", type: "default" },
+              { label: "库存紧张", type: "danger" },
+              { label: "可下全天订单", type: "highlight" }
+            ]
           },
           {
             name: '长沙长盛岚庭店',
@@ -363,7 +369,8 @@ Page({
           }
         ]
       }
-    ]
+    ],
+    scrollIntoId: ""
   },
 
   // 初始化地图数据
@@ -435,15 +442,109 @@ Page({
   },
 
   onAreaTap(e) {
-    const index = e.currentTarget.dataset.index;
-    this.setData({ selectedAreaIndex: index });
-    wx.pageScrollTo({
-      selector: `#area-${index}`,
-      duration: 300
+    const index = e.target.dataset.index;
+    console.log("index:",index);
+    this.setData({ 
+      selectedAreaIndex: index,
+      scrollIntoId: `area-${index}`  // 动态设置 scroll-into-view 的锚点ID 
+    }, () => {
+      // 添加延迟确保滚动生效
+      setTimeout(() => {
+        this.setData({ scrollIntoId: '' }); // 重置以允许重复触发相同ID
+      }, 100);
     });
+    // wx.pageScrollTo({
+    //   selector: `#area-${index}`,
+    //   duration: 300
+    // });
   },
 
   onStoreScroll(e) {
     // 可加入滚动同步逻辑
-  }
+    const scrollTop = e.detail.scrollTop;
+    console.log("scrollTop:",scrollTop);
+    const offsets = this.data.areaOffsets;
+    console.log("offsets:",offsets);
+
+    for (let i = 0; i < offsets.length; i++) {
+      const current = offsets[i];
+      const next = offsets[i + 1] ?? Infinity;
+      console.log("next:",next);
+      if (scrollTop >= current && scrollTop < next && this.data.selectedAreaIndex !== offsets.length-1) {
+        if (this.data.selectedAreaIndex !== i) {
+          this.setData({
+            selectedAreaIndex: i
+          });
+        }
+        break;
+      }
+    }
+  },
+  onReady() {
+    this.initAreaPositions(); // 页面加载后初始化位置
+  },
+  // 初始化区域位置
+  initAreaPositions() {
+    const query = wx.createSelectorQuery().in(this);
+    query.select('.store-list').boundingClientRect();
+    query.selectAll('.area-section').boundingClientRect();
+    query.exec((res) => {
+      console.log("res:",res);
+      const containerTop = res[0].top + 10;
+      console.log("containerTop:",containerTop);
+      const sectionRects = res[1];
+      console.log("sectionRects:",sectionRects);
+      const offsets = sectionRects.map(rect => rect.top - containerTop);
+      this.setData({
+        areaOffsets: offsets
+      });
+    });
+  },
+
+  onCardTap(e) {
+    console.log("222",e.currentTarget.dataset.store.name);
+    const store = e.currentTarget.dataset.store.name
+    wx.setStorageSync('selectedStore', store);
+    wx.switchTab({
+      url: '/pages/index/index'
+    });
+  },
+  onPhoneTap() {
+    console.log("onPhoneTap")
+  },
+  onGuideTap() {
+    console.log("onGuideTap")
+  },
+
+  // onHide() {
+  //   // 获取页面栈
+  //   const pages = getCurrentPages();
+    
+  //   // 当前页面是门店页，倒数第二个是城市页（我们要跳过它）
+  //   if (pages.length >= 2) {
+  //     const prevPage = pages[pages.length - 2];
+  //     console.log("prevPage:",prevPage);
+  //     if (prevPage.route === 'pages/citySelect/citySelect') {
+  //       // 从城市页返回，拦截并跳转首页
+  //       wx.reLaunch({
+  //         url: '/pages/index/index'
+  //       });
+  //     }
+  //   }
+  // },
+  // onUnload() {
+  //   const pages = getCurrentPages();
+  //   // 页面即将卸载（通常是 navigateBack）
+  //   if (pages.length >= 1) {
+  //     const current = pages[pages.length - 1];
+  //     const prev = pages.length > 1 ? pages[pages.length - 2] : null;
+      
+  //     // 如果上一个是城市页，说明是点了左上角返回
+  //     if (prev && prev.route === 'pages/citySelect/citySelect') {
+  //       wx.reLaunch({
+  //         url: '/pages/index/index'
+  //       });
+  //     }
+  //   }
+  // }
 });

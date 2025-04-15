@@ -54,40 +54,65 @@
   <!-- 门店列表 -->
   <view class="store-section">
     <!-- 左侧区域列表 -->
-    <scroll-view scroll-y class="area-list" bindtap="onAreaTap">
-    <view class="area1">
-      <block wx:for="{{areaList}}" wx:key="name">
-        <view
-          class="area-item {{selectedAreaIndex === index ? 'active' : ''}}"
-          data-index="{{index}}"
-        >{{item.name}}</view>
-      </block>
-    </view>
+    <scroll-view scroll-y class="area-list" bindtap="onAreaTap" scroll-with-animation="{{false}}">
+      <view class="area1">
+        <block wx:for="{{areaList}}" wx:key="name">
+          <view
+            class="area-item {{selectedAreaIndex === index ? 'active' : ''}}"
+            data-index="{{index}}"
+          >{{item.name}}</view>
+        </block>
+      </view>
     </scroll-view>
 
     <!-- 右侧门店列表 -->
-    <scroll-view scroll-y class="store-list" bindscroll="onStoreScroll">
-      <block wx:for="{{areaList}}" wx:key="name">
-        <view class="area-section" id="area-{{index}}">
-          <view class="area-title">{{item.name}}</view>
-          <block wx:for="{{item.stores}}" wx:key="name">
-            <view class="store-card">
-              <view class="store-header">
-                <text class="store-name">{{item.name}}</text>
-                <text class="tag" wx:if="{{item.supportSelfReturn}}">部分支持自助取还</text>
-                <text class="tag yellow" wx:if="{{item.beeBox}}">蜂巢柜</text>
-                <text class="tag orange" wx:if="{{item.orderableTomorrow}}">可下全天订单</text>
+    <scroll-view 
+      id="aaa"
+      scroll-y 
+      class="store-list" 
+      bindscroll="onStoreScroll" 
+      scroll-with-animation
+      scroll-into-view="{{scrollIntoId}}"
+    >
+      <view class="area1">
+        <block wx:for="{{areaList}}" wx:key="name">
+          <view class="area-section" id="area-{{index}}">
+            <view class="area-title">{{item.name}}</view>
+            <block wx:for="{{item.stores}}" wx:key="name">
+              <view class="store-card" data-store="{{item}}" bindtap="onCardTap">
+                <view class="store-header">
+                  <view class="store-name-wrapper">
+                    <text class="store-name">{{item.name}}</text>
+                    <text class="store-arrow">></text>
+                  </view>
+                  <view class="tag-list">
+                    <block wx:for="{{item.tags}}" wx:key="label">
+                      <text class="tag {{'tag-' + item.type}}">{{item.label}}</text>
+                    </block>
+                  </view>
+
+                </view>
+
+                <view class="store-addr">地址：{{item.address}}</view>
+                <view class="store-time">营业时间：{{item.openTime}} - {{item.closeTime}}</view>
+
+                <view class="store-actions">
+                  <button class="action-btn" open-type="makePhoneCall" data-phone="{{item.phone}}" catchtap="onPhoneTap">
+                    <text class="icon">📞</text> 电话
+                  </button>
+                  <button class="action-btn" catchtap="onGuideTap" data-lat="{{item.latitude}}" data-lng="{{item.longitude}}" data-name="{{item.name}}" data-address="{{item.address}}">
+                    <text class="icon">📍</text> 门店指引
+                  </button>
+                </view>
               </view>
-              <view class="store-addr">地址：{{item.address}}</view>
-              <view class="store-time">营业时间：{{item.openTime}} - {{item.closeTime}}</view>
-              <view class="store-actions">
-                <button class="phone-btn">📞 电话</button>
-                <button class="guide-btn">📍 门店指引</button>
-              </view>
-            </view>
-          </block>
-        </view>
-      </block>
+
+              <!-- 分隔线 -->
+              <view class="card-divider"></view>
+
+            </block>
+          </view>
+        </block>
+      </view>
     </scroll-view>
   </view>
 </view>

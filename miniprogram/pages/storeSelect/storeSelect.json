@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "选择门店",
-  "usingComponents": {}
+  "usingComponents": {},
+  "navigationStyle": "default",
+  "navigationBarBackButtonVisible": false
 }

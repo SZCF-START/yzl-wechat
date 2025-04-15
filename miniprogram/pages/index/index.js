@@ -14,7 +14,7 @@ Page({
 
     // 默认城市/门店
     defaultCity: '长治',
-    defaultStore: '西二环瑞丰物流店',
+    defaultStore: '',
 
     // 当前选择城市/门店
     currentCity: '',
@@ -52,6 +52,7 @@ Page({
   },
 
   onLoad(options) {
+    console.log("00000");
     // 这里可以检查地理位置授权、获取默认城市门店等
     this.checkLocationPermission();
     // 拆分金刚区数据，每页4个
@@ -227,9 +228,26 @@ Page({
     // 当从其他页面返回时，可在这里做数据刷新
     // 例如，如果在 citySelect/storeSelect/timeSelect 修改了数据并回传
     // 可以通过 globalData 或 query 参数进行更新
+    const store = wx.getStorageSync('selectedStore');
+    console.log("store555:",store);
+    // 使用展开运算符创建新对象
+    // 数据是对象或数组，直接修改内部属性不会触发渲染，需通过 ​​深拷贝​​ 或 ​​新建引用​​ 强制更新
+    // const newStore = { ...store }; 
+    // this.setData({ defaultStore: newStore });
+    if (store) {
+      console.log("store555777:",store);
+      this.setData({ currentStore: store }, () => {
+        wx.nextTick(() => {
+          console.log("DOM 已更新，可执行渲染后操作");
+        });
+      });
+      // wx.removeStorageSync('selectedStore'); // 用完即清
+    }
     console.log("options.pickupDate:" + this.data.pickupDate);
     this.setDefaultDateTime();
     // this.initLocation();
+
+    
   },
 
   // 初始化位置，演示逻辑：不做真实定位，仅设置默认值
@@ -266,7 +284,7 @@ Page({
               this.setData({
                 currentCity: city,
                 // 可根据城市设定默认门店等
-                currentStore: this.data.defaultStore,
+                // currentStore: this.data.defaultStore,
                 isLocationEnabled: true,
               });
             } else {
@@ -303,7 +321,7 @@ Page({
   initUnauthorizedLocation() {
     this.setData({
       currentCity: this.data.defaultCity,
-      currentStore: this.data.defaultStore,
+      // currentStore: this.data.defaultStore,
     });
   },
 

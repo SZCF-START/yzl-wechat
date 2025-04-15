@@ -19,7 +19,12 @@ App({
       // 'pages/settings/settings',
       // 'pages/order/order',
       // 'pages/cart/cart'
-    ]
+    ],
+    routeHistory: []
+  },
+
+  onShow(options) {
+    this.globalData.routeHistory.push(options.path);
   },
 
   // 检测定位权限方法

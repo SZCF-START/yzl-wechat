@@ -11,7 +11,7 @@
 .header {
   // position: fixed;
   top: 0;
-  width: 95%;
+  width: 100vw;
   background: #ffffff;
   z-index: 1000;
   padding: 20rpx;
@@ -130,9 +130,10 @@
   position: relative;
   // top: 100rpx; /* 与 header 高度保持一致 */
   left: 0;
-  width: 100%;
+  width: 100vw;
   height: 350rpx; /* 根据实际需求调整 */
   z-index: 900;
+  box-sizing: border-box;
   // border: 2rpx solid red;
 }
 
@@ -162,7 +163,7 @@
   // margin-top: 255rpx; 
   // height: calc(100vh - 255rpx); /* 占据剩余空间 */
   overflow: hidden;
-  border: 2rpx solid red;
+  // border: 2rpx solid red;
 }
 
 .area-list {
@@ -198,65 +199,98 @@
 
 .area-title {
   font-size: 28rpx;
+  width: 100%;
   font-weight: bold;
   margin-bottom: 20rpx;
+  background: #f5f5f5;
 }
 
 .store-card {
-  border: 1rpx solid #ffa400;
-  border-radius: 12rpx;
-  padding: 20rpx;
+  padding: 30rpx 20rpx;
+  background: #fff;
   margin-bottom: 20rpx;
 }
 
-.store-header {
+.store-name-wrapper {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
 }
 
 .store-name {
-  font-size: 28rpx;
+  font-size: 32rpx;
   font-weight: bold;
-  margin-right: 10rpx;
+  color: #222;
+}
+
+.store-arrow {
+  font-size: 32rpx;
+  margin-left: 10rpx;
+  color: #999;
 }
 
 .tag {
-  padding: 4rpx 10rpx;
-  background: #f2f2f2;
-  border-radius: 6rpx;
+  padding: 4rpx 12rpx;
   font-size: 20rpx;
-  margin-right: 6rpx;
-  color: #888;
+  border-radius: 6rpx;
+  margin-right: 8rpx;
+  margin-top: 8rpx;
+  display: inline-block;
 }
 
-.tag.yellow {
-  background: #fff7e0;
-  color: #f4b500;
+/* 默认灰色 */
+.tag-default {
+  background-color: #f2f2f2;
+  color: #666;
 }
 
-.tag.orange {
-  background: #ffe7e7;
+/* 高亮橙色 */
+.tag-highlight {
+  background-color: #ffe7e7;
   color: #ff5000;
 }
+
+/* 危险红色 */
+.tag-danger {
+  background-color: #ffe7e7;
+  color: #d9001b;
+}
+
 
 .store-addr,
 .store-time {
   font-size: 24rpx;
-  margin-top: 10rpx;
-  color: #666;
+  color: #888;
+  margin-top: 12rpx;
 }
 
 .store-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 20rpx;
+  margin-top: 24rpx;
+  gap: 20rpx;
 }
 
-.phone-btn,
-.guide-btn {
-  font-size: 24rpx;
-  padding: 10rpx 20rpx;
-  background: #f6f6f6;
-  border-radius: 6rpx;
+.action-btn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 26rpx;
+  border-radius: 12rpx;
+  background-color: #f5f5f5;
+  color: #444;
+  border: 1rpx solid #ccc;
 }
+
+.icon {
+  margin-right: 10rpx;
+  font-size: 26rpx;
+}
+
+.card-divider {
+  height: 2rpx;
+  background-color: #eee;
+  margin: 0 20rpx; /* 左右留白 */
+}
+
+
