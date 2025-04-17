@@ -373,6 +373,11 @@ Page({
     scrollIntoId: ""
   },
 
+  onLoad(options) {
+    console.log("options.city:",options);
+    this.setData({ currentCity: options.city });
+  },
+
   // 初始化地图数据
   initMap() {
     const myAmapFun = new amapFile.AMapWX({ key: config.WECHAT_AMAP_KEY });
@@ -426,6 +431,12 @@ Page({
       title: '地图功能点击',
       icon: 'none'
     });
+    wx.navigateTo({
+      url: `/pages/mapGuide/mapGuide`,
+    });
+  },
+
+  onViewBigMap() {
     wx.navigateTo({
       url: `/pages/mapGuide/mapGuide`,
     });
@@ -519,35 +530,10 @@ Page({
     console.log("onGuideTap")
   },
 
-  // onHide() {
-  //   // 获取页面栈
-  //   const pages = getCurrentPages();
-    
-  //   // 当前页面是门店页，倒数第二个是城市页（我们要跳过它）
-  //   if (pages.length >= 2) {
-  //     const prevPage = pages[pages.length - 2];
-  //     console.log("prevPage:",prevPage);
-  //     if (prevPage.route === 'pages/citySelect/citySelect') {
-  //       // 从城市页返回，拦截并跳转首页
-  //       wx.reLaunch({
-  //         url: '/pages/index/index'
-  //       });
-  //     }
-  //   }
-  // },
-  // onUnload() {
-  //   const pages = getCurrentPages();
-  //   // 页面即将卸载（通常是 navigateBack）
-  //   if (pages.length >= 1) {
-  //     const current = pages[pages.length - 1];
-  //     const prev = pages.length > 1 ? pages[pages.length - 2] : null;
-      
-  //     // 如果上一个是城市页，说明是点了左上角返回
-  //     if (prev && prev.route === 'pages/citySelect/citySelect') {
-  //       wx.reLaunch({
-  //         url: '/pages/index/index'
-  //       });
-  //     }
-  //   }
-  // }
+  onBack() {
+    console.log("333");
+    wx.switchTab({
+      url: '/pages/index/index'
+    });
+  }
 });

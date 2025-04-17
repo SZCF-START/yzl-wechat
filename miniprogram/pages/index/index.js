@@ -49,33 +49,14 @@ Page({
 
     //用户是否同意隐私
     isLocationEnabled: false,
+    activeTab: 'daily', // 默认显示日租
   },
 
   onLoad(options) {
-    console.log("00000");
     // 这里可以检查地理位置授权、获取默认城市门店等
     this.checkLocationPermission();
     // 拆分金刚区数据，每页4个
     this.initIconPages();
-    // this.setDefaultDateTime();
-
-    // 获取当前状态（同步，初始值可能不准确）
-    // this.setData({
-    //   isLocationEnabled: privacyStatusManager.getStatus()
-    // });
-
-    // // 注册监听器（权限状态变化时更新页面）
-    // privacyStatusManager.onChange((newStatus) => {
-    //   this.setData({
-    //     isLocationEnabled: newStatus
-    //   });
-    //   console.log("隐私权限变化：", newStatus);
-    // });
-
-    // // 主动检查一次（异步）
-    // privacyStatusManager.check().then(status => {
-    //   this.setData({ isLocationEnabled: status });
-    // });
     
   },
 
@@ -97,18 +78,6 @@ Page({
     
   },
 
-  // 用户点击按钮时调用隐私弹窗
-  onRequestPrivacyConsent() {
-    privacyStatusManager.requestUserPrivacyConsent()
-      .then(() => {
-        this.initLocation()
-        wx.showToast({ title: '已授权', icon: 'success' });
-      })
-      .catch(() => {
-        wx.showToast({ title: '你需要授权才能继续使用', icon: 'none' });
-      });
-  },
-
   setDefaultDateTime() {
     const now = new Date();
     console.log("this.data.pickupDateTimestamp" + this.data.pickupDateTimestamp);
@@ -119,7 +88,8 @@ Page({
     console.log("new Date(pickupDateTimestamp)" + new Date(pickupDateTimestamp));
     let pickupDate = this.formatDate(new Date(pickupDateTimestamp));
     // 如果 returnDate 为空，则默认为 pickupDate 的后一天
-    let returnDateTimestamp = this.data.returnDateTimestamp ? this.data.returnDateTimestamp : new Date(now.getTime() + 24 * 60 * 60 * 1000).getTime();
+    let returnDateTimestamp = this.data.returnDateTimestamp ? this.data.returnDateTimestamp 
+    : this.data.activeTab === 'monthly' ? new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000).getTime() : new Date(now.getTime() + 24 * 60 * 60 * 1000).getTime();
     let returnDate = this.formatDate(new Date(returnDateTimestamp));
   
     // 处理取车时间：如果为空则使用 formatTime 计算当前时间（不加小时）；如果有值则取其 "HH:mm" 部分，加上 pickupDate 对应的星期
@@ -145,6 +115,12 @@ Page({
     // 计算租赁天数（至少 1 天）
     const totalDays = this.calculateDays(pickupDateTimestamp, returnDateTimestamp,pickupTime,returnTime);
   
+    if(totalDays >= 28) {
+      this.setData({ activeTab: "monthly" });
+    }else{
+      this.setData({ activeTab: "daily" });
+    }
+
     // 更新页面数据
     this.setData({
       pickupDateTimestamp,
@@ -226,8 +202,6 @@ Page({
 
   onShow() {
     // 当从其他页面返回时，可在这里做数据刷新
-    // 例如，如果在 citySelect/storeSelect/timeSelect 修改了数据并回传
-    // 可以通过 globalData 或 query 参数进行更新
     const store = wx.getStorageSync('selectedStore');
     console.log("store555:",store);
     // 使用展开运算符创建新对象
@@ -247,7 +221,6 @@ Page({
     this.setDefaultDateTime();
     // this.initLocation();
 
-    
   },
 
   // 初始化位置，演示逻辑：不做真实定位，仅设置默认值
@@ -407,4 +380,10 @@ Page({
       icon: 'none',
     });
   },
+  switchTab(e) {
+    const type = e.currentTarget.dataset.tab;
+    console.log("type:",e);
+    this.setData({ activeTab: type });
+  }
+  
 });

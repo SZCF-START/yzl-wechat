@@ -337,7 +337,7 @@ Page({
     const city = e.currentTarget.dataset.city;
     this.selectCity(city);
     wx.navigateTo({
-      url: `/pages/storeSelect/storeSelect?city=${city}`,
+      url: `/pages/storeSelect/storeSelect?city=${city.cityName}`,
     });
   },
 

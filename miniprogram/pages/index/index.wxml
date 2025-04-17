@@ -20,10 +20,22 @@
 
   <!-- 租车卡片（叠放在Banner上） -->
   <view class="rent-card">
-    <!-- 日租标签，可以根据需求增加时租/其他 -->
+    <!-- 租赁类型标签区：日租 / 月租 -->
     <view class="rent-card-header">
-      <text class="rent-card-title">日租</text>
+      <view class="tab-container">
+        <text 
+          class="tab-item {{activeTab === 'daily' ? 'active' : ''}}" 
+          data-tab="daily" 
+          bindtap="switchTab"
+        >日租</text>
+        <text 
+          class="tab-item {{activeTab === 'monthly' ? 'active' : ''}}" 
+          data-tab="monthly" 
+          bindtap="switchTab"
+        >月租</text>
+      </view>
     </view>
+
     <!-- 第一行：城市 & 门店标题 + 异地还车提示 -->
     <!-- 城市和门店在同一行 -->
     <view class="row row-city-store">
@@ -59,18 +71,6 @@
         <text class="sub-text">{{ returnTime }}</text>
       </view>
     </view>
-
-    <!-- 第四行：上门送取checkbox -->
-    <!-- <view class="row row-checkbox">
-      <checkbox class="send-checkbox"
-                value="send"
-                color="#ff8c00"
-                checked="{{ sendChecked }}"
-                bindchange="onSendCheckChange"
-      >
-        <text class="checkbox-label">上门送取</text>
-      </checkbox>
-    </view> -->
 
     <!-- 第五行：去选车按钮 -->
     <view class="row row-button">
