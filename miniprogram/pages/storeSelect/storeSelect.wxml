@@ -1,4 +1,4 @@
-<navigation-bar title="选择门店1" back="{{true}}" bind:back="onBack" />
+<navigation-bar title="选择门店" background-color="{{nbBackgroundColor}}" back="{{true}}" bind:back="onBack" />
 <view class="container">
   <!-- 固定顶部搜索区域 -->
 <view class="header1">
@@ -24,6 +24,7 @@
 
   <!-- 搜索蒙层 -->
   <view wx:if="{{showSearchMask}}" class="mask-layer">
+    <navigation-bar title="选择门店" background-color="{{nbBackgroundColor}}" back="{{true}}" bind:back="onBack" />
     <view class="search-header">
       <input class="search-input" placeholder="请输入门店名、地址" />
       <text class="cancel-btn" bindtap="onCancelSearch">取消</text>

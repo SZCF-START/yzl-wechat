@@ -41,7 +41,8 @@
     "navigationBarBackgroundColor": "#F9C80E",
     "enablePullDownRefresh": true,
     "backgroundColor": "#efefef",
-    "backgroundTextStyle":"dark"
+    "backgroundTextStyle":"dark",
+    "navigationBarTextStyle":"black"
   },
   "tabBar": {
     "selectedColor": "#F9C80E",

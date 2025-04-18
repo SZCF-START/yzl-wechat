@@ -1,67 +1,60 @@
-<view class="container">
-  <!-- 顶部搜索栏 -->
-  <view class="header">
-    <view class="search-wrapper">
-      <view class="search-box">
-        <view class="city-select" bindtap="onCityTap">
-          <text class="city-text">{{ currentCity }} ▾</text>
-        </view>
-        <view class="divider"></view>
-        <view class="search-bar" bindtap="onSearchTap">
-          <image class="search-icon" src="/assets/search.png" />
-          <text class="search-placeholder">输入景点、地址寻找附近门店</text>
-        </view>
-      </view>
-      <view class="map-btn" bindtap="onMapTap">地图</view>
+
+<view class="rental-container">
+  <!-- 顶部选项卡 -->
+  <view class="tab-container">
+    <view class="tab-item {{currentTab == 0 ? 'active' : ''}}" bindtap="switchTab" data-tab="0">
+      <text class="tab-text {{currentTab == 0 ? 'active-text' : ''}}">日租</text>
+    </view>
+    <view class="tab-item {{currentTab == 1 ? 'active' : ''}}" bindtap="switchTab" data-tab="1">
+      <text class="tab-text {{currentTab == 1 ? 'active-text' : ''}}">月租</text>
+    </view>
+    <view class="tab-item {{currentTab == 2 ? 'active' : ''}}" bindtap="switchTab" data-tab="2">
+      <text class="tab-text {{currentTab == 2 ? 'active-text' : ''}}">时租</text>
     </view>
   </view>
 
-  <!-- 地图区域 -->
-  <view class="map-container">
-    <map
-      id="storeMap"
-      latitude="{{latitude}}"
-      longitude="{{longitude}}"
-      scale="16"
-      show-location
-      markers="{{markers}}"
-      style="width: 100%; height: 100%;">
-    </map>
-  </view>
-
-  <!-- 门店列表双栏区 -->
-  <view class="store-section">
-    <!-- 左侧区域列表 -->
-    <scroll-view scroll-y class="area-list">
-      <block wx:for="{{areaList}}" wx:key="name">
-        <view
-          class="area-item {{selectedAreaIndex === index ? 'active' : ''}}"
-          data-index="{{index}}"
-          bindtap="onAreaTap"
-        >{{item.name}}</view>
-      </block>
-    </scroll-view>
-
-    <!-- 右侧门店展示 -->
-    <scroll-view scroll-y class="store-list">
-      <view class="area-section">
-        <block wx:for="{{selectedAreaStores}}" wx:key="name">
-          <view class="store-card">
-            <view class="store-header">
-              <text class="store-name">{{item.name}}</text>
-              <text class="tag" wx:if="{{item.supportSelfReturn}}">部分支持自助取还</text>
-              <text class="tag yellow" wx:if="{{item.beeBox}}">蜂巢柜</text>
-              <text class="tag orange" wx:if="{{item.orderableTomorrow}}">可下全天订单</text>
-            </view>
-            <view class="store-addr">地址：{{item.address}}</view>
-            <view class="store-time">营业时间：{{item.openTime}} - {{item.closeTime}}</view>
-            <view class="store-actions">
-              <button class="phone-btn">📞 电话</button>
-              <button class="guide-btn">📍 门店指引</button>
-            </view>
-          </view>
-        </block>
+  <!-- 租车信息部分 -->
+  <view class="rental-info">
+    <!-- 取还车信息 -->
+    <view class="location-container">
+      <view class="location-item">
+        <text class="location-title">取还城市</text>
+        <view class="location-selector">
+          <text>桂林</text>
+          <image class="arrow-icon" src="/assets/arrow-down.png"></image>
+        </view>
       </view>
-    </scroll-view>
+      
+      <view class="location-item">
+        <text class="location-title">取还网点</text>
+        <view class="location-selector">
+          <text class="placeholder-text">请选择门店</text>
+          <image class="arrow-icon" src="/assets/arrow-down.png"></image>
+        </view>
+      </view>
+    </view>
+
+    <!-- 日期选择 -->
+    <view class="date-container">
+      <view class="date-item">
+        <view class="date-day">04月18日</view>
+        <view class="date-time">今天 13:00</view>
+      </view>
+      
+      <view class="date-middle">
+        <text class="date-duration">2天</text>
+      </view>
+      
+      <view class="date-item">
+        <view class="date-day">04月20日</view>
+        <view class="date-time">星期日 13:00</view>
+      </view>
+    </view>
+
+    
+
+    <!-- 选车按钮 -->
+    <view class="select-car-btn" bindtap="goToCarSelection">去选车</view>
+
   </view>
 </view>

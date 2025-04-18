@@ -24,11 +24,11 @@
   top: 285rpx; /* 根据Banner高度可做微调 */
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
+  width: 92%;
   background-color: #ffffff;
   border-radius: 20rpx;
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
-  padding: 20rpx;
+  padding: 0;
   overflow: hidden; /* 关键！让 header 背景不要溢出圆角 */
   padding-bottom: 20rpx; /* 移除 padding-top，header 占满上方 */
 }
@@ -51,7 +51,7 @@
   text-align: center;
   font-size: 32rpx;
   line-height: 88rpx;
-  background-color: #f5f5f5; /* 未激活灰背景 */
+  background-color: #f0f4ff; /* 未激活灰背景 */
   color: #666;
   transition: all 0.3s ease;
 }
@@ -87,6 +87,7 @@
 .row-city-store {
   display: flex;
   justify-content: space-between;
+  margin: 20px 10px 0;
 }
 
 /* 城市块、门店块各占一半 */
@@ -130,10 +131,11 @@
 
 /* 第二行：日期区间 */
 .row-date {
-  background-color: #fafafa;
+  background-color: #f5f5f5;
   border-radius: 10rpx;
   padding: 20rpx;
   cursor: pointer;
+  margin: 10px 10px 0;
 }
 .date-item {
   display: flex;
@@ -191,17 +193,14 @@
 }
 
 /* 第五行：去选车按钮 */
-.row-button {
-  justify-content: center;
-}
-.go-select-btn {
-  width: 100%;
-  background-color: #ff8c00;
-  color: #fff;
-  font-size: 30rpx;
+.select-car-btn {
+  background-color: #FF8C00;
+  color: white;
   text-align: center;
-  border-radius: 8rpx;
-  padding: 16rpx 0;
+  font-size: 16px;
+  padding: 14px 0;
+  border-radius: 25px;
+  margin: 20px 10px;
 }
 
 /* 金刚区 - 使用swiper分页 */

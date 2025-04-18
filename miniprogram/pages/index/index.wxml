@@ -71,11 +71,8 @@
         <text class="sub-text">{{ returnTime }}</text>
       </view>
     </view>
-
-    <!-- 第五行：去选车按钮 -->
-    <view class="row row-button">
-      <button class="go-select-btn" bindtap="goSelectCar">去选车</button>
-    </view>
+    <view class="select-car-btn" bindtap="goSelectCar">去选车</view>
+    
   </view>
 
   <!-- 金刚区：使用swiper分页，每页显示4个图标 -->

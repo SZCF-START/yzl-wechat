@@ -1,166 +1,250 @@
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+
+.rental-container {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding: 10px; /* 移除顶部内边距 */
 }
 
-/* 顶部搜索栏 */
-.header {
-  position: fixed;
+.tab-container {
+  display: flex;
+  background-color: #f0f4ff;
+  border-radius: 0; /* 移除外部圆角 */
+  margin: 0; /* 移除外边距 */
+  padding: 0; /* 移除内边距 */
+  overflow: hidden;
+  width: 100%; /* 确保宽度100% */
+  box-sizing: border-box;
+  position: relative;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 15px 0;
+  margin: 0; /* 移除任何外边距 */
+  border-radius: 0; /* 移除圆角 */
+  position: relative;
+  overflow: hidden;
+}
+
+/* 为中间标签项（比如月租）添加左侧弧形边界 */
+.tab-item:nth-child(2)::before {
+  content: '';
+  position: absolute;
   top: 0;
-  width: 90%;
-  padding: 20rpx;
-  background: #fff;
-  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
+  left: -15px;
+  width: 30px;
+  height: 100%;
+  background-color: #f0f4ff;
+  border-radius: 0 0 50% 50%;
+  z-index: 1;
 }
 
-.search-wrapper {
+/* 为中间标签项添加右侧弧形边界 */
+.tab-item:nth-child(2)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -15px;
+  width: 30px;
+  height: 100%;
+  background-color: #f0f4ff;
+  border-radius: 0 0 50% 50%;
+  z-index: 1;
+}
+
+/* 可以为两侧的标签项添加特殊样式，如果需要的话 */
+.tab-item:first-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.tab-item:last-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.tab-text {
+  font-size: 16px;
+  color: #333;
+  position: relative;
+  z-index: 2;
+}
+
+.active {
+  background-color: #fff; /* 选中标签改为白色 */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* 添加轻微阴影效果 */
+}
+
+.active-text {
+  color: #FF8C00; /* 保持文字为橙色 */
+  font-weight: bold;
+}
+
+.rental-info {
+  background-color: #fff;
+  margin: 0;
+  border-radius: 0 0 8px 8px;
+  padding: 10px 16px;
+}
+
+.location-container {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.location-item {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-}
-
-.search-box {
-  flex: 1;
-  display: flex;
   align-items: center;
-  background: #f5f5f5;
-  border-radius: 30rpx;
-  padding: 10rpx 20rpx;
-  margin-right: 20rpx;
+  margin: 12px 0;
 }
 
-.city-select {
-  display: flex;
-  align-items: center;
-}
-
-.city-text {
-  font-size: 26rpx;
-  font-weight: bold;
+.location-title {
+  font-size: 14px;
   color: #333;
 }
 
-.divider {
-  width: 1rpx;
-  height: 32rpx;
-  background-color: #ddd;
-  margin: 0 20rpx;
-}
-
-.search-bar {
-  flex: 1;
+.location-selector {
   display: flex;
   align-items: center;
+  font-size: 14px;
 }
 
-.search-icon {
-  width: 28rpx;
-  height: 28rpx;
-  margin-right: 10rpx;
+.placeholder-text {
+  color: #999;
 }
 
-.search-placeholder {
-  font-size: 24rpx;
-  color: #aaa;
+.arrow-icon {
+  width: 16px;
+  height: 16px;
+  margin-left: 5px;
 }
 
-.map-btn {
-  color: #ff9900;
-  font-size: 26rpx;
+.free-text {
+  color: #FF8C00;
+  font-size: 14px;
 }
 
-/* 地图区域填满剩余空间 */
-.map-container {
-  flex: 1;
-  min-height: 400rpx;
+.free-switch {
+  transform: scale(0.8);
 }
 
-/* 门店列表双栏布局 */
-.store-section {
+.date-container {
   display: flex;
-  height: 420rpx;
-  border-top: 1rpx solid #eee;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #eee;
 }
 
-.area-list {
-  width: 180rpx;
-  background: #f5f5f5;
+.date-item {
+  text-align: center;
 }
 
-.area-item {
-  padding: 20rpx;
-  font-size: 26rpx;
+.date-day {
+  font-size: 18px;
+  font-weight: bold;
   color: #333;
+  margin-bottom: 5px;
 }
 
-.area-item.active {
-  background: #fff;
-  border-left: 6rpx solid #ffa400;
-  font-weight: bold;
-}
-
-.store-list {
-  flex: 1;
-  padding: 20rpx;
-  background: #fff;
-}
-
-.store-card {
-  border: 1rpx solid #ffa400;
-  border-radius: 12rpx;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
-}
-
-.store-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.store-name {
-  font-size: 28rpx;
-  font-weight: bold;
-  margin-right: 10rpx;
-}
-
-.tag {
-  padding: 4rpx 10rpx;
-  background: #f2f2f2;
-  border-radius: 6rpx;
-  font-size: 20rpx;
-  margin-right: 6rpx;
-  color: #888;
-}
-
-.tag.yellow {
-  background: #fff7e0;
-  color: #f4b500;
-}
-
-.tag.orange {
-  background: #ffe7e7;
-  color: #ff5000;
-}
-
-.store-addr,
-.store-time {
-  font-size: 24rpx;
-  margin-top: 10rpx;
+.date-time {
+  font-size: 12px;
   color: #666;
 }
 
-.store-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20rpx;
+.date-middle {
+  background-color: #f5f5f5;
+  padding: 5px 15px;
+  border-radius: 15px;
 }
 
-.phone-btn,
-.guide-btn {
-  font-size: 24rpx;
-  padding: 10rpx 20rpx;
-  background: #f6f6f6;
-  border-radius: 6rpx;
+.date-duration {
+  font-size: 12px;
+  color: #666;
+}
+
+.promotion-banner {
+  display: flex;
+  align-items: center;
+  background-color: #FFF8F0;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.promo-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.promo-text {
+  flex: 1;
+  font-size: 14px;
+  color: #FF8C00;
+}
+
+.fill-btn {
+  font-size: 12px;
+  color: #FF8C00;
+  border: 1px solid #FF8C00;
+  border-radius: 15px;
+  padding: 3px 10px;
+}
+
+.select-car-btn {
+  background-color: #FF8C00;
+  color: white;
+  text-align: center;
+  font-size: 16px;
+  padding: 14px 0;
+  border-radius: 25px;
+  margin: 20px 0;
+}
+
+.footer-info {
+  padding: 10px 0;
+}
+
+.service-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.service-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+}
+
+.service-text {
+  font-size: 13px;
+  color: #00BCD4;
+}
+
+.deposit-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deposit-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+}
+
+.deposit-text {
+  font-size: 13px;
+  color: #333;
+}
+
+.check-now {
+  font-size: 13px;
+  color: #00BCD4;
+  margin-left: 10px;
 }

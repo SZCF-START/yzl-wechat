@@ -14,8 +14,11 @@ Page({
 
     // 时间选择（自定义滚动列表，半小时一档）
     timeList: [],
-    startTimeRaw: '09:00', // 当前选中的取车时间
-    endTimeRaw: '07:30',   // 当前选中的还车时间
+    startTimeRaw: '', // 当前选中的取车时间
+    endTimeRaw: '',   // 当前选中的还车时间
+
+    startTimeRaw1: '', // 当前选中的取车时间
+    endTimeRaw1: '',   // 当前选中的还车时间
 
     // 总时长（天、小时）
     totalDays: 0,
@@ -69,11 +72,17 @@ Page({
     }
     if (options.pickupTime) {
       const pickupTime = this.extractTime(options.pickupTime);
-      this.setData({ startTimeRaw: pickupTime });
+      this.setData({ 
+        startTimeRaw: pickupTime ,
+        startTimeRaw1: pickupTime 
+      });
     }
     if (options.returnTime) {
       const returnTime = this.extractTime(options.returnTime);
-      this.setData({ endTimeRaw: returnTime });
+      this.setData({ 
+        endTimeRaw: returnTime ,
+        endTimeRaw1: returnTime 
+      });
     }
     
     // 根据已有数据更新顶部显示
@@ -81,12 +90,12 @@ Page({
     this.computeDuration();
 
     // 如果没有传入，使用默认时间
-    if (!this.data.startTimeRaw) {
-      this.setData({ startTimeRaw: '09:00' });
-    }
-    if (!this.data.endTimeRaw) {
-      this.setData({ endTimeRaw: '07:30' });
-    }
+    // if (!this.data.startTimeRaw) {
+    //   this.setData({ startTimeRaw: '' });
+    // }
+    // if (!this.data.endTimeRaw) {
+    //   this.setData({ endTimeRaw: '' });
+    // }
     
     this.setData({
       formatter: this.formatterFunction, // 在 onLoad 里绑定
@@ -176,6 +185,12 @@ Page({
         showCalendar: true,
         dateRangeComplete: true
       });
+      console.log("88889999");
+      const startSnapped = this.getSnappedScrollTop(this.data.lastStartScrollTop, "start");
+      this.adsorb(startSnapped,"startScrollTop");
+      const endSnapped = this.getSnappedScrollTop(this.data.lastEndScrollTop, "end");
+      this.adsorb(endSnapped,"endScrollTop");
+
       this.updateDateDisplay();
       this.computeDuration();
     }else{
@@ -219,12 +234,15 @@ Page({
     this.data.startScrollTimer = setTimeout(() => {
       // 如果延时后上次记录的位置和当前相同，则认为停止滚动
       if (this.data.lastStartScrollTop === current) {
-        const snapped = this.getSnappedScrollTop(current);
+        const snapped = this.getSnappedScrollTop(current, "start");
         this.setData({ startScrollTop: snapped });
         let index = snapped / this.data.itemHeightPx;
         let time = this.data.timeList[index]
         console.log("取车时间滚动停止，吸附到：", time);
-        this.setData({ startTimeRaw: time });
+        this.setData({ 
+          startTimeRaw: time ,
+          startTimeRaw1: time
+        });
         this.computeDuration();
       }
     }, 100);
@@ -241,35 +259,56 @@ Page({
     });
     this.data.endScrollTimer = setTimeout(() => {
       if (this.data.lastEndScrollTop === current) {
-        const snapped = this.getSnappedScrollTop(current);
+        const snapped = this.getSnappedScrollTop(current, "end");
         this.setData({ endScrollTop: snapped });
         let index = snapped / this.data.itemHeightPx;
         let time = this.data.timeList[index]
         console.log("还车时间滚动停止，吸附到：", time);
-        this.setData({ endTimeRaw: time });
+        this.setData({ 
+          endTimeRaw: time ,
+          endTimeRaw1: time
+        });
         this.computeDuration();
       }
     }, 100);
   },
 
+  adsorb(snapped,type) {
+
+    if(type === "startScrollTop") {
+      this.setData({ startScrollTop: snapped })
+    }else{ 
+      this.setData({ endScrollTop: snapped })
+    }
+
+    let index = snapped / this.data.itemHeightPx;
+    let time = this.data.timeList[index]
+    console.log("还车时间滚动停止，吸附到：", time);
+    this.setData({ 
+      endTimeRaw: time ,
+      endTimeRaw1: time
+    });
+    this.computeDuration();
+  },
+
   // 触摸结束时也触发吸附
   onStartScrollTouchEnd(e) {
     const current = e.detail.scrollTop;
-    const snapped = this.getSnappedScrollTop(current);
+    const snapped = this.getSnappedScrollTop(current, "start");
     this.setData({ startScrollTop: snapped });
   },
   onEndScrollTouchEnd(e) {
     const current = e.detail.scrollTop;
-    const snapped = this.getSnappedScrollTop(current);
+    const snapped = this.getSnappedScrollTop(current, "end");
     this.setData({ endScrollTop: snapped });
   },
 
   // 自动吸附算法：计算最接近的 item 位置（item 高度 30rpx）
-  getSnappedScrollTop(scrollTop) {
+  getSnappedScrollTop(scrollTop,type) {
     const itemHeight = this.data.itemHeightPx;
     const systemInfo = wx.getWindowInfo();
     let index = Math.floor(scrollTop / itemHeight);
-    let sameDay = this.isSameDay(this.data.startDateVal,this.data.endDateVal);
+    let sameDay = type === 'start' ? this.isSameDay1(this.data.startDateVal,this.data.endDateVal) : this.isSameDay(this.data.startDateVal,this.data.endDateVal);
     if (sameDay){
       let selectTime = this.data.timeList[index];
       // 获取当前时间并计算最近的半小时时间
@@ -308,6 +347,7 @@ Page({
   },
 
   isSameDay(timestamp1, timestamp2) {
+    if (typeof timestamp2 === 'undefined' || timestamp2 === null) return false;
     // 确保时间戳为毫秒（如为秒级则乘以1000）
     const date1 = new Date(timestamp1);
     const date2 = new Date(timestamp2);
@@ -318,11 +358,36 @@ Page({
     );
   },
 
+  isSameDay1(timestamp1, timestamp2) {
+    const date1 = new Date(timestamp1);
+    const today = new Date();
+    
+    // 检查 timestamp1 是否是当天（精确到时分秒）
+    const isToday = 
+      date1.getFullYear() === today.getFullYear() &&
+      date1.getMonth() === today.getMonth() &&
+      date1.getDate() === today.getDate();
+
+    if (isToday) return true;
+
+    // 处理 timestamp2 不存在的情况
+    if (typeof timestamp2 === 'undefined' || timestamp2 === null) return false;
+
+    const date2 = new Date(timestamp2);
+    
+    // 检查两个日期是否是同一天
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  },
+
   // 计算总时长，结合日期与时间
   computeDuration() {
-    const { startDateVal, endDateVal, startTimeRaw, endTimeRaw } = this.data;
+    const { startDateVal, endDateVal, startTimeRaw1, endTimeRaw1 } = this.data;
 
-    console.log("111",startDateVal, endDateVal, startTimeRaw, endTimeRaw ,"222");
+    console.log("111",startDateVal, endDateVal, startTimeRaw1, endTimeRaw1 ,"222");
     if (!startDateVal || !endDateVal) {
       this.setData({ totalDays: 0, totalHours: 0, dateRangeComplete: false });
       return;
@@ -330,8 +395,8 @@ Page({
     let startObj = new Date(startDateVal);
     let endObj = new Date(endDateVal);
     // 解析时间字符串 "HH:mm"
-    let [sh, sm] = startTimeRaw.split(':').map(Number);
-    let [eh, em] = endTimeRaw.split(':').map(Number);
+    let [sh, sm] = startTimeRaw1.split(':').map(Number);
+    let [eh, em] = endTimeRaw1.split(':').map(Number);
     startObj.setHours(sh, sm, 0, 0);
     endObj.setHours(eh, em, 0, 0);
 
@@ -380,17 +445,19 @@ Page({
       endDateDisplay: '',
       startWeek: '',
       endWeek: '',
-      startTimeRaw: '09:00',
-      endTimeRaw: '07:30',
+      startTimeRaw: '',
+      endTimeRaw: '',
       totalDays: 0,
       totalHours: 0,
-      dateRangeComplete: false
+      dateRangeComplete: false,
+      dateRange: []
+      
     });
   },
 
   // 底部按钮：确定后执行逻辑
   onConfirm() {
-    const { startDateVal, endDateVal, startTimeRaw, endTimeRaw, startDateDisplay, endDateDisplay, startWeek, endWeek, totalDays, totalHours } = this.data;
+    const { startDateVal, endDateVal, startTimeRaw1, endTimeRaw1, startDateDisplay, endDateDisplay, startWeek, endWeek, totalDays, totalHours } = this.data;
     if (!startDateDisplay || !endDateDisplay) {
       wx.showToast({ title: '请选择完整的日期区间', icon: 'none' });
       return;
@@ -406,9 +473,9 @@ Page({
     if (prevPage) {
       prevPage.setData({
         pickupDateTimestamp: startDateVal,    // 取车日期（时间戳）
-        pickupTime: startTimeRaw,      // 取车时间
+        pickupTime: startTimeRaw1,      // 取车时间
         returnDateTimestamp: endDateVal,        // 还车日期（时间戳）
-        returnTime: endTimeRaw         // 还车时间
+        returnTime: endTimeRaw1         // 还车时间
       });
     }
     wx.navigateBack();

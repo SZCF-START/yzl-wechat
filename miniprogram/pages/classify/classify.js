@@ -1,37 +1,23 @@
 Page({
   data: {
-    currentCity: "太原",
-    latitude: 37.872,
-    longitude: 112.548,
-    markers: [
-      {
-        id: 1,
-        latitude: 37.872,
-        longitude: 112.548,
-        title: "门店 A"
-      }
-    ],
-    areaList: [
-      {
-        name: "迎泽区",
-        stores: [
-          {
-            name: "迎泽门店 A",
-            address: "迎泽南街 123 号",
-            openTime: "08:00",
-            closeTime: "20:00",
-            supportSelfReturn: true,
-            beeBox: true,
-            orderableTomorrow: true
-          }
-        ]
-      }
-    ],
-    selectedAreaIndex: 0
+    currentTab: 0
   },
-  onAreaTap(e) {
+  
+  onLoad: function() {
+    // 页面加载时执行
+  },
+  
+  switchTab: function(e) {
+    const tab = e.currentTarget.dataset.tab;
     this.setData({
-      selectedAreaIndex: e.currentTarget.dataset.index
+      currentTab: parseInt(tab)
+    });
+  },
+  
+  goToCarSelection: function() {
+    // 跳转到选车页面
+    wx.navigateTo({
+      url: '/pages/car-selection/car-selection'
     });
   }
-});
+})

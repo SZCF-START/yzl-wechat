@@ -370,7 +370,8 @@ Page({
         ]
       }
     ],
-    scrollIntoId: ""
+    scrollIntoId: "",
+    nbBackgroundColor: "#efefef"
   },
 
   onLoad(options) {
@@ -524,10 +525,16 @@ Page({
     });
   },
   onPhoneTap() {
-    console.log("onPhoneTap")
+    wx.makePhoneCall({ phoneNumber: this.data.selectedStore.phone });
   },
   onGuideTap() {
-    console.log("onGuideTap")
+    const store = this.data.selectedStore;
+    wx.openLocation({
+      latitude: store.latitude,
+      longitude: store.longitude,
+      name: store.name,
+      address: store.address
+    });
   },
 
   onBack() {
