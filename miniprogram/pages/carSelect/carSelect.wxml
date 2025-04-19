@@ -1,0 +1,80 @@
+<view class="container">
+
+<!-- 时间选择区域 -->
+<view class="time-section">
+  <text class="store">{{storeName}}</text>
+  <view class="time-range">
+    <text class="time">{{startTimeFormatted}}</text>
+    <text class="dash">—</text>
+    <text class="time">{{endTimeFormatted}}</text>
+  </view>
+</view>
+
+<!-- 筛选项标签 -->
+<view class="filter-tabs">
+  <view class="tab" bindtap="onFilterTap" data-key="sort">
+    综合排序<text class="arrow">▾</text>
+  </view>
+  <view class="tab" bindtap="onFilterTap" data-key="brand">
+    品牌<text class="arrow">▾</text>
+  </view>
+  <view class="tab" bindtap="onFilterTap" data-key="price">
+    价格<text class="arrow">▾</text>
+  </view>
+  <view class="tab" bindtap="onFilterTap" data-key="more">
+    更多<text class="arrow">▾</text>
+  </view>
+</view>
+
+<!-- 功能筛选标签 -->
+<scroll-view class="feature-tags" scroll-x="true" show-scrollbar="false">
+  <view wx:for="{{features}}" wx:key="*this" class="tag" bindtap="onFeatureTap" data-key="{{item.key}}" data-index="{{index}}">
+    {{item.name}}
+  </view>
+</scroll-view>
+
+<!-- 主体区域 -->
+<view class="main">
+  <!-- 左侧分类列表 -->
+  <view class="category-list">
+    <view 
+      wx:for="{{categories}}" wx:key="id"
+      class="category {{ activeCategoryId === item.id ? 'active' : '' }}"
+      bindtap="onCategoryTap"
+      data-id="{{item.id}}"
+    >
+      <text>{{item.name}}</text>
+      <text wx:if="{{item.price}}" class="cat-price">¥{{item.price}}起</text>
+    </view>
+  </view>
+
+  <!-- 右侧车型列表 -->
+  <scroll-view class="car-list" scroll-y="true" scroll-with-animation="true">
+    <block wx:for="{{carList}}" wx:key="id">
+      <view class="car-card">
+        <view class="card-top">
+          <image class="car-img" src="{{item.image}}" mode="aspectFill" />
+          <view class="car-info">
+            <view class="car-name">{{item.name}}</view>
+            <view class="car-desc">{{item.desc}}</view>
+            <view class="tags">
+              <block wx:for="{{item.tags}}" wx:key="tag">
+                <text class="tag-item">{{tag}}</text>
+              </block>
+            </view>
+          </view>
+        </view>
+        <view class="card-bottom">
+          <text class="pickup">京牌 {{item.pickupType}}</text>
+          <view class="price-info">
+            <text class="daily">日均¥<text class="daily-num">{{item.dailyPrice}}</text></text>
+            <text class="total">总价¥{{item.totalPrice}}起</text>
+          </view>
+          <view class="arrow">›</view>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+</view>
+
+</view>

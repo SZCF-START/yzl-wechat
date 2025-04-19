@@ -369,7 +369,27 @@ Page({
       title: '跳转到选车页示例',
       icon: 'none',
     });
-    // 也可使用 wx.navigateTo({ url: '/pages/carList/carList' });
+    const newPickupTimestamp = this.combineDateTime(this.data.pickupDateTimestamp,this.data.pickupTime);
+    const newReturnTimestamp  = this.combineDateTime(this.data.returnDateTimestamp,this.data.returnTime);
+    wx.navigateTo({ 
+      url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}`,
+    });
+  },
+
+  combineDateTime(timestamp, timeStr) {
+    const date = new Date(timestamp);
+    
+    // 提取时间部分（自动过滤周x信息）
+    const [_, timePart] = timeStr.split(' '); // 分割周x和时间
+    const [hours, minutes] = timePart.split(':').map(Number);
+  
+    // 重置时分秒毫秒
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+  
+    return date.getTime();
   },
 
   // 金刚区点击事件
