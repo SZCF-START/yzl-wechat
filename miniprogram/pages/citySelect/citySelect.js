@@ -22,7 +22,8 @@ Page({
 
     // 全部城市分组
     letters: [],
-    citiesByLetter: {}
+    citiesByLetter: {},
+    sourceUrl: ''
   },
 
   onLoad(options) {
@@ -34,11 +35,11 @@ Page({
     const storedHistory = wx.getStorageSync('historyCities') || [];
     this.setData({
       currentCity: storedCity,
-      historyCities: storedHistory
+      historyCities: storedHistory,
+      sourceUrl: options.source
     });
-    console.log("options.city",options.city);
+
     if (options.city){
-      console.log("options.city222",options.city);
       this.setData({
         currentCity: options.city,
       })
@@ -337,7 +338,7 @@ Page({
     const city = e.currentTarget.dataset.city;
     this.selectCity(city);
     wx.navigateTo({
-      url: `/pages/storeSelect/storeSelect?city=${city.cityName}`,
+      url: `/pages/storeSelect/storeSelect?city=${city.cityName}&source=${this.data.sourceUrl}`,
     });
   },
 

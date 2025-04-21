@@ -371,12 +371,16 @@ Page({
       }
     ],
     scrollIntoId: "",
-    nbBackgroundColor: "#efefef"
+    nbBackgroundColor: "#efefef",
+    sourceUrl: ''
   },
 
   onLoad(options) {
     console.log("options.city:",options);
-    this.setData({ currentCity: options.city });
+    this.setData({ 
+      currentCity: options.city,
+      sourceUrl: options.sourceUrl
+    });
   },
 
   // 初始化地图数据
@@ -520,9 +524,14 @@ Page({
     console.log("222",e.currentTarget.dataset.store.name);
     const store = e.currentTarget.dataset.store.name
     wx.setStorageSync('selectedStore', store);
-    wx.switchTab({
-      url: '/pages/index/index'
-    });
+    if(this.data.sourceUrl === ''){
+      wx.switchTab({
+        url: '/pages/index/index'
+      });
+    }else{
+      wx.navigateBack();
+    }
+    
   },
   onPhoneTap() {
     wx.makePhoneCall({ phoneNumber: this.data.selectedStore.phone });
@@ -538,9 +547,15 @@ Page({
   },
 
   onBack() {
-    console.log("333");
-    wx.switchTab({
-      url: '/pages/index/index'
-    });
+    console.log("333",this.data.sourceUrl === '');
+    if(this.data.sourceUrl === ''){
+      wx.switchTab({
+        url: '/pages/index/index'
+      });
+    }else{
+      console.log("000");
+      wx.navigateBack();
+    }
+    
   }
 });

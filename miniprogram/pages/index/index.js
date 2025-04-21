@@ -319,9 +319,10 @@ Page({
   goCitySelect() {
     let url = '/pages/citySelect/citySelect';
 
-
+    let sourceUrl = '/pages/index/index'
+    url += `?source=${sourceUrl}`;
     if (this.data.isLocationEnabled) {
-      url += `?city=${this.data.currentCity}`;
+      url += `&city=${this.data.currentCity}`;
     }
     wx.navigateTo({
       url: url,
@@ -334,8 +335,9 @@ Page({
       wx.showToast({ title: '请先选择城市', icon: 'none' });
       return;
     }
+    let sourceUrl = '/pages/index/index'
     wx.navigateTo({
-      url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}`,
+      url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${sourceUrl}`,
     });
   },
 
@@ -372,7 +374,8 @@ Page({
     const newPickupTimestamp = this.combineDateTime(this.data.pickupDateTimestamp,this.data.pickupTime);
     const newReturnTimestamp  = this.combineDateTime(this.data.returnDateTimestamp,this.data.returnTime);
     wx.navigateTo({ 
-      url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}`,
+      url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}
+      &currentCity=${this.data.currentCity}&currentStore=${this.data.currentStore}`,
     });
   },
 
