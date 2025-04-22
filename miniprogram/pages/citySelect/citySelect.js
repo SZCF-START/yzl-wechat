@@ -33,10 +33,12 @@ Page({
     // 2. 从本地或后端获取当前城市、历史城市
     const storedCity = wx.getStorageSync('currentCity') || '';
     const storedHistory = wx.getStorageSync('historyCities') || [];
+
+    console.log("options.source:",options);
     this.setData({
       currentCity: storedCity,
       historyCities: storedHistory,
-      sourceUrl: options.source
+      sourceUrl: decodeURIComponent(options.source) 
     });
 
     if (options.city){
@@ -44,6 +46,9 @@ Page({
         currentCity: options.city,
       })
     }
+  },
+  onShow() {
+    console.log("citySelect-onShow");
   },
 
   /* 初始化全部城市 */
@@ -337,8 +342,13 @@ Page({
   onSelectCity(e) {
     const city = e.currentTarget.dataset.city;
     this.selectCity(city);
+
+    let url = '/pages/storeSelect/storeSelect';
+    url += `?city=${city.cityName}`;
+    url += `&source=${this.data.sourceUrl}`;
+    console.log("url:",url);
     wx.navigateTo({
-      url: `/pages/storeSelect/storeSelect?city=${city.cityName}&source=${this.data.sourceUrl}`,
+      url: url,
     });
   },
 

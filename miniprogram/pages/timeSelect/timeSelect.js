@@ -470,14 +470,40 @@ Page({
     // 回传数据给上一页
     const pages = getCurrentPages();
     const prevPage = pages[pages.length - 2];
+
+    console.log("startTimeRaw1:",startTimeRaw1);
+    console.log("endTimeRaw1:",endTimeRaw1);
+    let newPickupDateTimestamp = this.combineDateTime(startDateVal,startTimeRaw1);
+    let newReturnDateTimestamp = this.combineDateTime(endDateVal,endTimeRaw1);
     if (prevPage) {
       prevPage.setData({
-        pickupDateTimestamp: startDateVal,    // 取车日期（时间戳）
+        pickupDateTimestamp: newPickupDateTimestamp,    // 取车日期（时间戳）
         pickupTime: startTimeRaw1,      // 取车时间
-        returnDateTimestamp: endDateVal,        // 还车日期（时间戳）
-        returnTime: endTimeRaw1         // 还车时间
+        returnDateTimestamp: newReturnDateTimestamp,        // 还车日期（时间戳）
+        returnTime: endTimeRaw1,         // 还车时间
       });
     }
     wx.navigateBack();
-  }
+  },
+  combineDateTime(timestamp, timeStr) {
+    const date = new Date(timestamp);
+    let timePart;
+    // 提取时间部分（自动过滤周x信息）
+    if (timeStr.includes(' ')) {
+      const [_, tmpTime] = timeStr.split(' '); // 分割出时间部分
+      timePart = tmpTime;
+    } else {
+      timePart = timeStr; // 无空格时直接使用整个字符串
+    }
+    const [hours, minutes] = timePart.split(':').map(Number);
+    console.log("hours:",hours);
+    console.log("minutes:",minutes);
+    // 重置时分秒毫秒
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+  
+    return date.getTime();
+  },
 });

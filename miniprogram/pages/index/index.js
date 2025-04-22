@@ -29,9 +29,6 @@ Page({
     returnTime: null,
     totalDays: 0, // 示例：2天
 
-    // 是否勾选“上门送取”
-    sendChecked: false,
-
     // 金刚区数据
     iconList: [
       { id: 1, icon: '../../assets/yh.png', text: '特价活动' },
@@ -53,6 +50,7 @@ Page({
   },
 
   onLoad(options) {
+    console.log("index onLoad");
     // 这里可以检查地理位置授权、获取默认城市门店等
     this.checkLocationPermission();
     // 拆分金刚区数据，每页4个
@@ -203,7 +201,14 @@ Page({
   onShow() {
     // 当从其他页面返回时，可在这里做数据刷新
     const store = wx.getStorageSync('selectedStore');
-    console.log("store555:",store);
+    const city = wx.getStorageSync('currentCity');
+    if (city) {
+      this.setData({ currentCity: city }, () => {
+        wx.nextTick(() => {
+          console.log("DOM 已更新，可执行渲染后操作");
+        });
+      });
+    }
     // 使用展开运算符创建新对象
     // 数据是对象或数组，直接修改内部属性不会触发渲染，需通过 ​​深拷贝​​ 或 ​​新建引用​​ 强制更新
     // const newStore = { ...store }; 
@@ -217,7 +222,6 @@ Page({
       });
       // wx.removeStorageSync('selectedStore'); // 用完即清
     }
-    console.log("options.pickupDate:" + this.data.pickupDate);
     this.setDefaultDateTime();
     // this.initLocation();
 
@@ -260,6 +264,7 @@ Page({
                 // currentStore: this.data.defaultStore,
                 isLocationEnabled: true,
               });
+              wx.setStorageSync('currentCity', city);
             } else {
               wx.showToast({
                 title: '获取城市失败',
@@ -285,8 +290,8 @@ Page({
 
         this.setData({
           currentCity: this.data.defaultCity,
-          currentStore: this.data.defaultStore,
         });
+        wx.setStorageSync('currentCity', this.data.defaultCity);
       }
     });  
   },
@@ -294,8 +299,9 @@ Page({
   initUnauthorizedLocation() {
     this.setData({
       currentCity: this.data.defaultCity,
-      // currentStore: this.data.defaultStore,
     });
+    wx.setStorageSync('currentCity', this.data.defaultCity);
+
   },
 
   // 将 iconList 拆分为每页4个
@@ -337,7 +343,7 @@ Page({
     }
     let sourceUrl = '/pages/index/index'
     wx.navigateTo({
-      url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${sourceUrl}`,
+      url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${encodeURIComponent(sourceUrl)}`,
     });
   },
 
@@ -375,7 +381,7 @@ Page({
     const newReturnTimestamp  = this.combineDateTime(this.data.returnDateTimestamp,this.data.returnTime);
     wx.navigateTo({ 
       url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}
-      &currentCity=${this.data.currentCity}&currentStore=${this.data.currentStore}`,
+      &currentCity=${this.data.currentCity}`,
     });
   },
 

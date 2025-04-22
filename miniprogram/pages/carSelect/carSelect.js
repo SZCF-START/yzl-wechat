@@ -41,11 +41,11 @@ Page({
   },
 
   onLoad(options) {
+    console.log("carSelect-onLoad");
     // 上一页通过参数传递时间戳： options.startTime、options.endTime\
-    console.log("options.pickupTime:",options.pickupTime); 
-    console.log("options.returnTime:",options.returnTime);
+    // console.log("options.pickupTime:",options.pickupTime); 
+    // console.log("options.returnTime:",options.returnTime);
     console.log("options.currentCity:",options.currentCity);
-    console.log("options.currentStore:",options.currentStore);
     const s = Number(options.pickupDate);
     const e = Number(options.returnDate);
     this.processTimestamps(s,e);
@@ -54,10 +54,30 @@ Page({
       endTime: this.formatTimestamp(e),
       carList: this._mockCars(),
       currentCity: options.currentCity,
-      currentStore: options.currentStore,
       pickupDateTimestamp: s,
       returnDateTimestamp: e
     });
+  },
+
+  onShow() {
+    console.log("carSelect-onShow");
+    const { pickupDateTimestamp, returnDateTimestamp } = this.data;
+    const store = wx.getStorageSync('selectedStore');
+    if (store) {
+      console.log("store555777:",store);
+      this.setData({ currentStore: store }, () => {
+        wx.nextTick(() => {
+          console.log("DOM 已更新，可执行渲染后操作");
+        });
+      });
+    }
+
+    this.processTimestamps(pickupDateTimestamp,returnDateTimestamp);
+    this.setData({
+      startTime: this.formatTimestamp(pickupDateTimestamp),
+      endTime: this.formatTimestamp(returnDateTimestamp),
+      carList: this._mockCars(),
+    }); 
   },
 
   // 时间戳格式化为 MM-DD hh:mm
@@ -145,6 +165,9 @@ Page({
 
   onSelectCar() {
     this.setData({ showModal: false });
+    const pages = getCurrentPages();
+    const currentPage = pages[pages.length - 1];
+    currentPage.onShow();
     // 跳回车型列表页面（当前页），或重置列表
   },
 
@@ -235,7 +258,7 @@ Page({
     let url = '/pages/citySelect/citySelect';
 
     let sourceUrl = '/pages/carSelect/carSelect'
-    url += `?source=${sourceUrl}`;
+    url += `?source=${encodeURIComponent(sourceUrl)}`;
     if (this.data.isLocationEnabled) {
       url += `&city=${this.data.currentCity}`;
     }

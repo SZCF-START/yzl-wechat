@@ -50,6 +50,10 @@ Component({
       type: Number,
       value: 1
     },
+    customBack: {
+      type: Boolean,
+      value: false
+    }
   },
   /**
    * 组件的初始数据
@@ -93,13 +97,16 @@ Component({
       })
     },
     back() {
-      const data = this.data
-      if (data.delta) {
-        wx.navigateBack({
-          delta: data.delta
-        })
+      if(!this.data.customBack) {
+        const data = this.data
+        if (data.delta) {
+          wx.navigateBack({
+            delta: data.delta
+          })
+        }
       }
-      this.triggerEvent('back', { delta: data.delta }, {})
+      
+      this.triggerEvent('back', { delta: this.data.delta }, {})
     }
   },
 })

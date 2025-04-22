@@ -1,4 +1,6 @@
-<navigation-bar title="选择门店" background-color="{{nbBackgroundColor}}" back="{{true}}" bind:back="onBack" />
+
+<navigation-bar title="选择门店" background-color="{{nbBackgroundColor}}" back="{{true}}" customBack="{{true}}" bind:back="onBack" />
+
 <view class="container">
   <!-- 固定顶部搜索区域 -->
 <view class="header1">

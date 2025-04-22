@@ -1,5 +1,7 @@
 const amapFile = require('../../utils/amap-wx.130');
 import config from '../../config/config.js'
+import { backPage } from '../../utils/index.js'
+
 Page({
   data: {
     currentCity: '长沙',
@@ -376,10 +378,9 @@ Page({
   },
 
   onLoad(options) {
-    console.log("options.city:",options);
     this.setData({ 
       currentCity: options.city,
-      sourceUrl: options.sourceUrl
+      sourceUrl: decodeURIComponent(options.source) 
     });
   },
 
@@ -421,7 +422,7 @@ Page({
 
   onCityTap() {
     wx.navigateTo({
-      url: '/pages/citySelect/citySelect'
+      url: `/pages/citySelect/citySelect?source=${this.data.sourceUrl}`
     });
   },
 
@@ -524,12 +525,14 @@ Page({
     console.log("222",e.currentTarget.dataset.store.name);
     const store = e.currentTarget.dataset.store.name
     wx.setStorageSync('selectedStore', store);
-    if(this.data.sourceUrl === ''){
+    wx.setStorageSync('selectedCity', store);
+    console.log("333,",this.data.sourceUrl);
+    if(this.data.sourceUrl === '/pages/index/index'){
       wx.switchTab({
         url: '/pages/index/index'
       });
     }else{
-      wx.navigateBack();
+      backPage({ backUrl: this.data.sourceUrl })
     }
     
   },
@@ -545,17 +548,7 @@ Page({
       address: store.address
     });
   },
-
   onBack() {
-    console.log("333",this.data.sourceUrl === '');
-    if(this.data.sourceUrl === ''){
-      wx.switchTab({
-        url: '/pages/index/index'
-      });
-    }else{
-      console.log("000");
-      wx.navigateBack();
-    }
-    
+    backPage({ backUrl: this.data.sourceUrl })
   }
 });
