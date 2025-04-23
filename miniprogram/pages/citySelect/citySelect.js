@@ -7,6 +7,7 @@ Page({
 
     // 当前城市（为空则显示“开启定位”）
     currentCity: '',
+    currentStore: '',
     // 历史城市（最多2个，从左到右，右侧最新）
     historyCities: [],
 
@@ -44,6 +45,11 @@ Page({
     if (options.city){
       this.setData({
         currentCity: options.city,
+      })
+    }
+    if (options.store){
+      this.setData({
+        currentStore: options.store,
       })
     }
   },
@@ -346,6 +352,7 @@ Page({
     let url = '/pages/storeSelect/storeSelect';
     url += `?city=${city.cityName}`;
     url += `&source=${this.data.sourceUrl}`;
+    url += `&store=${this.data.currentStore}`;
     console.log("url:",url);
     wx.navigateTo({
       url: url,
@@ -355,8 +362,18 @@ Page({
   /* 通用选城市逻辑 */
   selectCity(city) {
     // 设置当前城市
-    // this.setData({ currentCity: city.cityName });
-    wx.setStorageSync('currentCity', city.cityName);
+    console.log("this.data.sourceUrl:",this.data.sourceUrl);
+    console.log("this.data.sourceUr44l:",this.data.sourceUrl === '/pages/index/index');
+    if(this.data.sourceUrl === '/pages/index/index'){
+      wx.setStorageSync('currentCity', city.cityName);
+      wx.removeStorageSync('selectedStore');
+    }else{
+      this.setData({ 
+        currentCity: city.cityName ,
+        currentStore: ''
+      });
+    }
+
 
     // 更新历史城市（最多2个，右侧最新）
     let arr = this.data.historyCities || [];

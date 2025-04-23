@@ -1,4 +1,3 @@
-
 <navigation-bar title="选择门店" background-color="{{nbBackgroundColor}}" back="{{true}}" customBack="{{true}}" bind:back="onBack" />
 
 <view class="container">

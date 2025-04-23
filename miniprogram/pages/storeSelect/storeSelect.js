@@ -5,6 +5,7 @@ import { backPage } from '../../utils/index.js'
 Page({
   data: {
     currentCity: '长沙',
+    currentStore: '',
     cityList: ['长沙', '北京', '广州'],
     latitude: 28.2282,
     longitude: 112.9388,
@@ -380,7 +381,8 @@ Page({
   onLoad(options) {
     this.setData({ 
       currentCity: options.city,
-      sourceUrl: decodeURIComponent(options.source) 
+      sourceUrl: decodeURIComponent(options.source) ,
+      currentStore: options.store
     });
   },
 
@@ -525,16 +527,16 @@ Page({
     console.log("222",e.currentTarget.dataset.store.name);
     const store = e.currentTarget.dataset.store.name
     wx.setStorageSync('selectedStore', store);
-    wx.setStorageSync('selectedCity', store);
-    console.log("333,",this.data.sourceUrl);
-    if(this.data.sourceUrl === '/pages/index/index'){
-      wx.switchTab({
-        url: '/pages/index/index'
-      });
-    }else{
-      backPage({ backUrl: this.data.sourceUrl })
-    }
+    wx.setStorageSync('currentCity', this.data.currentCity);
+    console.log("333store,",store);
     
+    backPage({ 
+      backUrl: this.data.sourceUrl, 
+      pageData: {
+        currentCity: this.data.currentCity,
+        currentStore: store
+      } 
+    })
   },
   onPhoneTap() {
     wx.makePhoneCall({ phoneNumber: this.data.selectedStore.phone });
@@ -549,6 +551,14 @@ Page({
     });
   },
   onBack() {
-    backPage({ backUrl: this.data.sourceUrl })
+    const condition = this.data.sourceUrl === '/pages/index/index';
+    console.log("condition:",condition);
+    backPage({ 
+      backUrl: this.data.sourceUrl ,
+      pageData: condition ? {} : {
+        currentCity: this.data.currentCity,
+        currentStore: this.data.currentStore
+      } 
+    })
   }
 });

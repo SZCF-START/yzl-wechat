@@ -213,15 +213,15 @@ Page({
     // 数据是对象或数组，直接修改内部属性不会触发渲染，需通过 ​​深拷贝​​ 或 ​​新建引用​​ 强制更新
     // const newStore = { ...store }; 
     // this.setData({ defaultStore: newStore });
-    if (store) {
-      console.log("store555777:",store);
-      this.setData({ currentStore: store }, () => {
-        wx.nextTick(() => {
-          console.log("DOM 已更新，可执行渲染后操作");
-        });
+    
+    console.log("store555777:",store);
+    this.setData({ currentStore: store }, () => {
+      wx.nextTick(() => {
+        console.log("DOM 已更新，可执行渲染后操作");
       });
-      // wx.removeStorageSync('selectedStore'); // 用完即清
-    }
+    });
+      
+    
     this.setDefaultDateTime();
     // this.initLocation();
 
@@ -329,6 +329,7 @@ Page({
     url += `?source=${sourceUrl}`;
     if (this.data.isLocationEnabled) {
       url += `&city=${this.data.currentCity}`;
+      url += `&store=${this.data.currentStore}`;
     }
     wx.navigateTo({
       url: url,
@@ -380,8 +381,7 @@ Page({
     const newPickupTimestamp = this.combineDateTime(this.data.pickupDateTimestamp,this.data.pickupTime);
     const newReturnTimestamp  = this.combineDateTime(this.data.returnDateTimestamp,this.data.returnTime);
     wx.navigateTo({ 
-      url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}
-      &currentCity=${this.data.currentCity}`,
+      url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}&currentCity=${this.data.currentCity}`,
     });
   },
 

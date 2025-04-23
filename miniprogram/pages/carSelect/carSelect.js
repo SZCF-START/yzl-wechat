@@ -57,12 +57,16 @@ Page({
       pickupDateTimestamp: s,
       returnDateTimestamp: e
     });
-  },
-
-  onShow() {
-    console.log("carSelect-onShow");
-    const { pickupDateTimestamp, returnDateTimestamp } = this.data;
     const store = wx.getStorageSync('selectedStore');
+    const city = wx.getStorageSync('currentCity');
+    if (city) {
+      console.log("store555777:",city);
+      this.setData({ currentCity: city }, () => {
+        wx.nextTick(() => {
+          console.log("DOM 已更新，可执行渲染后操作");
+        });
+      });
+    }
     if (store) {
       console.log("store555777:",store);
       this.setData({ currentStore: store }, () => {
@@ -71,6 +75,12 @@ Page({
         });
       });
     }
+  },
+
+  onShow(options) {
+    console.log("carSelect-onShow");
+    const { pickupDateTimestamp, returnDateTimestamp } = this.data;
+    
 
     this.processTimestamps(pickupDateTimestamp,returnDateTimestamp);
     this.setData({
@@ -231,16 +241,8 @@ Page({
 
   // 计算相差天数（不足一天算一天）
   calcDayDiff(startStamp, endStamp) {
-    // 重置时间为同一天的00:00:00
-    const start = new Date(startStamp)
-    start.setHours(0, 0, 0, 0)
-    
-    const end = new Date(endStamp)
-    end.setHours(0, 0, 0, 0)
-    
-    // 计算差值（取绝对值）
-    const diff = Math.abs(end - start)
-    return Math.ceil(diff / (1000 * 60 * 60 * 24))
+    const diff = (endStamp - startStamp) / (1000 * 60 * 60 * 24);
+    return Math.ceil(diff);
   },
 
   // 补零函数
