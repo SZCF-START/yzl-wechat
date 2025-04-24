@@ -81,7 +81,6 @@ Page({
     console.log("carSelect-onShow");
     const { pickupDateTimestamp, returnDateTimestamp } = this.data;
     
-
     this.processTimestamps(pickupDateTimestamp,returnDateTimestamp);
     this.setData({
       startTime: this.formatTimestamp(pickupDateTimestamp),
@@ -174,6 +173,10 @@ Page({
   },
 
   onSelectCar() {
+    wx.setStorageSync('selectedStore', this.data.currentStore);
+    wx.setStorageSync('currentCity', this.data.currentCity);
+    wx.setStorageSync('pickupDateTimestamp',this.data.pickupDateTimestamp);
+    wx.setStorageSync('returnDateTimestamp', this.data.returnDateTimestamp);
     this.setData({ showModal: false });
     const pages = getCurrentPages();
     const currentPage = pages[pages.length - 1];

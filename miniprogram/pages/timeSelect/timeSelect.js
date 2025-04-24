@@ -39,6 +39,7 @@ Page({
     // 记录 px 中的单项高度
     itemHeightPx: 0,
     dateRange: [], // 用于回显的时间戳数组
+    sourceUrl: ''
   },
 
   onLoad(options) {
@@ -57,45 +58,21 @@ Page({
 
     console.log("options.pickupDate:" + options.pickupDate);
     console.log("options.returnDate:" + options.returnDate);
+    console.log("options.source:" + options.source);
+    if (options.source) {
+      this.setData({ sourceUrl: decodeURIComponent(options.source) });
+    }
     if (options.pickupDate && options.returnDate){
       this.setData({
         dateRange: [Number(options.pickupDate), Number(options.returnDate)],
+        startDateVal: Number(options.pickupDate),
+        endDateVal: Number(options.returnDate)
       })
-    }
-
-    if (options.pickupDate) {
-      // options.pickupDate 格式应为标准日期字符串
-      this.setData({ startDateVal: Number(options.pickupDate) });
-    }
-    if (options.returnDate) {
-      this.setData({ endDateVal: Number(options.returnDate) });
-    }
-    if (options.pickupTime) {
-      const pickupTime = this.extractTime(options.pickupTime);
-      this.setData({ 
-        startTimeRaw: pickupTime ,
-        startTimeRaw1: pickupTime 
-      });
-    }
-    if (options.returnTime) {
-      const returnTime = this.extractTime(options.returnTime);
-      this.setData({ 
-        endTimeRaw: returnTime ,
-        endTimeRaw1: returnTime 
-      });
     }
     
     // 根据已有数据更新顶部显示
     this.updateDateDisplay();
     this.computeDuration();
-
-    // 如果没有传入，使用默认时间
-    // if (!this.data.startTimeRaw) {
-    //   this.setData({ startTimeRaw: '' });
-    // }
-    // if (!this.data.endTimeRaw) {
-    //   this.setData({ endTimeRaw: '' });
-    // }
     
     this.setData({
       formatter: this.formatterFunction, // 在 onLoad 里绑定
@@ -172,6 +149,7 @@ Page({
       }
     }
     // times.push(''); // 后加空串
+    console.log("times999999999:",times);
     this.setData({ timeList: times });
   },
 
@@ -191,7 +169,7 @@ Page({
       const endSnapped = this.getSnappedScrollTop(this.data.lastEndScrollTop, "end");
       this.adsorb(endSnapped,"endScrollTop");
 
-      this.updateDateDisplay();
+      this.updateDateDisplay1();
       this.computeDuration();
     }else{
       this.setData({ dateRangeComplete: false });
@@ -200,9 +178,29 @@ Page({
 
   // 更新顶部日期显示和星期信息
   updateDateDisplay() {
-    const { startDateVal, endDateVal, startTimeRaw, endTimeRaw } = this.data;
+    const { startDateVal, endDateVal } = this.data;
+    if (startDateVal) {
+      let startObj = new Date(Number(startDateVal));
+      this.setData({
+        startDateDisplay: this.formatMonthDay(startObj),
+        startWeek: this.getWeek(startObj),
+        startTimeRaw: this.formatTime(startObj),
+        startTimeRaw1: this.formatTime(startObj)
+      });
+    }
+    if (endDateVal) {
+      let endObj = new Date(Number(endDateVal));
+      this.setData({
+        endDateDisplay: this.formatMonthDay(endObj),
+        endWeek: this.getWeek(endObj),
+        endTimeRaw: this.formatTime(endObj),
+        endTimeRaw1: this.formatTime(endObj)
+      });
+    }
+  },
 
-    
+  updateDateDisplay1() {
+    const { startDateVal, endDateVal } = this.data;
     if (startDateVal) {
       let startObj = new Date(Number(startDateVal));
       this.setData({
@@ -434,6 +432,13 @@ Page({
     return weekArr[dateObj.getDay()];
   },
 
+  formatTime(date) {
+    let newTime = date;
+    let hours = newTime.getHours().toString().padStart(2, '0');
+    let minutes = newTime.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  },
+
   // 底部按钮：清空所有选择
   onClear() {
     // 重置所有日期和时间选择
@@ -475,12 +480,15 @@ Page({
     console.log("endTimeRaw1:",endTimeRaw1);
     let newPickupDateTimestamp = this.combineDateTime(startDateVal,startTimeRaw1);
     let newReturnDateTimestamp = this.combineDateTime(endDateVal,endTimeRaw1);
+
+    if(this.data.sourceUrl === '/pages/index/index'){
+      wx.setStorageSync('pickupDateTimestamp',newPickupDateTimestamp);
+      wx.setStorageSync('returnDateTimestamp', newReturnDateTimestamp);
+    }
     if (prevPage) {
       prevPage.setData({
         pickupDateTimestamp: newPickupDateTimestamp,    // 取车日期（时间戳）
-        pickupTime: startTimeRaw1,      // 取车时间
         returnDateTimestamp: newReturnDateTimestamp,        // 还车日期（时间戳）
-        returnTime: endTimeRaw1,         // 还车时间
       });
     }
     wx.navigateBack();

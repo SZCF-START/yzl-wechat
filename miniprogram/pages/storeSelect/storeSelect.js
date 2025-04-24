@@ -526,8 +526,10 @@ Page({
   onCardTap(e) {
     console.log("222",e.currentTarget.dataset.store.name);
     const store = e.currentTarget.dataset.store.name
-    wx.setStorageSync('selectedStore', store);
-    wx.setStorageSync('currentCity', this.data.currentCity);
+    if(this.data.sourceUrl === '/pages/index/index') {
+      wx.setStorageSync('selectedStore', store);
+      wx.setStorageSync('currentCity', this.data.currentCity);
+    }
     console.log("333store,",store);
     
     backPage({ 
