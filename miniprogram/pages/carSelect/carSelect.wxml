@@ -56,10 +56,99 @@
 
 <!-- 筛选项标签 -->
 <view class="filter-section">
-  <view class="filter-item">综合排序 ▾</view>
-  <view class="filter-item">品牌 ▾</view>
-  <view class="filter-item">价格 ▾</view>
-  <view class="filter-item">更多 ▾</view>
+  <view class="filter-item {{activeType === 'sort' ? 'active' : ''}}" bindtap="onFilterTap" data-type="sort">
+    综合排序
+    <image
+      class="arrow-icon"
+      src="{{activeType === 'sort' ? '../../assets/up-arrow-activate.png' : '../../assets/down-arrow.png'}}"
+    />
+  </view>
+  <view class="filter-item {{activeType === 'brand' ? 'active' : ''}}" bindtap="onFilterTap" data-type="brand">
+    品牌
+    <image
+      class="arrow-icon"
+      src="{{activeType === 'brand' ? '../../assets/up-arrow-activate.png' : '../../assets/down-arrow.png'}}"
+    />
+  </view>
+  <view class="filter-item {{activeType === 'price' ? 'active' : ''}}" bindtap="onFilterTap" data-type="price">
+    价格
+    <image
+      class="arrow-icon"
+      src="{{activeType === 'price' ? '../../assets/up-arrow-activate.png' : '../../assets/down-arrow.png'}}"
+    />
+  </view>
+  <view class="filter-item {{activeType === 'more' ? 'active' : ''}}" bindtap="onFilterTap" data-type="more">
+    更多
+    <image
+      class="arrow-icon"
+      src="{{activeType === 'more' ? '../../assets/up-arrow-activate.png' : '../../assets/down-arrow.png'}}"
+    />
+  </view>
+</view>
+
+<!-- 筛选蒙层（根据当前类型展示不同内容） -->
+<view class="filter-mask" wx:if="{{showMask}}" catchtap="onMaskClose">
+  <view class="filter-popup" catchtap="stopTouch">
+    <block wx:if="{{currentFilter === 'sort'}}">
+      <view 
+        class="popup-option {{item.value === selectedSort ? 'active' : ''}}" 
+        wx:for="{{sortOptions}}" 
+        wx:key="value" 
+        data-value="{{item.value}}"
+        data-label="{{item.label}}"
+        bindtap="onSortSelect"
+      >
+        {{item.label}}
+      </view>
+    </block>
+    <!-- 后续可以继续添加品牌、价格、更多的展示逻辑 -->
+    <!-- 品牌筛选内容 - 双列布局 -->
+    <block wx:if="{{currentFilter === 'brand'}}">
+      <view class="brand-container">
+        <view class="brand-selection-area">
+          <!-- 左侧品牌列表 -->
+          <scroll-view scroll-y class="brand-categories">
+            <view 
+              wx:for="{{brandData}}" 
+              wx:key="id"
+              class="brand-category-item {{selectedBrandCategory === item.name ? 'active' : ''}}"
+              data-brand="{{item.name}}"
+              bindtap="selectBrandCategory"
+            >
+              <view class="brand-item-content">
+                <image class="category-logo" src="{{item.logo}}" mode="aspectFit"></image>
+                <text class="brand-name">{{item.name}}</text>
+                <!-- 当该品牌有选中的车系时，显示橙色点 -->
+                <view class="selected-dot" wx:if="{{item.hasSelectedModels}}"></view>
+              </view>
+            </view>
+          </scroll-view>
+          
+          <!-- 右侧车型列表 -->
+          <scroll-view scroll-y class="brand-models">
+            
+            <view 
+              wx:for="{{currentModels}}" 
+              wx:key="id"
+              class="model-item {{item.selected ? 'selected' : ''}}"
+              data-modelid="{{item.id}}"
+              bindtap="selectModel"
+            >
+              <text>{{item.name}}</text>
+              <!-- 车型被选中时显示对勾 -->
+              <view class="checkmark" wx:if="{{item.selected}}">✓</view>
+            </view>
+          </scroll-view>
+        </view>
+        
+        <!-- 底部操作按钮 -->
+        <view class="brand-actions">
+          <button class="clear-btn" bindtap="clearBrandSelection">清空</button>
+          <button class="confirm-btn" bindtap="confirmBrandSelection">确定</button>
+        </view>
+      </view>
+    </block>
+  </view>
 </view>
 
 <!-- 功能筛选标签：横向滚动，不换行 -->

@@ -37,7 +37,123 @@ Page({
     currentCity: '',
     currentStore: '',
     pickupDateTimestamp: '',
-    returnDateTimestamp: ''
+    returnDateTimestamp: '',
+    showMask: false,
+    currentFilter: '',
+    sortOptions: [
+      { label: '默认排序', value: 'default' },
+      { label: '价格从低到高', value: 'asc' },
+      { label: '价格从高到低', value: 'desc' }
+    ],
+    activeType: '' ,// 当前激活的过滤类型
+    selectedSort: '',
+
+    selectedBrandCategory: '', // 当前显示的品牌
+    // 模拟后端返回的品牌和车型数据
+    brandData: [
+      {
+        id: 1,
+        name: '奥迪',
+        logo: '/images/brands/audi.png',
+        hasSelectedModels: false,
+        models: [
+          { id: 'none', name: '不限车系', selected: false },
+          { id: 101, name: 'A3', selected: false },
+          { id: 102, name: 'A4L', selected: false },
+          { id: 103, name: 'Q5L', selected: false },
+          { id: 104, name: 'A6L', selected: false }
+        ]
+      },
+      {
+        id: 2,
+        name: '宝马',
+        logo: '/images/brands/bmw.png',
+        hasSelectedModels: false,
+        models: [
+          { id: 'none', name: '不限车系', selected: false },
+          { id: 201, name: 'A6L', selected: false },
+          { id: 202, name: 'A7L', selected: false }
+        ]
+      },
+      {
+        id: 3,
+        name: '本田',
+        logo: '/images/brands/bentian.png',
+        hasSelectedModels: false,
+        models: [
+          { id: 'none', name: '不限车系', selected: false },
+          { id: 301, name: 'A7L', selected: false },
+          { id: 302, name: 'Q5L', selected: false }
+        ]
+      },
+      {
+        id: 4,
+        name: '比亚迪',
+        logo: '/images/brands/biaozhi.png',
+        hasSelectedModels: false,
+        models: [
+          { id: 'none', name: '不限车系', selected: false },
+          { id: 401, name: 'Q3', selected: false },
+          { id: 402, name: 'Q5L', selected: false }
+        ]
+      },
+      {
+        id: 5,
+        name: '大众',
+        logo: '/images/brands/dazhong.png',
+        hasSelectedModels: false,
+        models: [
+          { id: 'none', name: '不限车系', selected: false },
+          { id: 501, name: 'A3', selected: false },
+          { id: 502, name: 'A6L', selected: false }
+        ]
+      },
+      {
+        id: 6,
+        name: '丰田',
+        logo: '/images/brands/fengtian.png',
+        hasSelectedModels: false,
+        models: [
+          { id: 'none', name: '不限车系', selected: false },
+          { id: 601, name: 'A6L', selected: false },
+          { id: 602, name: 'A7L', selected: false }
+        ]
+      },
+      {
+        id: 7,
+        name: '凯迪拉克',
+        logo: '/images/brands/jibao.png',
+        hasSelectedModels: false,
+        models: [
+          { id: 'none', name: '不限车系', selected: false },
+          { id: 701, name: 'A6L', selected: false },
+          { id: 702, name: 'A7L', selected: false }
+        ]
+      },
+      {
+        id: 8,
+        name: '日产',
+        logo: '/images/brands/richan.png',
+        hasSelectedModels: false,
+        models: [
+          { id: 'none', name: '不限车系', selected: false },
+          { id: 801, name: 'Q3', selected: false },
+          { id: 802, name: 'Q5L', selected: false }
+        ]
+      },
+      {
+        id: 9,
+        name: '日产2',
+        logo: '/images/brands/richan.png',
+        hasSelectedModels: false,
+        models: [
+          { id: 'none', name: '不限车系', selected: false },
+          { id: 801, name: 'Q3', selected: false },
+          { id: 802, name: 'Q5L', selected: false }
+        ]
+      }
+    ],
+    currentModels: [], // 当前显示的车型列表
   },
 
   onLoad(options) {
@@ -73,6 +189,15 @@ Page({
         wx.nextTick(() => {
           console.log("DOM 已更新，可执行渲染后操作");
         });
+      });
+    }
+
+
+    // 页面加载时，默认选中第一个品牌
+    if (this.data.brandData.length > 0) {
+      this.setData({
+        selectedBrandCategory: this.data.brandData[0].name,
+        currentModels: this.data.brandData[0].models
       });
     }
   },
@@ -281,4 +406,139 @@ Page({
       url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${sourceUrl}`,
     });
   },
+
+  // 点击筛选项
+  onFilterTap(e) {
+    console.log("e55666dff:",e);
+    const type = e.currentTarget.dataset.type
+    const isActive = this.data.activeType === type;
+    this.setData({
+      currentFilter: type,
+      activeType: isActive ? '' : type,
+      showMask: !isActive // 如果已经是激活状态则关闭，否则开启
+    })
+  },
+
+  // 点击蒙层遮罩关闭
+  onMaskClose() {
+    // this.setData({
+    //   showMask: false,
+    //   currentFilter: ''
+    // })
+  },
+
+  // 防止点击内容区域关闭
+  stopTouch() {},
+
+  // 点击选项
+  onSortSelect(e) {
+    console.log("e2222:",e);
+    const selectedValue = e.currentTarget.dataset.value
+    console.log('选择了排序项:', selectedValue)
+    this.setData({
+      selectedSort: selectedValue === 'default' ? '' : selectedValue,
+      showMask: false,
+      currentFilter: '',
+      activeType: '',
+    })
+    // 可进一步处理筛选逻辑
+  },
+
+  
+  // 选择左侧品牌
+  selectBrandCategory(e) {
+    const brandName = e.currentTarget.dataset.brand;
+    const selectedBrand = this.data.brandData.find(brand => brand.name === brandName);
+    
+    if (selectedBrand) {
+      this.setData({
+        selectedBrandCategory: brandName,
+        currentModels: selectedBrand.models
+      });
+    }
+  },
+
+  // 选择右侧车型
+  selectModel(e) {
+    const modelId = e.currentTarget.dataset.modelid;
+    const { selectedBrandCategory, brandData: originalBrandData } = this.data;
+  
+    // 深拷贝避免直接修改原数据
+    const brandData = JSON.parse(JSON.stringify(originalBrandData));
+    const brandIndex = brandData.findIndex(brand => brand.name === selectedBrandCategory);
+    if (brandIndex === -1) return;
+  
+    const currentBrand = brandData[brandIndex];
+    const models = currentBrand.models;
+    const modelIndex = models.findIndex(model => model.id === modelId);
+    if (modelIndex === -1) return;
+  
+    // 使用映射生成新车型数组（核心优化点）
+    const newModels = models.map(model => {
+      // 处理"none"的特殊互斥逻辑
+      if (modelId === 'none') {
+        return {
+          ...model,
+          selected: model.id === 'none' ? !model.selected : false
+        };
+      } else {
+        return {
+          ...model,
+          selected: model.id === 'none' 
+            ? false 
+            : model.id === modelId 
+              ? !model.selected 
+              : model.selected
+        };
+      }
+    });
+  
+    // 更新品牌数据
+    currentBrand.models = newModels;
+    currentBrand.hasSelectedModels = newModels.some(model => model.selected);
+  
+    this.setData({
+      brandData: brandData,
+      currentModels: newModels
+    });
+  },
+
+  // 清空选择
+  clearBrandSelection() {
+    const brandData = JSON.parse(JSON.stringify(this.data.brandData));
+    
+    // 重置所有选择状态
+    brandData.forEach(brand => {
+      brand.hasSelectedModels = false;
+      brand.models.forEach(model => {
+        model.selected = false;
+      });
+    });
+    
+    this.setData({
+      brandData: brandData,
+      currentModels: brandData.find(brand => brand.name === this.data.selectedBrandCategory)?.models || []
+    });
+  },
+
+  // 确认选择
+  confirmBrandSelection() {
+    // 处理已选择的品牌和车型
+    const selectedBrands = {};
+    this.data.brandData.forEach(brand => {
+      const selectedModels = brand.models.filter(model => model.selected).map(model => model.name);
+      if (selectedModels.length > 0) {
+        selectedBrands[brand.name] = selectedModels;
+      }
+    });
+    
+    console.log('已确认选择的品牌和车型:', selectedBrands);
+    
+    // 关闭弹窗
+    this.setData({
+      showMask: false
+    });
+    
+    // 这里可以添加筛选回调
+  }
 });

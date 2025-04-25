@@ -192,9 +192,200 @@
   height: 80rpx;
   border-bottom: 1rpx solid #eee;
 }
+
+.arrow-icon {
+  width: 20rpx;
+  height: 20rpx;
+  margin-left: 8rpx;
+}
+
 .filter-item {
+  display: flex;
+  align-items: center;
   font-size: 28rpx;
   color: #333;
+}
+.filter-item.active {
+  color: #ff8000; /* 激活状态颜色 */
+}
+
+/* 蒙层遮罩 */
+.filter-mask {
+  position: fixed;
+  // top: 127px; /* 紧贴筛选栏下方 */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 99;
+  height: calc(100vh - 127px);
+}
+
+/* 蒙层内容区域 */
+.filter-popup {
+  background-color: #fff;
+  padding: 20rpx 30rpx;
+}
+
+
+
+/* 筛选选项 */
+.popup-option {
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  // border-bottom: 1rpx solid #eee;
+}
+
+.popup-option.active {
+  color: #ff8000; /* 绿色高亮，也可自定义 */
+  font-weight: bold;
+}
+
+/* 品牌筛选样式 - 双列布局 */
+.brand-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.brand-selection-area {
+  display: flex;
+  height: 600rpx; /* 固定高度，可以根据需要调整 */
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 左侧品牌列表 */
+.brand-categories {
+  width: 40%;
+  height: 100%;
+  background-color: #f5f5f5;
+}
+
+.brand-category-item {
+  padding: 20rpx 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  /* 注释掉的样式 */
+  /* border-bottom: 1rpx solid #eee; */
+}
+
+.brand-item-content {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.brand-category-item.active {
+  background-color: #ffffff;
+  position: relative;
+}
+
+.brand-category-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6rpx;
+  height: 100%;
+  background-color: #ff9500;
+}
+
+.category-logo {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 16rpx;
+}
+
+.brand-name {
+  flex: 1;
+}
+
+/* 选中点标记 */
+.selected-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background-color: #ff9500;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* 右侧车型列表 */
+.brand-models {
+  width: 60%;
+  height: 100%;
+  padding: 0 20rpx;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+.models-header {
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  color: #333;
+  // border-bottom: 1rpx solid #eee;
+}
+
+.model-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 10rpx;
+  font-size: 28rpx;
+  color: #333;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.model-item.selected {
+  color: #ff9500;
+}
+
+/* 复选标记样式 */
+.checkmark {
+  color: #ff9500;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+/* 底部按钮 - 修改部分 */
+.brand-actions {
+  display: flex;
+  width: 100%;
+  padding: 20rpx;
+  box-sizing: border-box;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.clear-btn {
+  width: 32%; /* 清空按钮占三分之一 */
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  background-color: #f5f5f5;
+  color: #666;
+  border-radius: 40rpx; /* 添加圆角 */
+  font-size: 32rpx;
+  margin: 0 10rpx; /* 添加外边距 */
+}
+
+.confirm-btn {
+  width: 66%; /* 确定按钮占三分之二 */
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  background-color: #ff9500;
+  color: #fff;
+  border-radius: 40rpx; /* 添加圆角 */
+  font-size: 32rpx;
+  margin: 0 10rpx; /* 添加外边距 */
+}
+
+button::after {
+  border: none;
 }
 
 /* 功能标签横向滚动 */

@@ -382,15 +382,23 @@ Page({
 
   // 去选车
   goSelectCar() {
-    wx.showToast({
-      title: '跳转到选车页示例',
-      icon: 'none',
-    });
-    const newPickupTimestamp = this.combineDateTime(this.data.pickupDateTimestamp,this.data.pickupTime);
-    const newReturnTimestamp  = this.combineDateTime(this.data.returnDateTimestamp,this.data.returnTime);
-    wx.navigateTo({ 
-      url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}&currentCity=${this.data.currentCity}`,
-    });
+    if(this.data.currentStore){
+      wx.showToast({
+        title: '跳转到选车页示例',
+        icon: 'none',
+      });
+      const newPickupTimestamp = this.combineDateTime(this.data.pickupDateTimestamp,this.data.pickupTime);
+      const newReturnTimestamp  = this.combineDateTime(this.data.returnDateTimestamp,this.data.returnTime);
+      wx.navigateTo({ 
+        url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}&currentCity=${this.data.currentCity}`,
+      });
+    }else{
+      let sourceUrl = '/pages/index/index'
+      wx.navigateTo({
+        url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${encodeURIComponent(sourceUrl)}`,
+      });
+    }
+    
   },
 
   combineDateTime(timestamp, timeStr) {
