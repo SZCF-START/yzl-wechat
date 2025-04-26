@@ -154,6 +154,25 @@ Page({
       }
     ],
     currentModels: [], // 当前显示的车型列表
+
+    // 价格筛选
+    selectedPriceRange: 'unlimited',
+    priceRanges: [
+      { value: 'unlimited', label: '不限', min: 0, max: null },
+      { value: '0-150', label: '0-150', min: 0, max: 150 },
+      { value: '150-250', label: '150-250', min: 150, max: 250 },
+      { value: '250-350', label: '250-350', min: 250, max: 350 },
+      { value: '350+', label: '350以上', min: 350, max: null }
+    ],
+    // 价格范围条相关
+    rangeLeft: 0,
+    rangeWidth: 600,  // 总宽度
+    minPointPosition: 0,
+    maxPointPosition: 600,
+    minPointActive: false,
+    maxPointActive: false,
+    minPrice: 0,
+    maxPrice: null,  // null 表示不限
   },
 
   onLoad(options) {
@@ -540,5 +559,139 @@ Page({
     });
     
     // 这里可以添加筛选回调
+  },
+
+  // 选择价格区间
+  onPriceRangeSelect(e) {
+    const range = e.currentTarget.dataset.range;
+    const totalWidth = 600; // rpx
+    let rangeLeft = 0;
+    let rangeWidth = totalWidth;
+    let minPointPosition = 0;
+    let maxPointPosition = totalWidth;
+    let minPrice = 0;
+    let maxPrice = null;
+    
+    // 根据所选范围设置价格条的位置
+    switch(range) {
+      case '0-150':
+        maxPointPosition = totalWidth * 0.25;
+        rangeWidth = maxPointPosition;
+        minPrice = 0;
+        maxPrice = 150;
+        break;
+      case '150-250':
+        minPointPosition = totalWidth * 0.25;
+        maxPointPosition = totalWidth * 0.5;
+        rangeLeft = minPointPosition;
+        rangeWidth = maxPointPosition - minPointPosition;
+        minPrice = 150;
+        maxPrice = 250;
+        break;
+      case '250-350':
+        minPointPosition = totalWidth * 0.5;
+        maxPointPosition = totalWidth * 0.75;
+        rangeLeft = minPointPosition;
+        rangeWidth = maxPointPosition - minPointPosition;
+        minPrice = 250;
+        maxPrice = 350;
+        break;
+      case '350+':
+        minPointPosition = totalWidth * 0.75;
+        rangeLeft = minPointPosition;
+        rangeWidth = totalWidth - minPointPosition;
+        minPrice = 350;
+        maxPrice = null;
+        break;
+      case 'unlimited':
+      default:
+        minPrice = 0;
+        maxPrice = null;
+    }
+    
+    this.setData({
+      selectedPriceRange: range,
+      rangeLeft,
+      rangeWidth,
+      minPointPosition,
+      maxPointPosition,
+      minPrice,
+      maxPrice
+    });
+  },
+  
+  // 最小点触摸开始
+  onMinPointTouchStart() {
+    this.setData({
+      minPointActive: true
+    });
+  },
+  
+  // 最小点触摸移动
+  onMinPointTouchMove(e) {
+    // 在实际应用中，这里应该处理触摸移动逻辑
+    // 但根据需求，我们只需点击选择固定范围，此处保留但不实现滑动逻辑
+  },
+  
+  // 最小点触摸结束
+  onMinPointTouchEnd() {
+    this.setData({
+      minPointActive: false
+    });
+  },
+  
+  // 最大点触摸开始
+  onMaxPointTouchStart() {
+    this.setData({
+      maxPointActive: true
+    });
+  },
+  
+  // 最大点触摸移动
+  onMaxPointTouchMove(e) {
+    // 在实际应用中，这里应该处理触摸移动逻辑
+    // 但根据需求，我们只需点击选择固定范围，此处保留但不实现滑动逻辑
+  },
+  
+  // 最大点触摸结束
+  onMaxPointTouchEnd() {
+    this.setData({
+      maxPointActive: false
+    });
+  },
+  
+  // 清空价格筛选
+  onClearPrice() {
+    this.initPriceRangeBar();
+    this.setData({
+      selectedPriceRange: 'unlimited',
+      minPrice: 0,
+      maxPrice: null
+    });
+  },
+  
+  // 确认价格筛选
+  onConfirmPrice() {
+    this.setData({
+      showMask: false
+    });
+    
+    // 触发价格筛选查询
+    this.applyFilters();
+  },
+  
+  // 应用所有筛选条件
+  applyFilters() {
+    // 构建查询参数
+    const filters = {
+      sort: this.data.selectedSort,
+      minPrice: this.data.minPrice,
+      maxPrice: this.data.maxPrice
+    };
+    
+    console.log('应用筛选条件:', filters);
+    
+    // 这里可以调用请求数据的方法
+    // this.fetchFilteredData(filters);
   }
 });

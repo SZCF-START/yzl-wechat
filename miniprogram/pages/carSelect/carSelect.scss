@@ -388,6 +388,95 @@ button::after {
   border: none;
 }
 
+/* 价格筛选样式 */
+.price-filter-container {
+  padding: 20rpx 30rpx;
+}
+
+/* 价格快捷选择区域 */
+.price-quick-options {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 30rpx;
+}
+
+.price-option {
+  padding: 15rpx 20rpx;
+  background-color: #f5f5f5;
+  color: #333;
+  font-size: 24rpx;
+  border-radius: 8rpx;
+  margin-right: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.price-option.active {
+  background-color: #fff7e6;
+  color: #ff9500;
+  border: 1rpx solid #ff9500;
+}
+
+/* 价格范围条 */
+.price-range-title {
+  font-size: 26rpx;
+  color: #333;
+  margin: 30rpx 0 20rpx;
+}
+
+.price-range-bar {
+  position: relative;
+  margin: 50rpx 0;
+  padding: 0 20rpx;
+}
+
+.price-range-line {
+  position: relative;
+  height: 4rpx;
+  background-color: #e0e0e0;
+  margin: 30rpx 0;
+}
+
+.price-range-active {
+  position: absolute;
+  height: 4rpx;
+  background-color: #ff9500;
+  top: 0;
+}
+
+.price-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.price-range-points {
+  position: relative;
+  height: 0;
+}
+
+.range-point {
+  position: absolute;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 1rpx solid #e0e0e0;
+  top: -14rpx;
+  margin-left: -12rpx;
+}
+
+.range-point.active {
+  border-color: #ff9500;
+  box-shadow: 0 0 5rpx rgba(255, 149, 0, 0.5);
+}
+
+/* 按钮区域 */
+.price-buttons {
+  display: flex;
+  margin-top: 40rpx;
+}
+
 /* 功能标签横向滚动 */
 .feature-section {
   background: #fff;
