@@ -155,24 +155,19 @@ Page({
     ],
     currentModels: [], // 当前显示的车型列表
 
-    // 价格筛选
-    selectedPriceRange: 'unlimited',
-    priceRanges: [
-      { value: 'unlimited', label: '不限', min: 0, max: null },
-      { value: '0-150', label: '0-150', min: 0, max: 150 },
-      { value: '150-250', label: '150-250', min: 150, max: 250 },
-      { value: '250-350', label: '250-350', min: 250, max: 350 },
-      { value: '350+', label: '350以上', min: 350, max: null }
-    ],
     // 价格范围条相关
-    rangeLeft: 0,
-    rangeWidth: 600,  // 总宽度
-    minPointPosition: 0,
-    maxPointPosition: 600,
-    minPointActive: false,
-    maxPointActive: false,
+    pricePoints: [0, 150, 250, 350, Infinity], // Infinity 表示"不限"
+    leftThumbPosition: 0, // 左滑块位置，单位rpx
+    rightThumbPosition: 560, // 右滑块位置，单位rpx
+    selectionWidth: 560, // 选中区域宽度，单位rpx
+    trackWidth: 560, // 轨道总宽度，单位rpx
+    isRangeSelecting: false, // 是否正在选择区间
+    firstSelectedPoint: null, // 首次选中的点
     minPrice: 0,
-    maxPrice: null,  // null 表示不限
+    maxPrice: null, // null 表示不限
+    selectedPriceRange: 'unlimited',
+    isRangeValid: false,
+    isTrackGrayed: false
   },
 
   onLoad(options) {
@@ -211,7 +206,6 @@ Page({
       });
     }
 
-
     // 页面加载时，默认选中第一个品牌
     if (this.data.brandData.length > 0) {
       this.setData({
@@ -219,6 +213,9 @@ Page({
         currentModels: this.data.brandData[0].models
       });
     }
+
+    // 初始化价格范围条
+    this.initPriceRangeBar();
   },
 
   onShow(options) {
@@ -561,113 +558,223 @@ Page({
     // 这里可以添加筛选回调
   },
 
-  // 选择价格区间
-  onPriceRangeSelect(e) {
-    const range = e.currentTarget.dataset.range;
-    const totalWidth = 600; // rpx
-    let rangeLeft = 0;
-    let rangeWidth = totalWidth;
-    let minPointPosition = 0;
-    let maxPointPosition = totalWidth;
-    let minPrice = 0;
-    let maxPrice = null;
+  // 初始化价格范围条
+  initPriceRangeBar() {
+    this.setData({
+      leftThumbPosition: 0,
+      rightThumbPosition: this.data.trackWidth,
+      selectionWidth: this.data.trackWidth,
+      isRangeSelecting: false,
+      firstSelectedPoint: null,
+      minPrice: 0,
+      maxPrice: null,
+      selectedPriceRange: 'unlimited',
+      isRangeValid: false, // 添加表示范围是否有效的标志
+      isTrackGrayed: false // 添加表示轨道是否置灰的标志
+    });
+  },
+  
+  // 点击左滑块
+  onLeftThumbTap() {
+    if (this.data.isRangeSelecting) {
+      // 如果已经在选择区间，重置状态
+      this.setData({
+        isRangeSelecting: false,
+        firstSelectedPoint: null,
+        isTrackGrayed: false
+      });
+    } else {
+      // 标记开始选择区间，并记录第一个点为左滑块位置
+      const pointIndex = this.getPointIndexFromPosition(this.data.leftThumbPosition);
+      this.setData({
+        isRangeSelecting: true,
+        firstSelectedPoint: pointIndex,
+        isTrackGrayed: true // 置灰轨道
+      });
+    }
+  },
+  
+  // 点击右滑块
+  onRightThumbTap() {
+    if (this.data.isRangeSelecting) {
+      // 如果已经在选择区间，重置状态
+      this.setData({
+        isRangeSelecting: false,
+        firstSelectedPoint: null,
+        isTrackGrayed: false
+      });
+    } else {
+      // 标记开始选择区间，并记录第一个点为右滑块位置
+      const pointIndex = this.getPointIndexFromPosition(this.data.rightThumbPosition);
+      this.setData({
+        isRangeSelecting: true,
+        firstSelectedPoint: pointIndex,
+        isTrackGrayed: true // 置灰轨道
+      });
+    }
+  },
+  
+  // 点击轨道
+  onTrackClick(e) {
+    // 获取点击位置相对于轨道的坐标
+    console.log("e666:", e);
     
-    // 根据所选范围设置价格条的位置
-    switch(range) {
-      case '0-150':
-        maxPointPosition = totalWidth * 0.25;
-        rangeWidth = maxPointPosition;
-        minPrice = 0;
-        maxPrice = 150;
-        break;
-      case '150-250':
-        minPointPosition = totalWidth * 0.25;
-        maxPointPosition = totalWidth * 0.5;
-        rangeLeft = minPointPosition;
-        rangeWidth = maxPointPosition - minPointPosition;
-        minPrice = 150;
-        maxPrice = 250;
-        break;
-      case '250-350':
-        minPointPosition = totalWidth * 0.5;
-        maxPointPosition = totalWidth * 0.75;
-        rangeLeft = minPointPosition;
-        rangeWidth = maxPointPosition - minPointPosition;
-        minPrice = 250;
-        maxPrice = 350;
-        break;
-      case '350+':
-        minPointPosition = totalWidth * 0.75;
-        rangeLeft = minPointPosition;
-        rangeWidth = totalWidth - minPointPosition;
-        minPrice = 350;
-        maxPrice = null;
-        break;
-      case 'unlimited':
-      default:
-        minPrice = 0;
-        maxPrice = null;
+    // 使用SelectorQuery替代getBoundingClientRect
+    const query = wx.createSelectorQuery();
+    query.select('.click-area').boundingClientRect();
+    query.exec((res) => {
+      if (res && res[0]) {
+        const trackRect = res[0];
+        const clickX = e.touches[0].clientX - trackRect.left;
+        
+        // 将点击位置转换为rpx单位
+        const rpxRatio = 750 / wx.getSystemInfoSync().windowWidth;
+        const clickPositionRpx = clickX * rpxRatio;
+        
+        // 找到最接近点击位置的价格点
+        const nearestPointIndex = this.findNearestPricePoint(clickPositionRpx);
+        const nearestPosition = this.getPositionFromPointIndex(nearestPointIndex);
+        
+        if (this.data.isRangeSelecting) {
+          // 正在选择区间，这是第二次点击
+          const firstIndex = this.data.firstSelectedPoint;
+
+          // 检查是否与第一次点击位置相同
+          if (firstIndex === nearestPointIndex) {
+            // 相同点击位置，无效操作，继续等待不同位置的点击
+            console.log('点击位置相同，请选择不同位置');
+            return;
+          }
+          const secondIndex = nearestPointIndex;
+          
+          // 确保左滑块在右滑块左侧
+          if (firstIndex <= secondIndex) {
+            this.updatePriceRange(firstIndex, secondIndex);
+          } else {
+            this.updatePriceRange(secondIndex, firstIndex);
+          }
+          
+          // 重置选择状态并设置范围有效
+          this.setData({
+            isRangeSelecting: false,
+            firstSelectedPoint: null,
+            isTrackGrayed: false,
+            isRangeValid: true // 设置范围有效
+          });
+        } else {
+          // 第一次点击，开始选择区间
+          this.setData({
+            isRangeSelecting: true,
+            firstSelectedPoint: nearestPointIndex,
+            isTrackGrayed: true, // 置灰轨道
+            isRangeValid: false // 重置范围有效状态
+          });
+        }
+      }
+    });
+  },
+  
+  // 根据点索引获取位置（rpx）
+  getPositionFromPointIndex(index) {
+    // 将价格点索引转换为位置
+    const totalPoints = this.data.pricePoints.length;
+    const segmentWidth = this.data.trackWidth / (totalPoints - 1);
+    return index * segmentWidth;
+  },
+  
+  // 根据位置获取最近的点索引
+  getPointIndexFromPosition(position) {
+    const totalPoints = this.data.pricePoints.length;
+    const segmentWidth = this.data.trackWidth / (totalPoints - 1);
+    return Math.round(position / segmentWidth);
+  },
+  
+  // 找到最接近点击位置的价格点
+  findNearestPricePoint(position) {
+    const totalPoints = this.data.pricePoints.length;
+    const segmentWidth = this.data.trackWidth / (totalPoints - 1);
+    
+    // 找到最接近的点索引
+    return Math.min(Math.max(Math.round(position / segmentWidth), 0), totalPoints - 1);
+  },
+  
+  // 更新价格范围
+  updatePriceRange(leftIndex, rightIndex) {
+    const leftPosition = this.getPositionFromPointIndex(leftIndex);
+    const rightPosition = this.getPositionFromPointIndex(rightIndex);
+    const selectionWidth = rightPosition - leftPosition;
+    
+    // 获取对应的价格值
+    const minPrice = this.data.pricePoints[leftIndex];
+    const maxPrice = this.data.pricePoints[rightIndex] === Infinity ? null : this.data.pricePoints[rightIndex];
+    
+    // 确定价格区间名称
+    let rangeName = 'custom';
+    if (leftIndex === 0 && rightIndex === 4) {
+      rangeName = 'unlimited'; // 0 - 不限
+    } else if (leftIndex === 0 && rightIndex === 1) {
+      rangeName = '0-150'; // 0 - 150
+    } else if (leftIndex === 1 && rightIndex === 2) {
+      rangeName = '150-250'; // 150 - 250
+    } else if (leftIndex === 2 && rightIndex === 3) {
+      rangeName = '250-350'; // 250 - 350
+    } else if (leftIndex === 3 && rightIndex === 4) {
+      rangeName = '350+'; // 350 - 不限
     }
     
     this.setData({
-      selectedPriceRange: range,
-      rangeLeft,
-      rangeWidth,
-      minPointPosition,
-      maxPointPosition,
-      minPrice,
-      maxPrice
+      leftThumbPosition: leftPosition,
+      rightThumbPosition: rightPosition,
+      selectionWidth: selectionWidth,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      selectedPriceRange: rangeName,
+      isRangeValid: true // 设置范围有效
     });
+    
+    console.log(`价格范围更新: ${minPrice} - ${maxPrice === null ? '不限' : maxPrice}`);
   },
   
-  // 最小点触摸开始
-  onMinPointTouchStart() {
-    this.setData({
-      minPointActive: true
-    });
+  // 根据价格区间名称设置范围
+  setPriceRangeByName(rangeName) {
+    let leftIndex = 0;
+    let rightIndex = 4;
+    
+    switch(rangeName) {
+      case '0-150':
+        leftIndex = 0;
+        rightIndex = 1;
+        break;
+      case '150-250':
+        leftIndex = 1;
+        rightIndex = 2;
+        break;
+      case '250-350':
+        leftIndex = 2;
+        rightIndex = 3;
+        break;
+      case '350+':
+        leftIndex = 3;
+        rightIndex = 4;
+        break;
+      case 'unlimited':
+      default:
+        leftIndex = 0;
+        rightIndex = 4;
+    }
+    
+    this.updatePriceRange(leftIndex, rightIndex);
   },
   
-  // 最小点触摸移动
-  onMinPointTouchMove(e) {
-    // 在实际应用中，这里应该处理触摸移动逻辑
-    // 但根据需求，我们只需点击选择固定范围，此处保留但不实现滑动逻辑
-  },
-  
-  // 最小点触摸结束
-  onMinPointTouchEnd() {
-    this.setData({
-      minPointActive: false
-    });
-  },
-  
-  // 最大点触摸开始
-  onMaxPointTouchStart() {
-    this.setData({
-      maxPointActive: true
-    });
-  },
-  
-  // 最大点触摸移动
-  onMaxPointTouchMove(e) {
-    // 在实际应用中，这里应该处理触摸移动逻辑
-    // 但根据需求，我们只需点击选择固定范围，此处保留但不实现滑动逻辑
-  },
-  
-  // 最大点触摸结束
-  onMaxPointTouchEnd() {
-    this.setData({
-      maxPointActive: false
-    });
+  // 选择价格区间（通过快捷按钮）
+  onPriceRangeSelect(e) {
+    const range = e.currentTarget.dataset.range;
+    this.setPriceRangeByName(range);
   },
   
   // 清空价格筛选
   onClearPrice() {
     this.initPriceRangeBar();
-    this.setData({
-      selectedPriceRange: 'unlimited',
-      minPrice: 0,
-      maxPrice: null
-    });
   },
   
   // 确认价格筛选
@@ -684,7 +791,6 @@ Page({
   applyFilters() {
     // 构建查询参数
     const filters = {
-      sort: this.data.selectedSort,
       minPrice: this.data.minPrice,
       maxPrice: this.data.maxPrice
     };
