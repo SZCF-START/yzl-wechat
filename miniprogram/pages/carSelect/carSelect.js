@@ -169,17 +169,34 @@ Page({
     isRangeValid: false,
     isTrackGrayed: false,
     
-    carConfigOptions: [{id: 1,value: '倒车雷达'}, {id: 2,value: '倒车影像'}],
-    selectedCarConfig: [],
-
-    powerTypeOptions: ['汽油', '油电混合', '纯电动'],
-    selectedPowerType: [],
-
-    seatCountOptions: ['5座', '6座', '7座'],
-    selectedSeatCount: '',
-
-    selfServiceOptions: ['可自助取还', '非自助取还'],
-    selectedSelfService: '',
+    moreFilters: [
+      {
+        title: '车辆配置',
+        key: 'carConfig',
+        options: ['倒车雷达', '倒车影像']
+      },
+      {
+        title: '动力类型',
+        key: 'powerType',
+        options: ['汽油', '油电混合', '纯电动']
+      },
+      {
+        title: '座位数',
+        key: 'seats',
+        options: ['5座', '6座', '7座']
+      },
+      {
+        title: '自助',
+        key: 'selfService',
+        options: ['可自助取还', '非自助取还']
+      }
+    ],
+    selectedFilters: {
+      carConfig: [],
+      powerType: [],
+      seats: [],
+      selfService: []
+    },
   },
 
   onLoad(options) {
@@ -830,69 +847,33 @@ Page({
   },
 
 
-  // 选择车辆配置（多选）
-  onCarConfigSelect(e) {
-    console.log("e:",e);
-    const value = Number(e.currentTarget.dataset.value);
-    // 使用展开运算符创建新数组
-    const prevSelected = [...this.data.selectedCarConfig];
-    console.log("value:",value);
-    console.log("prevSelected:",prevSelected);
-    // 采用不可变数据操作
-    const newSelected = prevSelected.includes(value)
-      ? prevSelected.filter(id => id !== value) // 移除已选项
-      : [...prevSelected, value]; // 添加新选项
-      console.log("newSelected:",newSelected);
-    this.setData({ selectedCarConfig: newSelected }, () => {
-      // 此回调在数据更新且视图渲染完成后执行
-      console.log('最新选中值:', this.data.selectedCarConfig);
-      console.log(this.data.selectedCarConfig.includes('倒车影像') ? 'active' : '');
+  handleFilterSelect(e) {
+    console.log("e.currentTarget.dataset",e);
+    const { filterKey, optionValue } = e.currentTarget.dataset;
+    const filters = this.data.selectedFilters[filterKey];
+    console.log("filters:",filters);
+    const newFilters = filters.includes(optionValue)
+      ? filters.filter(v => v !== optionValue)
+      : [...filters, optionValue];
+
+    this.setData({
+      [`selectedFilters.${filterKey}`]: newFilters
     });
+
+    console.log("selectedFilters:",this.data.selectedFilters);
   },
 
-  // 选择动力类型（单选）
-  onPowerTypeSelect(e) {
-    const value = e.currentTarget.dataset.value;
-    let selected = this.data.selectedPowerType;
-
-    if (selected.includes(value)) {
-      selected = selected.filter(item => item !== value);
-    } else {
-      selected.push(value);
-    }
-    this.setData({ selectedPowerType: selected });
-  },
-
-  // 选择座位数（单选）
-  onSeatCountSelect(e) {
-    const value = e.currentTarget.dataset.value;
-    this.setData({ selectedSeatCount: value });
-  },
-
-  // 选择自助取还（单选）
-  onSelfServiceSelect(e) {
-    const value = e.currentTarget.dataset.value;
-    this.setData({ selectedSelfService: value });
-  },
-
-  // 清空
   onClear() {
     this.setData({
-      selectedCarConfig: [],
-      selectedPowerType: '',
-      selectedSeatCount: '',
-      selectedSelfService: ''
+      selectedOptions: {}
     });
   },
 
-  // 确定
   onConfirm() {
-    console.log('当前筛选结果：', {
-      carConfig: this.data.selectedCarConfig,
-      powerType: this.data.selectedPowerType,
-      seatCount: this.data.selectedSeatCount,
-      selfService: this.data.selectedSelfService
+    console.log('用户选择了：', this.data.selectedOptions);
+    this.setData({
+      showMask: false
     });
-    this.setData({ showMask: false }); // 隐藏蒙层
-  }
+    // 可以在这里触发事件，把筛选条件传递给列表页
+  },
 });

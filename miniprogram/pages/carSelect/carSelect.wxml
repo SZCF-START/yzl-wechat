@@ -215,56 +215,24 @@
       </view>
     </block>
     <block wx:if="{{currentFilter === 'more'}}">
-      <view class="filter-group">
-        <view class="filter-title">车辆配置</view>
+      <view 
+        class="filter-group" 
+        wx:for="{{moreFilters}}" 
+        wx:key="key"
+        data-testid="filter-section"
+      >
+        <view class="filter-title">{{item.title}}</view>
         <view class="filter-options">
-          <view 
-            class="filter-option {{selectedCarConfig.includes(item.id)  ? 'active' : ''}}" 
-            wx:for="{{carConfigOptions}}" 
-            wx:key="id" 
-            data-value="{{item.id}}" 
-            bindtap="onCarConfigSelect"
+          <view
+            class="filter-option {{selectedFilters[item.key].includes(option) ? 'active' : ''}}"
+            wx:for="{{item.options}}"
+            wx:for-item="option"
+            wx:key="*this"
+            bindtap="handleFilterSelect"
+            data-filter-key="{{item.key}}"
+            data-option-value="{{option}}"
           >
-            {{item.value}}
-          </view>
-        </view>
-
-        <view class="filter-title">动力类型</view>
-        <view class="filter-options">
-          <view 
-            class="filter-option {{selectedPowerType.includes(item) ? 'active' : ''}}" 
-            wx:for="{{powerTypeOptions}}" 
-            wx:key="item" 
-            data-value="item" 
-            bindtap="onPowerTypeSelect"
-          >
-            {{item}}
-          </view>
-        </view>
-
-        <view class="filter-title">座位数</view>
-        <view class="filter-options">
-          <view 
-            class="filter-option {{selectedSeatCount === item ? 'active' : ''}}" 
-            wx:for="{{seatCountOptions}}" 
-            wx:key="item" 
-            data-value="item" 
-            bindtap="onSeatCountSelect"
-          >
-            {{item}}
-          </view>
-        </view>
-
-        <view class="filter-title">自助</view>
-        <view class="filter-options">
-          <view 
-            class="filter-option {{selectedSelfService === item ? 'active' : ''}}" 
-            wx:for="{{selfServiceOptions}}" 
-            wx:key="item" 
-            data-value="item" 
-            bindtap="onSelfServiceSelect"
-          >
-            {{item}}
+            {{option}}
           </view>
         </view>
       </view>
