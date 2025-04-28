@@ -158,16 +158,28 @@ Page({
     // 价格范围条相关
     pricePoints: [0, 150, 250, 350, Infinity], // Infinity 表示"不限"
     leftThumbPosition: 0, // 左滑块位置，单位rpx
-    rightThumbPosition: 560, // 右滑块位置，单位rpx
-    selectionWidth: 560, // 选中区域宽度，单位rpx
-    trackWidth: 560, // 轨道总宽度，单位rpx
+    rightThumbPosition: 600, // 右滑块位置，单位rpx
+    selectionWidth: 600, // 选中区域宽度，单位rpx
+    trackWidth: 600, // 轨道总宽度，单位rpx
     isRangeSelecting: false, // 是否正在选择区间
     firstSelectedPoint: null, // 首次选中的点
     minPrice: 0,
     maxPrice: null, // null 表示不限
     selectedPriceRange: 'unlimited',
     isRangeValid: false,
-    isTrackGrayed: false
+    isTrackGrayed: false,
+    
+    carConfigOptions: [{id: 1,value: '倒车雷达'}, {id: 2,value: '倒车影像'}],
+    selectedCarConfig: [],
+
+    powerTypeOptions: ['汽油', '油电混合', '纯电动'],
+    selectedPowerType: [],
+
+    seatCountOptions: ['5座', '6座', '7座'],
+    selectedSeatCount: '',
+
+    selfServiceOptions: ['可自助取还', '非自助取还'],
+    selectedSelfService: '',
   },
 
   onLoad(options) {
@@ -560,6 +572,14 @@ Page({
 
   // 初始化价格范围条
   initPriceRangeBar() {
+    // 设置轨道刻度分段
+    const pricePointsCount = this.data.pricePoints.length;
+    const tickMarks = [];
+    for (let i = 0; i < pricePointsCount; i++) {
+      tickMarks.push({
+        position: this.getPositionFromPointIndex(i)
+      });
+    }
     this.setData({
       leftThumbPosition: 0,
       rightThumbPosition: this.data.trackWidth,
@@ -570,7 +590,8 @@ Page({
       maxPrice: null,
       selectedPriceRange: 'unlimited',
       isRangeValid: false, // 添加表示范围是否有效的标志
-      isTrackGrayed: false // 添加表示轨道是否置灰的标志
+      isTrackGrayed: false, // 添加表示轨道是否置灰的标志
+      tickMarks: tickMarks // 添加刻度标记数组
     });
   },
   
@@ -635,7 +656,9 @@ Page({
         const nearestPointIndex = this.findNearestPricePoint(clickPositionRpx);
         const nearestPosition = this.getPositionFromPointIndex(nearestPointIndex);
         
+        
         if (this.data.isRangeSelecting) {
+          console.log("44444444566666");
           // 正在选择区间，这是第二次点击
           const firstIndex = this.data.firstSelectedPoint;
 
@@ -659,15 +682,20 @@ Page({
             isRangeSelecting: false,
             firstSelectedPoint: null,
             isTrackGrayed: false,
-            isRangeValid: true // 设置范围有效
+            isRangeValid: true, // 设置范围有效
           });
         } else {
+          console.log("44444444555555555");
           // 第一次点击，开始选择区间
           this.setData({
             isRangeSelecting: true,
             firstSelectedPoint: nearestPointIndex,
             isTrackGrayed: true, // 置灰轨道
-            isRangeValid: false // 重置范围有效状态
+            isRangeValid: false, // 重置范围有效状态
+            leftThumbPosition: nearestPosition, // 设置第一个滑块位置
+            rightThumbPosition: null, // 清空第二个滑块位置
+            selectionWidth: 0,
+            selectedPriceRange: '',
           });
         }
       }
@@ -799,5 +827,72 @@ Page({
     
     // 这里可以调用请求数据的方法
     // this.fetchFilteredData(filters);
+  },
+
+
+  // 选择车辆配置（多选）
+  onCarConfigSelect(e) {
+    console.log("e:",e);
+    const value = Number(e.currentTarget.dataset.value);
+    // 使用展开运算符创建新数组
+    const prevSelected = [...this.data.selectedCarConfig];
+    console.log("value:",value);
+    console.log("prevSelected:",prevSelected);
+    // 采用不可变数据操作
+    const newSelected = prevSelected.includes(value)
+      ? prevSelected.filter(id => id !== value) // 移除已选项
+      : [...prevSelected, value]; // 添加新选项
+      console.log("newSelected:",newSelected);
+    this.setData({ selectedCarConfig: newSelected }, () => {
+      // 此回调在数据更新且视图渲染完成后执行
+      console.log('最新选中值:', this.data.selectedCarConfig);
+      console.log(this.data.selectedCarConfig.includes('倒车影像') ? 'active' : '');
+    });
+  },
+
+  // 选择动力类型（单选）
+  onPowerTypeSelect(e) {
+    const value = e.currentTarget.dataset.value;
+    let selected = this.data.selectedPowerType;
+
+    if (selected.includes(value)) {
+      selected = selected.filter(item => item !== value);
+    } else {
+      selected.push(value);
+    }
+    this.setData({ selectedPowerType: selected });
+  },
+
+  // 选择座位数（单选）
+  onSeatCountSelect(e) {
+    const value = e.currentTarget.dataset.value;
+    this.setData({ selectedSeatCount: value });
+  },
+
+  // 选择自助取还（单选）
+  onSelfServiceSelect(e) {
+    const value = e.currentTarget.dataset.value;
+    this.setData({ selectedSelfService: value });
+  },
+
+  // 清空
+  onClear() {
+    this.setData({
+      selectedCarConfig: [],
+      selectedPowerType: '',
+      selectedSeatCount: '',
+      selectedSelfService: ''
+    });
+  },
+
+  // 确定
+  onConfirm() {
+    console.log('当前筛选结果：', {
+      carConfig: this.data.selectedCarConfig,
+      powerType: this.data.selectedPowerType,
+      seatCount: this.data.selectedSeatCount,
+      selfService: this.data.selectedSelfService
+    });
+    this.setData({ showMask: false }); // 隐藏蒙层
   }
 });

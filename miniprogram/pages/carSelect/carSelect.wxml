@@ -101,7 +101,6 @@
         {{item.label}}
       </view>
     </block>
-    <!-- 后续可以继续添加品牌、价格、更多的展示逻辑 -->
     <!-- 品牌筛选内容 - 双列布局 -->
     <block wx:if="{{currentFilter === 'brand'}}">
       <view class="brand-container">
@@ -148,7 +147,6 @@
         </view>
       </view>
     </block>
-
     <!-- 价格筛选内容 -->
     <block wx:elif="{{currentFilter === 'price'}}">
       <view class="price-filter-container">
@@ -176,14 +174,21 @@
         <view class="price-range-title">更多价格范围</view>
         <view class="price-range-container">
           <view class="range-slider">
-            <!-- 左右滑块指示器 -->
-            <view class="slider-thumb left-thumb" style="left: {{leftThumbPosition}}rpx;" bindtap="onLeftThumbTap"></view>
-            <view class="slider-thumb right-thumb" style="left: {{rightThumbPosition}}rpx;" bindtap="onRightThumbTap"></view>
+            <!-- 左右滑块指示器 - 使用自定义图片并根据isTrackGrayed控制显隐 -->
+            <view class="slider-thumb left-thumb" style="left: {{leftThumbPosition}}rpx;" bindtap="onLeftThumbTap">
+              <image src="../../assets/slider.png" class="thumb-icon" mode="aspectFit"></image>
+            </view>
+            <view class="slider-thumb right-thumb" wx:if="{{selectionWidth !== 0}}" style="left: {{rightThumbPosition}}rpx;" bindtap="onRightThumbTap">
+              <image src="../../assets/slider.png" class="thumb-icon" mode="aspectFit"></image>
+            </view>
 
-            <!-- 滑动轨道 -->
-            <view class="slider-track {{isTrackGrayed ? 'grayed' : ''}}"></view>
+            <!-- 带刻度的滑动轨道 -->
+            <view class="slider-track">
+              <view wx:for="{{tickMarks}}" wx:key="index" class="track-tick" style="left: {{item.position}}rpx;"></view>
+            </view>
+            
             <!-- 选中区域 -->
-            <view class="slider-selection {{isTrackGrayed ? 'grayed' : ''}}" style="left: {{leftThumbPosition}}rpx; width: {{selectionWidth}}rpx;"></view>
+            <view class="slider-selection"  wx:if="{{selectionWidth !== 0}}" style="left: {{leftThumbPosition}}rpx; width: {{selectionWidth}}rpx;"></view>
 
             <!-- 可点击区域 -->
             <view class="click-area" bindtap="onTrackClick"></view>
@@ -207,6 +212,66 @@
                 disabled="{{!isRangeValid}}">确定</view>
         </view>
 
+      </view>
+    </block>
+    <block wx:if="{{currentFilter === 'more'}}">
+      <view class="filter-group">
+        <view class="filter-title">车辆配置</view>
+        <view class="filter-options">
+          <view 
+            class="filter-option {{selectedCarConfig.includes(item.id)  ? 'active' : ''}}" 
+            wx:for="{{carConfigOptions}}" 
+            wx:key="id" 
+            data-value="{{item.id}}" 
+            bindtap="onCarConfigSelect"
+          >
+            {{item.value}}
+          </view>
+        </view>
+
+        <view class="filter-title">动力类型</view>
+        <view class="filter-options">
+          <view 
+            class="filter-option {{selectedPowerType.includes(item) ? 'active' : ''}}" 
+            wx:for="{{powerTypeOptions}}" 
+            wx:key="item" 
+            data-value="item" 
+            bindtap="onPowerTypeSelect"
+          >
+            {{item}}
+          </view>
+        </view>
+
+        <view class="filter-title">座位数</view>
+        <view class="filter-options">
+          <view 
+            class="filter-option {{selectedSeatCount === item ? 'active' : ''}}" 
+            wx:for="{{seatCountOptions}}" 
+            wx:key="item" 
+            data-value="item" 
+            bindtap="onSeatCountSelect"
+          >
+            {{item}}
+          </view>
+        </view>
+
+        <view class="filter-title">自助</view>
+        <view class="filter-options">
+          <view 
+            class="filter-option {{selectedSelfService === item ? 'active' : ''}}" 
+            wx:for="{{selfServiceOptions}}" 
+            wx:key="item" 
+            data-value="item" 
+            bindtap="onSelfServiceSelect"
+          >
+            {{item}}
+          </view>
+        </view>
+      </view>
+
+      <view class="filter-bottom">
+        <view class="clear-btn" bindtap="onClear">清空</view>
+        <view class="confirm-btn" bindtap="onConfirm">确定</view>
       </view>
     </block>
 
