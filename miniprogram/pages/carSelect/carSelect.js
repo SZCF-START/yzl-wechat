@@ -159,8 +159,11 @@ Page({
     pricePoints: [0, 150, 250, 350, Infinity], // Infinity 表示"不限"
     leftThumbPosition: 0, // 左滑块位置，单位rpx
     rightThumbPosition: 600, // 右滑块位置，单位rpx
-    selectionWidth: 600, // 选中区域宽度，单位rpx
-    trackWidth: 600, // 轨道总宽度，单位rpx
+    confirmLeftThumbPosition: null, 
+    confirmRightThumbPosition: null,
+    selectionWidth: 620, // 选中区域宽度，单位rpx
+    confirmSelectionWidth: 0,
+    trackWidth: 620, // 轨道总宽度，单位rpx
     isRangeSelecting: false, // 是否正在选择区间
     firstSelectedPoint: null, // 首次选中的点
     minPrice: 0,
@@ -197,6 +200,11 @@ Page({
       seats: [],
       selfService: []
     },
+    processedList: [],
+    confirmActive: false,
+    //品牌任意一个车型是否被选中状态
+    brandActive: false,
+    selectedModels: {}
   },
 
   onLoad(options) {
@@ -245,6 +253,7 @@ Page({
 
     // 初始化价格范围条
     this.initPriceRangeBar();
+    this.updateProcessedList();
   },
 
   onShow(options) {
@@ -455,6 +464,22 @@ Page({
   // 点击筛选项
   onFilterTap(e) {
     console.log("e55666dff:",e);
+    console.log("this.data.brandActive:",this.data.brandActive);
+    console.log("this.data.selectedModels:",this.data.selectedModels);
+    if(Object.keys(this.data.selectedModels).length === 0) {
+      this.clearBrandSelection()
+    }else{
+      this.updateBrandSelectionFromSelectedModels()
+    }
+    if(this.data.confirmLeftThumbPosition !== null && this.data.confirmRightThumbPosition !== null){
+      const firstIndex = this.getPointIndexFromPosition(this.data.confirmLeftThumbPosition);
+      const secondIndex = this.getPointIndexFromPosition(this.data.confirmRightThumbPosition);
+      if (firstIndex <= secondIndex) {
+        this.updatePriceRange(firstIndex, secondIndex);
+      } else {
+        this.updatePriceRange(secondIndex, firstIndex);
+      }
+    }
     const type = e.currentTarget.dataset.type
     const isActive = this.data.activeType === type;
     this.setData({
@@ -463,6 +488,32 @@ Page({
       showMask: !isActive // 如果已经是激活状态则关闭，否则开启
     })
   },
+
+  updateBrandSelectionFromSelectedModels() {
+    const { selectedModels, brandData } = this.data;
+  
+    const updatedBrandData = brandData.map(brand => {
+      const selectedIds = selectedModels[brand.id] || [];
+      console.log("selectedIds:",selectedIds);
+      const updatedModels = brand.models.map(model => ({
+        ...model,
+        selected: selectedIds.includes(model.id)
+      }));
+      console.log("updatedModels:",updatedModels);
+      return {
+        ...brand,
+        hasSelectedModels: selectedIds.length > 0,
+        models: updatedModels
+      };
+    });
+    console.log("updatedBrandData:",updatedBrandData);
+    const selectedBrand = updatedBrandData.find(brand => brand.name === this.data.selectedBrandCategory);
+    this.setData({
+      brandData: updatedBrandData,
+      currentModels: selectedBrand.models,
+      brandActive: true
+    });
+  },  
 
   // 点击蒙层遮罩关闭
   onMaskClose() {
@@ -541,10 +592,17 @@ Page({
     // 更新品牌数据
     currentBrand.models = newModels;
     currentBrand.hasSelectedModels = newModels.some(model => model.selected);
-  
+    //检查是否有任意一个车型选中
+    const brandActive = brandData.some(item => item.hasSelectedModels === true);
+
     this.setData({
       brandData: brandData,
-      currentModels: newModels
+      currentModels: newModels,
+      brandActive
+    }, () => {
+      console.log("brandData:",brandData);
+      console.log("currentModels:",this.data.currentModels);
+      console.log("brandActive:",brandActive);
     });
   },
 
@@ -562,7 +620,9 @@ Page({
     
     this.setData({
       brandData: brandData,
-      currentModels: brandData.find(brand => brand.name === this.data.selectedBrandCategory)?.models || []
+      currentModels: brandData.find(brand => brand.name === this.data.selectedBrandCategory)?.models || [],
+      brandActive: false,
+      
     });
   },
 
@@ -571,9 +631,9 @@ Page({
     // 处理已选择的品牌和车型
     const selectedBrands = {};
     this.data.brandData.forEach(brand => {
-      const selectedModels = brand.models.filter(model => model.selected).map(model => model.name);
+      const selectedModels = brand.models.filter(model => model.selected).map(model => model.id);
       if (selectedModels.length > 0) {
-        selectedBrands[brand.name] = selectedModels;
+        selectedBrands[brand.id] = selectedModels;
       }
     });
     
@@ -581,7 +641,11 @@ Page({
     
     // 关闭弹窗
     this.setData({
-      showMask: false
+      showMask: false,
+      activeType: '',
+      selectedModels: selectedBrands
+    }, () => {
+      console.log("selectedModels:",this.data.selectedModels);
     });
     
     // 这里可以添加筛选回调
@@ -605,10 +669,10 @@ Page({
       firstSelectedPoint: null,
       minPrice: 0,
       maxPrice: null,
-      selectedPriceRange: 'unlimited',
+      selectedPriceRange: '',
       isRangeValid: false, // 添加表示范围是否有效的标志
       isTrackGrayed: false, // 添加表示轨道是否置灰的标志
-      tickMarks: tickMarks // 添加刻度标记数组
+      tickMarks: tickMarks, // 添加刻度标记数组
     });
   },
   
@@ -700,6 +764,7 @@ Page({
             firstSelectedPoint: null,
             isTrackGrayed: false,
             isRangeValid: true, // 设置范围有效
+            rightThumbPosition: nearestPosition
           });
         } else {
           console.log("44444444555555555");
@@ -825,7 +890,10 @@ Page({
   // 确认价格筛选
   onConfirmPrice() {
     this.setData({
-      showMask: false
+      showMask: false,
+      activeType: '',
+      confirmLeftThumbPosition: this.data.leftThumbPosition,
+      confirmRightThumbPosition: this.data.rightThumbPosition
     });
     
     // 触发价格筛选查询
@@ -846,26 +914,61 @@ Page({
     // this.fetchFilteredData(filters);
   },
 
+  updateProcessedList() {
+    const { moreFilters, selectedFilters } = this.data;
+    const processedList = moreFilters.map(item => {
+      return {
+        key: item.key,
+        title: item.title,
+        options: item.options.map(option => {
+          return {
+            value: option,
+            active: selectedFilters[item.key].includes(option) // 这里处理active
+          }
+        })
+      };
+    });
+  
+    // 检查是否有任意active为true
+    const confirmActive = processedList.some(item => 
+      item.options.some(option => option.active)
+    );
 
+    this.setData({
+      processedList,
+      confirmActive
+    }, () => {
+      console.log("processedList",processedList);
+    });
+  },
+
+  // 优化后的筛选处理
   handleFilterSelect(e) {
-    console.log("e.currentTarget.dataset",e);
     const { filterKey, optionValue } = e.currentTarget.dataset;
     const filters = this.data.selectedFilters[filterKey];
-    console.log("filters:",filters);
     const newFilters = filters.includes(optionValue)
       ? filters.filter(v => v !== optionValue)
       : [...filters, optionValue];
 
     this.setData({
       [`selectedFilters.${filterKey}`]: newFilters
+    }, () => {
+      console.log("this.data.selectedFilters",this.data.selectedFilters);
+      this.updateProcessedList(); // 更新处理后的列表
     });
-
-    console.log("selectedFilters:",this.data.selectedFilters);
   },
 
   onClear() {
+    // 清空选中的filters
+    const emptyFilters = {};
+    Object.keys(this.data.selectedFilters).forEach(key => {
+      emptyFilters[key] = [];
+    });
+
     this.setData({
-      selectedOptions: {}
+      selectedFilters: emptyFilters
+    }, () => {
+      this.updateProcessedList();
     });
   },
 

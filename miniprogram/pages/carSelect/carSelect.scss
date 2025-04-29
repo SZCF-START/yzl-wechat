@@ -198,6 +198,11 @@
   height: 20rpx;
   margin-left: 8rpx;
 }
+.arrow-icon.active {
+  width: 20rpx;
+  height: 20rpx;
+  margin-left: 8rpx;
+}
 
 .filter-item {
   display: flex;
@@ -236,7 +241,18 @@
   // border-bottom: 1rpx solid #eee;
 }
 
-.popup-option.active {
+.option-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 两边顶开 */
+}
+
+.label {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.label.active {
   color: #ff8000; /* 绿色高亮，也可自定义 */
   font-weight: bold;
 }
