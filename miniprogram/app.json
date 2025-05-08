@@ -27,7 +27,8 @@
     "pages/citySelect/citySelect",
     "pages/storeSelect/storeSelect",
     "pages/mapGuide/mapGuide",
-    "pages/carSelect/carSelect"
+    "pages/carSelect/carSelect",
+    "pages/orderConfirm/orderConfirm"
   ],
   "permission": {
     "scope.userLocation": {

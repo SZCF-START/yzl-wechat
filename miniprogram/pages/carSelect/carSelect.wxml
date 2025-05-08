@@ -242,7 +242,7 @@
 
       <view class="filter-bottom">
         <view class="clear-btn" bindtap="onClear">清空</view>
-        <view class="confirm-btn {{!confirmActive ? 'disabled' : ''}}" bindtap="onConfirm">确定</view>
+        <view class="confirm-btn" bindtap="onConfirm">确定</view>
       </view>
     </block>
 

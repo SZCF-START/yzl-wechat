@@ -200,10 +200,19 @@ Page({
       seats: [],
       selfService: []
     },
+    //更多最终选择
+    confirmSelectedFilters: {
+      carConfig: [],
+      powerType: [],
+      seats: [],
+      selfService: []
+    },
     processedList: [],
+    //更多选项任意一个是否被选中状态
     confirmActive: false,
     //品牌任意一个车型是否被选中状态
     brandActive: false,
+    //品牌最终选择
     selectedModels: {}
   },
 
@@ -383,6 +392,7 @@ Page({
 
   // 显示总价费用明细弹框
   showDetail(e) {
+    console.log("999999");
     const item = e.currentTarget.dataset.item;
     this.setData({ showPopup:true, popup:item });
   },
@@ -471,6 +481,9 @@ Page({
     }else{
       this.updateBrandSelectionFromSelectedModels()
     }
+
+    console.log("this.data.confirmLeftThumbPosition:",this.data.confirmLeftThumbPosition);
+    console.log("this.data.confirmRightThumbPosition:",this.data.confirmRightThumbPosition);
     if(this.data.confirmLeftThumbPosition !== null && this.data.confirmRightThumbPosition !== null){
       const firstIndex = this.getPointIndexFromPosition(this.data.confirmLeftThumbPosition);
       const secondIndex = this.getPointIndexFromPosition(this.data.confirmRightThumbPosition);
@@ -479,6 +492,8 @@ Page({
       } else {
         this.updatePriceRange(secondIndex, firstIndex);
       }
+    }else{
+      this.initPriceRangeBar();
     }
     const type = e.currentTarget.dataset.type
     const isActive = this.data.activeType === type;
@@ -486,6 +501,16 @@ Page({
       currentFilter: type,
       activeType: isActive ? '' : type,
       showMask: !isActive // 如果已经是激活状态则关闭，否则开启
+    })
+
+    this.updateProcessedList(true)
+    this.setData({
+      selectedFilters: {
+        carConfig: [...this.data.confirmSelectedFilters.carConfig],
+        powerType: [...this.data.confirmSelectedFilters.powerType],
+        seats: [...this.data.confirmSelectedFilters.seats],
+        selfService: [...this.data.confirmSelectedFilters.selfService]
+      }
     })
   },
 
@@ -914,8 +939,12 @@ Page({
     // this.fetchFilteredData(filters);
   },
 
-  updateProcessedList() {
-    const { moreFilters, selectedFilters } = this.data;
+  updateProcessedList(useConfirm = false) {
+    const { moreFilters, selectedFilters, confirmSelectedFilters } = this.data;
+  
+    // 根据参数决定使用哪个 filter 数据
+    const filters = useConfirm ? confirmSelectedFilters : selectedFilters;
+  
     const processedList = moreFilters.map(item => {
       return {
         key: item.key,
@@ -923,25 +952,25 @@ Page({
         options: item.options.map(option => {
           return {
             value: option,
-            active: selectedFilters[item.key].includes(option) // 这里处理active
-          }
+            active: filters[item.key]?.includes(option) || false
+          };
         })
       };
     });
   
-    // 检查是否有任意active为true
+    // 检查是否有任意 active 为 true
     const confirmActive = processedList.some(item => 
       item.options.some(option => option.active)
     );
-
+  
     this.setData({
       processedList,
       confirmActive
     }, () => {
-      console.log("processedList",processedList);
+      console.log("processedList", processedList);
     });
   },
-
+  
   // 优化后的筛选处理
   handleFilterSelect(e) {
     const { filterKey, optionValue } = e.currentTarget.dataset;
@@ -974,9 +1003,24 @@ Page({
 
   onConfirm() {
     console.log('用户选择了：', this.data.selectedOptions);
+
     this.setData({
-      showMask: false
+      showMask: false,
+      activeType: '',
+      confirmSelectedFilters: {
+        carConfig: [...this.data.selectedFilters.carConfig],
+        powerType: [...this.data.selectedFilters.powerType],
+        seats: [...this.data.selectedFilters.seats],
+        selfService: [...this.data.selectedFilters.selfService]
+      }
     });
     // 可以在这里触发事件，把筛选条件传递给列表页
   },
+
+  onCheckout() {
+    console.log("00000");
+    wx.navigateTo({
+      url: `/pages/orderConfirm/orderConfirm`,
+    });
+  }
 });

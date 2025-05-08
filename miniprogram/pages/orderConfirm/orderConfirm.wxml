@@ -1,0 +1,39 @@
+<view class="card">
+  <view class="card-header">
+    <image src="{{car.image}}" class="car-image" />
+    <view class="car-info">
+      <text class="car-name">{{car.name}}</text>
+      <text class="car-spec">{{car.transmission}}/{{car.engine}}/{{car.body}}/{{car.seats}}</text>
+    </view>
+    <view class="car-rating">
+      <text class="rating-value">{{car.rating}}%</text>
+      <text class="rating-label">满意</text>
+    </view>
+  </view>
+
+  <view class="card-content">
+    <view class="item">
+      <text class="label">取车</text>
+      <view class="detail">
+        <text class="location">{{car.pickupLocation}}</text>
+        <text class="datetime">{{car.pickupDate}}</text>
+      </view>
+    </view>
+    <view class="item">
+      <text class="label">还车</text>
+      <view class="detail">
+        <text class="location">{{car.dropoffLocation}}</text>
+        <text class="datetime">{{car.dropoffDate}}</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 订单确认底部栏 -->
+<view class="footer-bar">
+  <view class="price-info">
+    <text class="total-label">预计总价：</text>
+    <text class="total-price">¥{{car.totalPrice}}</text>
+  </view>
+  <button class="confirm-btn" bindtap="onConfirmOrder">确认订单</button>
+</view>
