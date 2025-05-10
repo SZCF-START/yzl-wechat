@@ -14,15 +14,27 @@ Page({
       { key: '4wd', name: '四驱' },
     ],
 
+    // categories: [
+    //   { id: 1, name: '推荐' },
+    //   { id: 2, name: '京牌畅行', price: 258 },
+    //   { id: 3, name: '精英型', price: 258 },
+    //   { id: 4, name: 'SUV', price: 313 },
+    //   { id: 5, name: '豪华车', price: 459 },
+    //   { id: 6, name: '个性车', price: 1456 },
+    //   { id: 7, name: '自助取还', price: 258 },
+    //   { id: 8, name: '临近时间' }
+    // ],
     categories: [
-      { id: 1, name: '推荐' },
-      { id: 2, name: '京牌畅行', price: 258 },
-      { id: 3, name: '精英型', price: 258 },
-      { id: 4, name: 'SUV', price: 313 },
-      { id: 5, name: '豪华车', price: 459 },
-      { id: 6, name: '个性车', price: 1456 },
-      { id: 7, name: '自助取还', price: 258 },
-      { id: 8, name: '临近时间' }
+      { id: 1, name: '热门推荐' },                    // 默认展示机型
+      { id: 2, name: '微型挖机（1-5吨）', price: 1200 },  // 三一SY16C/徐工XE27E
+      { id: 3, name: '小型挖机（6-15吨）', price: 1800 }, // 柳工915E/临工LG6150
+      { id: 4, name: '中型挖机（20-30吨）', price: 2600 },// 三一SY245/中联ZE205E
+      { id: 5, name: '大型挖机（35吨+）', price: 3500 },  // 山河SWE450/徐工XE370
+      { id: 6, name: '智能电驱型', price: 3200 },        // 三一SY550H混合动力
+      { id: 7, name: '长臂深坑型', price: 3800 },       // 超长臂改装（10米+）
+      { id: 8, name: '特种改装型', price: 4200 },       // 抓钢机/拆楼剪/打桩臂
+      // { id: 9, name: '当天可取', price: 0 },           // 紧急工程绿色通道
+      // { id: 10, name: '灵活租期' }                    // 支持小时/周租计费
     ],
     activeCat: 1,
 
@@ -53,103 +65,91 @@ Page({
     brandData: [
       {
         id: 1,
-        name: '奥迪',
-        logo: '/images/brands/audi.png',
+        name: '三一重工',
+        logo: '/images/brands/sany.png',
         hasSelectedModels: false,
         models: [
-          { id: 'none', name: '不限车系', selected: false },
-          { id: 101, name: 'A3', selected: false },
-          { id: 102, name: 'A4L', selected: false },
-          { id: 103, name: 'Q5L', selected: false },
-          { id: 104, name: 'A6L', selected: false }
+          { id: 'none', name: '不限机型', selected: false },
+          { id: 101, name: 'SY75C（0.8m³铲斗）', selected: false },
+          { id: 102, name: 'SY365（2.2m³矿用）', selected: false },
+          { id: 103, name: 'SY950（智能液压）', selected: false }
         ]
       },
       {
         id: 2,
-        name: '宝马',
-        logo: '/images/brands/bmw.png',
+        name: '徐工集团',
+        logo: '/images/brands/xugong.png',
         hasSelectedModels: false,
         models: [
-          { id: 'none', name: '不限车系', selected: false },
-          { id: 201, name: 'A6L', selected: false },
-          { id: 202, name: 'A7L', selected: false }
+          { id: 'none', name: '不限机型', selected: false },
+          { id: 201, name: 'XE60D（6吨级）', selected: false },
+          { id: 202, name: 'XE370（矿山版）', selected: false }
         ]
       },
       {
         id: 3,
-        name: '本田',
-        logo: '/images/brands/bentian.png',
+        name: '柳工机械',
+        logo: '/images/brands/liugong.png',
         hasSelectedModels: false,
         models: [
-          { id: 'none', name: '不限车系', selected: false },
-          { id: 301, name: 'A7L', selected: false },
-          { id: 302, name: 'Q5L', selected: false }
+          { id: 'none', name: '不限机型', selected: false },
+          { id: 301, name: 'CLG915E（混合动力）', selected: false },
+          { id: 302, name: 'CLG950（超长臂）', selected: false }
         ]
       },
       {
         id: 4,
-        name: '比亚迪',
-        logo: '/images/brands/biaozhi.png',
+        name: '临工重机',
+        logo: '/images/brands/lingong.png',
         hasSelectedModels: false,
         models: [
-          { id: 'none', name: '不限车系', selected: false },
-          { id: 401, name: 'Q3', selected: false },
-          { id: 402, name: 'Q5L', selected: false }
+          { id: 'none', name: '不限机型', selected: false },
+          { id: 401, name: 'LG6150（高原型）', selected: false },
+          { id: 402, name: 'LG670（隧道专用）', selected: false }
         ]
       },
       {
         id: 5,
-        name: '大众',
-        logo: '/images/brands/dazhong.png',
+        name: '中联重科',
+        logo: '/images/brands/zoomlion.png',
         hasSelectedModels: false,
         models: [
-          { id: 'none', name: '不限车系', selected: false },
-          { id: 501, name: 'A3', selected: false },
-          { id: 502, name: 'A6L', selected: false }
+          { id: 'none', name: '不限机型', selected: false },
+          { id: 501, name: 'ZE205E（智能版）', selected: false },
+          { id: 502, name: 'ZE700（深基坑）', selected: false }
         ]
       },
       {
         id: 6,
-        name: '丰田',
-        logo: '/images/brands/fengtian.png',
+        name: '山河智能',
+        logo: '/images/brands/sunward.png',
         hasSelectedModels: false,
         models: [
-          { id: 'none', name: '不限车系', selected: false },
-          { id: 601, name: 'A6L', selected: false },
-          { id: 602, name: 'A7L', selected: false }
+          { id: 'none', name: '不限机型', selected: false },
+          { id: 601, name: 'SWE210（沼泽地）', selected: false },
+          { id: 602, name: 'SWE450（拆楼王）', selected: false }
         ]
       },
       {
         id: 7,
-        name: '凯迪拉克',
-        logo: '/images/brands/jibao.png',
+        name: '山推股份',
+        logo: '/images/brands/shanwei.png',
         hasSelectedModels: false,
         models: [
-          { id: 'none', name: '不限车系', selected: false },
-          { id: 701, name: 'A6L', selected: false },
-          { id: 702, name: 'A7L', selected: false }
+          { id: 'none', name: '不限机型', selected: false },
+          { id: 701, name: 'SE75（市政版）', selected: false },
+          { id: 702, name: 'SE390（岩石斗）', selected: false }
         ]
       },
       {
         id: 8,
-        name: '日产',
-        logo: '/images/brands/richan.png',
+        name: '雷沃重工',
+        logo: '/images/brands/lovol.png',
         hasSelectedModels: false,
         models: [
-          { id: 'none', name: '不限车系', selected: false },
-          { id: 801, name: 'Q3', selected: false },
-          { id: 802, name: 'Q5L', selected: false }
-        ]
-      },
-      {
-        id: 9,
-        name: '日产2',
-        logo: '/images/brands/richan.png',
-        hasSelectedModels: false,
-        models: [
-          { id: 'none', name: '不限车系', selected: false },
-          { id: 801, name: 'Q3', selected: false },
-          { id: 802, name: 'Q5L', selected: false }
+          { id: 'none', name: '不限机型', selected: false },
+          { id: 801, name: 'FR650（抓钢机）', selected: false },
+          { id: 802, name: 'FR220（轮式）', selected: false }
         ]
       }
     ],
@@ -174,25 +174,30 @@ Page({
     
     moreFilters: [
       {
-        title: '车辆配置',
-        key: 'carConfig',
-        options: ['倒车雷达', '倒车影像']
+        title: '核心配置',
+        key: 'config',
+        options: ['360°监控系统', 'GPS定位', '防滚架', '自动润滑', '快速换装']
       },
       {
         title: '动力类型',
         key: 'powerType',
-        options: ['汽油', '油电混合', '纯电动']
+        options: ['柴油发动机', '油电混合', '纯电动', '涡轮增压']
       },
       {
-        title: '座位数',
-        key: 'seats',
-        options: ['5座', '6座', '7座']
+        title: '吨位级别',
+        key: 'weight',
+        options: ['5-10吨', '10-20吨', '20-30吨', '30吨+']
       },
       {
-        title: '自助',
-        key: 'selfService',
-        options: ['可自助取还', '非自助取还']
-      }
+        title: '属具类型',
+        key: 'attachment',
+        options: ['标准铲斗', '岩石斗', '抓钢器', '破碎锤', '松土器']
+      },
+      // {
+      //   title: '服务类型',
+      //   key: 'service',
+      //   options: ['含操作员', '自备操作员', '免费运输', '技术支持']
+      // }
     ],
     selectedFilters: {
       carConfig: [],
@@ -291,61 +296,75 @@ Page({
   _mockCars() {
     return [
       {
-        id:1, name:'日产天籁', desc:'自动/2.0L/三厢/5座',
-        img:'../../assets/rsg.png',
-        tags:['蓝牙连接','倒车雷达','倒车影像','天窗'],
-        daily:258, total:636,
-        details:[
-          {label:'基础租金',value:'¥500'},
-          {label:'保险费',value:'¥100'},
-          {label:'手续费',value:'¥36'}
+        id: 1,
+        name: '三一重工SY75C',
+        desc: '液压驱动/21吨级/0.8m³铲斗',
+        img: '../../assets/rsg.png',
+        tags: ['GPS定位', '智能调速', '防滚架', '快速维护'],
+        daily: 2200,
+        total: 32800,
+        details: [
+          {label: '基础租金', value: '¥28,000'},
+          {label: '设备保险费', value: '¥3,500'},
+          {label: '运输费', value: '¥1,300'}
         ]
       },
       {
-        id:2, name:'大众新帕萨特', desc:'双离合/1.4T/三厢/5座',
-        img:'../../assets/rsg.png',
-        tags:['倒车雷达','蓝牙连接','六个月内车龄'],
-        daily:258, total:636,
-        details:[
-          {label:'基础租金',value:'¥500'},
-          {label:'保险费',value:'¥100'},
-          {label:'手续费',value:'¥36'}
-        ]
-      },
-      // … 可继续添加
-      {
-        id:3, name:'大众新帕萨特1', desc:'双离合/1.4T/三厢/5座',
-        img:'../../assets/rsg.png',
-        tags:['倒车雷达','蓝牙连接','六个月内车龄'],
-        daily:258, total:636,
-        details:[
-          {label:'基础租金',value:'¥500'},
-          {label:'保险费',value:'¥100'},
-          {label:'手续费',value:'¥36'}
+        id: 2,
+        name: '徐工XE60D',
+        desc: '电喷发动机/6吨级/0.3m³铲斗',
+        img: '../../assets/rsg.png',
+        tags: ['低油耗', '折叠臂', '三年质保'],
+        daily: 1500,
+        total: 21800,
+        details: [
+          {label: '基础租金', value: '¥18,000'},
+          {label: '设备保险费', value: '¥2,800'},
+          {label: '操作员费', value: '¥1,000'}
         ]
       },
       {
-        id:4, name:'大众新帕萨特2', desc:'双离合/1.4T/三厢/5座',
-        img:'../../assets/rsg.png',
-        tags:['倒车雷达','蓝牙连接','六个月内车龄'],
-        daily:258, total:636,
-        details:[
-          {label:'基础租金',value:'¥500'},
-          {label:'保险费',value:'¥100'},
-          {label:'手续费',value:'¥36'}
+        id: 3,
+        name: '柳工CLG915E',
+        desc: '混合动力/15吨级/0.6m³铲斗',
+        img: '../../assets/rsg.png',
+        tags: ['远程监控', '自动润滑', '工况适应'],
+        daily: 2800,
+        total: 45800,
+        details: [
+          {label: '基础租金', value: '¥40,000'},
+          {label: '设备保险费', value: '¥4,200'},
+          {label: '燃油补贴', value: '¥1,600'}
         ]
       },
       {
-        id:5, name:'大众新帕萨特3', desc:'双离合/1.4T/三厢/5座',
-        img:'../../assets/rsg.png',
-        tags:['倒车雷达','蓝牙连接','六个月内车龄'],
-        daily:258, total:636,
-        details:[
-          {label:'基础租金',value:'¥500'},
-          {label:'保险费',value:'¥100'},
-          {label:'手续费',value:'¥36'}
+        id: 4,
+        name: '临工LG6150',
+        desc: '涡轮增压/15吨级/0.5m³铲斗',
+        img: '../../assets/rsg.png',
+        tags: ['矿山加强型', '防爆系统', '快速换装'],
+        daily: 2600,
+        total: 43800,
+        details: [
+          {label: '基础租金', value: '¥36,000'},
+          {label: '设备保险费', value: '¥5,000'},
+          {label: '配件押金', value: '¥2,800'}
         ]
       },
+      {
+        id: 5,
+        name: '中联重科ZE205E',
+        desc: '智能液压/20吨级/1.0m³铲斗',
+        img: '../../assets/rsg.png',
+        tags: ['工况自识别', '云端管理', '360°影像'],
+        daily: 3500,
+        total: 59800,
+        details: [
+          {label: '基础租金', value: '¥50,000'},
+          {label: '设备保险费', value: '¥7,000'},
+          {label: '技术支持费', value: '¥2,800'}
+        ]
+      }
     ];
   },
 
