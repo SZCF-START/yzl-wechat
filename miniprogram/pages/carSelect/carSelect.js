@@ -175,7 +175,7 @@ Page({
     moreFilters: [
       {
         title: '核心配置',
-        key: 'config',
+        key: 'carConfig',
         options: ['360°监控系统', 'GPS定位', '防滚架', '自动润滑', '快速换装']
       },
       {
@@ -202,15 +202,15 @@ Page({
     selectedFilters: {
       carConfig: [],
       powerType: [],
-      seats: [],
-      selfService: []
+      weight: [],
+      attachment: []
     },
     //更多最终选择
     confirmSelectedFilters: {
       carConfig: [],
       powerType: [],
-      seats: [],
-      selfService: []
+      weight: [],
+      attachment: []
     },
     processedList: [],
     //更多选项任意一个是否被选中状态
@@ -298,7 +298,7 @@ Page({
       {
         id: 1,
         name: '三一重工SY75C',
-        desc: '液压驱动/21吨级/0.8m³铲斗',
+        desc: '液压先导/21吨级/履带式',
         img: '../../assets/rsg.png',
         tags: ['GPS定位', '智能调速', '防滚架', '快速维护'],
         daily: 2200,
@@ -312,7 +312,7 @@ Page({
       {
         id: 2,
         name: '徐工XE60D',
-        desc: '电喷发动机/6吨级/0.3m³铲斗',
+        desc: '液压先导/6吨级/履带式',
         img: '../../assets/rsg.png',
         tags: ['低油耗', '折叠臂', '三年质保'],
         daily: 1500,
@@ -326,7 +326,7 @@ Page({
       {
         id: 3,
         name: '柳工CLG915E',
-        desc: '混合动力/15吨级/0.6m³铲斗',
+        desc: '机械拉杆/15吨级/​​轮式',
         img: '../../assets/rsg.png',
         tags: ['远程监控', '自动润滑', '工况适应'],
         daily: 2800,
@@ -340,7 +340,7 @@ Page({
       {
         id: 4,
         name: '临工LG6150',
-        desc: '涡轮增压/15吨级/0.5m³铲斗',
+        desc: '液压先导/6吨级/履带式',
         img: '../../assets/rsg.png',
         tags: ['矿山加强型', '防爆系统', '快速换装'],
         daily: 2600,
@@ -354,7 +354,7 @@ Page({
       {
         id: 5,
         name: '中联重科ZE205E',
-        desc: '智能液压/20吨级/1.0m³铲斗',
+        desc: '电控液压/6吨级/履带式',
         img: '../../assets/rsg.png',
         tags: ['工况自识别', '云端管理', '360°影像'],
         daily: 3500,
@@ -527,8 +527,8 @@ Page({
       selectedFilters: {
         carConfig: [...this.data.confirmSelectedFilters.carConfig],
         powerType: [...this.data.confirmSelectedFilters.powerType],
-        seats: [...this.data.confirmSelectedFilters.seats],
-        selfService: [...this.data.confirmSelectedFilters.selfService]
+        weight: [...this.data.confirmSelectedFilters.weight],
+        attachment: [...this.data.confirmSelectedFilters.attachment]
       }
     })
   },
@@ -1029,8 +1029,8 @@ Page({
       confirmSelectedFilters: {
         carConfig: [...this.data.selectedFilters.carConfig],
         powerType: [...this.data.selectedFilters.powerType],
-        seats: [...this.data.selectedFilters.seats],
-        selfService: [...this.data.selectedFilters.selfService]
+        weight: [...this.data.selectedFilters.weight],
+        attachment: [...this.data.selectedFilters.attachment]
       }
     });
     // 可以在这里触发事件，把筛选条件传递给列表页

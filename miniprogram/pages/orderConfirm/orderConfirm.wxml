@@ -1,39 +1,263 @@
-<view class="card">
-  <view class="card-header">
-    <image src="{{car.image}}" class="car-image" />
-    <view class="car-info">
-      <text class="car-name">{{car.name}}</text>
-      <text class="car-spec">{{car.transmission}}/{{car.engine}}/{{car.body}}/{{car.seats}}</text>
+<scroll-view scroll-y="true" class="page-container">
+  <view class="card">
+    <view class="card-header">
+      <image src="{{car.image}}" class="car-image" />
+      <view class="car-info">
+        <text class="car-name">{{car.name}}</text>
+        <text class="car-spec">{{car.specs}}</text>
+      </view>
+      <view class="car-rating">
+        <text class="rating-value">{{car.rating}}%</text>
+        <text class="rating-label">满意</text>
+      </view>
     </view>
-    <view class="car-rating">
-      <text class="rating-value">{{car.rating}}%</text>
-      <text class="rating-label">满意</text>
+    <view class="card-content">
+      <view class="item">
+        <text class="label">取车</text>
+        <view class="detail">
+          <text class="location">{{car.pickupLocation}}</text>
+          <text class="datetime">{{car.pickupDate}}</text>
+        </view>
+      </view>
+      <view class="item">
+        <text class="label">还车</text>
+        <view class="detail">
+          <text class="location">{{car.dropoffLocation}}</text>
+          <text class="datetime">{{car.dropoffDate}}</text>
+        </view>
+      </view>
     </view>
   </view>
 
-  <view class="card-content">
-    <view class="item">
-      <text class="label">取车</text>
-      <view class="detail">
-        <text class="location">{{car.pickupLocation}}</text>
-        <text class="datetime">{{car.pickupDate}}</text>
-      </view>
+  <!-- 租车保险卡片 -->
+  <view class="insurance-card">
+    <view class="insurance-header">
+      <text class="insurance-title">租车保险·安心出行</text>
+      <view class="rules-link">保障规则 ></view>
     </view>
-    <view class="item">
-      <text class="label">还车</text>
-      <view class="detail">
-        <text class="location">{{car.dropoffLocation}}</text>
-        <text class="datetime">{{car.dropoffDate}}</text>
+    <text class="basic-info">含基本保障服务部分 ></text>
+    
+    <view class="insurance-options">
+      <view class="insurance-option {{selectedInsurance === 'basic' ? 'selected' : ''}}" bindtap="selectInsurance" data-type="basic">
+        <view class="insurance-icon green">
+          <image src="/assets/images/shield_green.png" class="shield-icon" />
+        </view>
+        <text class="option-title">尊享保障 ></text>
+        <view class="benefits">
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">全额车损(豁免)</text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">三者保障<text class="orange-text">30万</text></text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">免停运费</text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">全国道路救援</text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">乘客保障<text class="orange-text">2万/人</text></text></view>
+        </view>
+        <view class="option-footer">
+          <view class="price">¥51/天</view>
+          <radio class="option-radio" checked="{{selectedInsurance === 'basic'}}" />
+        </view>
+        <!-- <view class="popular-tag">300w+用户选择</view> -->
       </view>
+      
+      <!-- <view class="insurance-option {{selectedInsurance === 'premium' ? 'selected' : ''}}" bindtap="selectInsurance" data-type="premium">
+        <view class="upgrade-tag">可升级</view>
+        <view class="insurance-icon blue">
+          <image src="/assets/images/shield_blue.png" class="shield-icon" />
+        </view>
+        <text class="option-title">全程无忧 ></text>
+        <view class="benefits">
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">全额车损(豁免)</text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">三者保障<text class="orange-text">120万</text></text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">免停运费</text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">全国道路救援</text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">乘客保障<text class="orange-text">5万/人</text></text></view>
+        </view>
+        <view class="option-footer">
+          <view class="price">¥91/天</view>
+          <radio class="option-radio" checked="{{selectedInsurance === 'premium'}}" />
+        </view>
+        <view class="value-tag">高性价比</view>
+      </view>
+      
+      <view class="insurance-option {{selectedInsurance === 'guard' ? 'selected' : ''}}" bindtap="selectInsurance" data-type="guard">
+        <view class="insurance-icon orange">
+          <image src="/assets/images/shield_orange.png" class="shield-icon" />
+        </view>
+        <text class="option-title">尊享守护 ></text>
+        <view class="benefits">
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">全额车损(豁免)</text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">三者保障<text class="orange-text">30万</text></text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">免停运费</text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">全国道路救援</text></view>
+          <view class="benefit"><text class="check">✓</text> <text class="benefit-text">乘客保障<text class="orange-text">5万/人</text></text></view>
+        </view>
+        <view class="option-footer">
+          <view class="price">¥71/天</view>
+          <radio class="option-radio" checked="{{selectedInsurance === 'guard'}}" />
+        </view>
+      </view> -->
     </view>
   </view>
-</view>
 
-<!-- 订单确认底部栏 -->
-<view class="footer-bar">
-  <view class="price-info">
-    <text class="total-label">预计总价：</text>
-    <text class="total-price">¥{{car.totalPrice}}</text>
+  <!-- 额外卡片位置 -->
+  <view class="additional-card">
+    <view class="card-header">
+      <text class="card-title">门店信息</text>
+    </view>
+    <view class="card-content">
+      <view class="store-info">
+        <text class="store-name">{{car.pickupLocation}}</text>
+        <text class="store-address">具体地址信息将在订单确认后提供</text>
+        <text class="store-hours">营业时间: 08:00-22:00</text>
+      </view>
+    </view>
   </view>
-  <button class="confirm-btn" bindtap="onConfirmOrder">确认订单</button>
-</view>
+
+  <view class="additional-card">
+    <view class="card-header">
+      <text class="card-title">费用明细</text>
+      <text class="view-details">明细 ></text>
+    </view>
+    <view class="card-content">
+      <view class="fee-item">
+        <text class="fee-name">基础租金</text>
+        <text class="fee-value">¥{{car.basePrice}}</text>
+      </view>
+      <view class="fee-item" wx:if="{{selectedInsurance}}">
+        <text class="fee-name">{{insuranceNames[selectedInsurance]}}保险</text>
+        <text class="fee-value">¥{{insurancePrice}}</text>
+      </view>
+      <view class="fee-item total">
+        <text class="fee-name">总计</text>
+        <text class="fee-value highlight">¥{{totalPrice}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="additional-card">
+    <view class="card-header">
+      <text class="card-title">取车须知</text>
+    </view>
+    <view class="card-content">
+      <view class="notice-item">
+        <text class="notice-title">所需证件</text>
+        <text class="notice-content">本人有效身份证、驾驶证原件</text>
+      </view>
+      <view class="notice-item">
+        <text class="notice-title">押金说明</text>
+        <text class="notice-content">信用授权或现金押金 ¥3000</text>
+      </view>
+      <view class="notice-item">
+        <text class="notice-title">油量政策</text>
+        <text class="notice-content">取还车同等油量</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部占位，确保内容不被底部栏遮挡 -->
+  <view class="footer-placeholder"></view>
+</scroll-view>
+
+<!-- 价格明细弹窗 -->
+<view class="price-detail-popup {{showPriceDetail ? 'show' : ''}}">
+    <view class="popup-content">
+      <view class="popup-header">
+        <view class="close-btn" bindtap="hidePriceDetail">×</view>
+        <text class="popup-title">费用明细</text>
+        <text class="fee-rule">费用规则</text>
+      </view>
+      
+      <view class="popup-body">
+        <!-- 租车费用部分 -->
+        <view class="fee-section">
+          <view class="fee-title-row">
+            <text class="fee-title">车辆租赁费及门店服务费</text>
+            <text class="fee-amount">¥426</text>
+          </view>
+          
+          <!-- 日期价格展示区 -->
+          <view class="date-price-area">
+            <view class="date-price-item">
+              <text class="date">05/31周六</text>
+              <text class="price">¥59</text>
+            </view>
+            <view class="date-price-item">
+              <text class="date">06/01周日</text>
+              <text class="price">¥260</text>
+            </view>
+            <view class="date-price-item">
+              <text class="date">06/02周一</text>
+              <text class="price">¥107</text>
+            </view>
+          </view>
+          
+          <view class="rental-period">
+            <text>租期总计：</text>
+            <text class="days">2天</text>
+          </view>
+        </view>
+        
+        <!-- 基本保障服务费 -->
+        <view class="fee-section">
+          <view class="fee-title-row">
+            <text class="fee-title">基本保障服务费</text>
+            <text class="fee-amount">¥50*2= ¥100</text>
+          </view>
+          <view class="fee-description">
+            <text>一键承担车辆维修费用（不含轮胎、轮毂）中大于1500元的部分+三者保障限额20万+乘客保障2万等</text>
+            <view class="help-icon">?</view>
+          </view>
+        </view>
+        
+        <!-- 车辆整备费 -->
+        <view class="fee-section">
+          <view class="fee-title-row">
+            <text class="fee-title">车辆整备费</text>
+            <text class="fee-amount">¥20</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="popup-footer">
+        <!-- 违章押金 -->
+        <view class="deposit-item">
+          <view class="deposit-left">
+            <text>违章押金</text>
+            <text class="refundable">(可退)</text>
+          </view>
+          <text class="deposit-amount">¥2000</text>
+        </view>
+        
+        <!-- 车辆押金 -->
+        <view class="deposit-item">
+          <view class="deposit-left">
+            <text>车辆押金</text>
+            <text class="exempted">(免收)</text>
+          </view>
+        </view>
+        
+        <!-- 总额显示 -->
+        <view class="total-area">
+          <text>订单总额</text>
+          <text class="total-price">¥546</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 提示区域 -->
+  <view class="notice-area">
+    <view class="notice-icon">👍</view>
+    <view class="notice-text">支付成功后生成订单，取车前可免费取消，无惧计划有变！</view>
+  </view>
+  
+  <!-- 底部支付栏 -->
+  <view class="footer-bar">
+    <view class="price-info">
+      <view class="price-row">
+        <text class="total-label">总价</text>
+        <text class="total-price">¥546</text>
+        <view class="detail-btn" bindtap="showPriceDetail">明细 ></view>
+      </view>
+      <view class="discount-text">已优惠¥0</view>
+    </view>
+    <button class="confirm-btn" bindtap="goToPayment">去支付</button>
+  </view>
