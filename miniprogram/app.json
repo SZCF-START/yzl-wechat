@@ -63,12 +63,7 @@
         "iconPath": "/assets/tabBar/notice.png",
         "selectedIconPath": "/assets/tabBar/notice-activate.png"
       },
-      {
-        "pagePath": "pages/classify/classify",
-        "text": "分类",
-        "iconPath": "/assets/tabBar/classify.png",
-        "selectedIconPath": "/assets/tabBar/classify-activate.png"
-      },
+
       {
         "pagePath": "pages/order/order",
         "text": "订单",

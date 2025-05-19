@@ -1,18 +1,95 @@
-<view class="line"></view>
-<button
-  type="primary"
-  plain
-  open-type="getPhoneNumber"
-  bindgetphonenumber="getphonenumber"
->快速验证组件</button>
-
-<button id="agree-btn1" open-type="getPhoneNumber|agreePrivacyAuthorization" bindgetphonenumber="handleGetPhoneNumber" bindagreeprivacyauthorization="handleAgreePrivacyAuthorization">同意隐私协议并授权手机号</button>
-
-<view class="line"></view>
-<button
-  type="warn"
-  plain
-  open-type="getRealtimePhoneNumber"
-  bindgetrealtimephonenumber="getrealtimephonenumber"
->实时验证组件</button>
-<view class="line"></view>
+<view class="order-container">
+  <!-- 订单类型切换 -->
+  <view class="order-type">
+    <view 
+      wx:for="{{orderTypeList}}" 
+      wx:key="id" 
+      class="{{activeOrderType == item.id ? 'active-type' : ''}}" 
+      bindtap="switchOrderType" 
+      data-type="{{item.id}}">
+      {{item.name}}
+    </view>
+  </view>
+  
+  <!-- 订单状态切换 -->
+  <view class="order-status-bar">
+    <view 
+      wx:for="{{statusList}}" 
+      wx:key="id" 
+      class="status-item {{activeStatus == item.id ? 'active-status' : ''}}" 
+      bindtap="switchStatus" 
+      data-status="{{item.id}}">
+      <text>{{item.name}}</text>
+      <view class="active-line" wx:if="{{activeStatus == item.id}}"></view>
+    </view>
+  </view>
+  
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <block wx:if="{{orderList.length > 0}}">
+      <view class="order-item" wx:for="{{orderList}}" wx:key="id">
+        <view class="order-header">
+          <view class="success-status">{{item.statusText}}</view>
+          <view class="order-price">¥{{item.price}}</view>
+        </view>
+        <view class="car-info">
+          <view class="car-name">{{item.carModel}}</view>
+          <image class="car-image" src="{{item.carImage}}" mode="aspectFit"></image>
+        </view>
+        <view class="store-info">
+          <view class="store-point orange"></view>
+          <view class="store-name">{{item.pickupStore}}</view>
+        </view>
+        <view class="store-info">
+          <view class="store-point green"></view>
+          <view class="store-name">{{item.returnStore}}</view>
+        </view>
+        <view class="rental-time">
+          <view class="time-info">{{item.pickupTime}}</view>
+          <view class="time-info">—</view>
+          <view class="day-count">{{item.rentalDays}}天</view>
+          <view class="time-info">—</view>
+          <view class="time-info">{{item.returnTime}}</view>
+        </view>
+        <view class="order-actions">
+          <view class="more-action" 
+                bindtap="showMoreActions" 
+                data-id="{{item.id}}">更多
+            <!-- 更多下拉菜单 -->
+            <view class="more-dropdown {{item.id === activeMoreId ? 'show' : ''}} {{item.isLeftAligned ? 'left-aligned' : ''}}">
+              <view class="dropdown-item" bindtap="viewCarDetails" data-id="{{item.id}}">车辆详情</view>
+              <view class="dropdown-item" bindtap="modifyOrder" data-id="{{item.id}}">修改订单</view>
+              <view class="dropdown-item" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</view>
+            </view>
+          </view>
+          <view class="action-button" bindtap="handleConsult" data-id="{{item.id}}">咨询</view>
+          <view class="action-button" bindtap="handlePickupGuide" data-id="{{item.id}}">取车门店指引</view>
+          <view class="action-button highlight" bindtap="handleInvoice" data-id="{{item.id}}">开发票</view>
+        </view>
+        <view class="car-details-btn" bindtap="viewCarDetails" data-id="{{item.id}}">车辆详情</view>
+      </view>
+    </block>
+    <view class="no-order" wx:else>
+      <image src="/images/no-order.png" mode="aspectFit"></image>
+      <text>暂无订单</text>
+    </view>
+    
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{orderList.length > 0}}">
+      <text wx:if="{{isLoading}}">加载中...</text>
+      <text wx:elif="{{hasMoreOrders}}" bindtap="loadMoreOrders">加载更多</text>
+      <text wx:else>没有更多数据了</text>
+    </view>
+    
+    <!-- 分页信息 -->
+    <!-- <view class="pagination-info" wx:if="{{orderList.length > 0}}">
+      <text>共{{totalCount}}条 {{pageNum-1}}/{{totalPage}}页</text>
+    </view> -->
+  </view>
+  
+  <!-- 搜索按钮 -->
+  <view class="search-btn" bindtap="searchOrder">
+    <image src="/images/search.png" mode="aspectFit"></image>
+    <text>订单搜索</text>
+  </view>
+</view>
