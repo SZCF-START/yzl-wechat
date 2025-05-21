@@ -62,9 +62,9 @@
               <view class="dropdown-item" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</view>
             </view>
           </view>
-          <view class="action-button" bindtap="handleConsult" data-id="{{item.id}}">咨询</view>
-          <view class="action-button" bindtap="handlePickupGuide" data-id="{{item.id}}">取车门店指引</view>
-          <view class="action-button highlight" bindtap="handleInvoice" data-id="{{item.id}}">开发票</view>
+          <view class="action-button highlight" bindtap="handleConsult" data-id="{{item.id}}">咨询</view>
+          <view class="action-button highlight" bindtap="handlePickupGuide" data-id="{{item.id}}">取车门店指引</view>
+          <view class="action-button highlight" bindtap="handleInvoice" data-id="{{item.id}}">续租</view>
         </view>
         <view class="car-details-btn" bindtap="viewCarDetails" data-id="{{item.id}}">车辆详情</view>
       </view>

@@ -44,8 +44,8 @@ Page({
     setTimeout(() => {
       // 模拟后台返回的订单类型数据
       const orderTypeList = [
-        { id: 0, name: "自驾订单" },
-        { id: 1, name: "他人代订" }
+        { id: 0, name: "挖机订单" },
+        { id: 1, name: "属具订单" }
       ];
       
       this.setData({
@@ -61,10 +61,10 @@ Page({
       // 模拟后台返回的订单状态数据
       const statusList = [
         { id: 0, name: "预约中" },
-        { id: 1, name: "候补中" },
-        { id: 2, name: "租赁中" },
-        { id: 3, name: "已完成" },
-        { id: 4, name: "已取消" }
+        // { id: 1, name: "候补中" },
+        { id: 1, name: "租赁中" },
+        { id: 2, name: "已完成" },
+        { id: 3, name: "已取消" }
       ];
       
       this.setData({
@@ -162,14 +162,14 @@ Page({
     const { orderType, orderStatus, pageNum, pageSize } = params;
     
     // 模拟不同状态的订单数据
-    const carModels = ["本田飞度", "丰田卡罗拉", "大众朗逸", "日产轩逸", "宝马3系"];
+    const carModels = ["三一SY16C", "徐工XE27E", "柳工915E", "临工LG6150", "中联ZE205E"];
     const stores = ["长沙长沙先锋店", "长沙岳麓区店", "长沙火车南站店", "长沙五一广场店", "长沙黄花机场店"];
     const carImages = [
-      "/images/car1.png", 
-      "/images/car2.png", 
-      "/images/car3.png", 
-      "/images/car4.png", 
-      "/images/car5.png"
+      "../../assets/rsg.png", 
+      "../../assets/rsg.png", 
+      "../../assets/rsg.png", 
+      "../../assets/rsg.png", 
+      "../../assets/rsg.png"
     ];
     
     // 模拟分页数据
@@ -177,15 +177,15 @@ Page({
     let totalCount;
     if (orderType === 0) { // 自驾订单
       if (orderStatus === 0) totalCount = 35; // 预约中
-      else if (orderStatus === 1) totalCount = 18; // 候补中
-      else if (orderStatus === 2) totalCount = 27; // 租赁中
-      else if (orderStatus === 3) totalCount = 42; // 已完成
+      // else if (orderStatus === 1) totalCount = 18; // 候补中
+      else if (orderStatus === 1) totalCount = 27; // 租赁中
+      else if (orderStatus === 2) totalCount = 42; // 已完成
       else totalCount = 15; // 已取消
     } else { // 他人代订
       if (orderStatus === 0) totalCount = 20; // 预约中
-      else if (orderStatus === 1) totalCount = 8; // 候补中
-      else if (orderStatus === 2) totalCount = 12; // 租赁中
-      else if (orderStatus === 3) totalCount = 25; // 已完成
+      // else if (orderStatus === 1) totalCount = 8; // 候补中
+      else if (orderStatus === 1) totalCount = 12; // 租赁中
+      else if (orderStatus === 2) totalCount = 25; // 已完成
       else totalCount = 5; // 已取消
     }
     

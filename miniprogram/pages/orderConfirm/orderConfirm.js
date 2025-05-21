@@ -1,9 +1,9 @@
 Page({
   data: {
     car: {
-      image: '/assets/images/car_placeholder.png',
-      name: '日产天籁',
-      specs: '自动/2.0L/三厢/5座',
+      image: '../../assets/rsg.png',
+      name: '三一重工SY75C',
+      specs: '液压先导/21吨级/履带式',
       rating: 95,
       pickupLocation: '昆明 - 长水机场商业街店',
       pickupDate: '05月09日 11:00',
