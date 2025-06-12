@@ -7,7 +7,9 @@ Page({
 
     // 当前城市（为空则显示“开启定位”）
     currentCity: '',
+    locationCity: '',
     currentStore: '',
+    isLocationEnabled: false,
     // 历史城市（最多2个，从左到右，右侧最新）
     historyCities: [],
 
@@ -34,11 +36,15 @@ Page({
     // 2. 从本地或后端获取当前城市、历史城市
     const storedCity = wx.getStorageSync('currentCity') || '';
     const storedHistory = wx.getStorageSync('historyCities') || [];
+    const isLocationEnabled = wx.getStorageSync('isLocationEnabled');
+    const locationCity = wx.getStorageSync('locationCity') || '';
 
     console.log("options.source:",options);
     this.setData({
       currentCity: storedCity,
       historyCities: storedHistory,
+      isLocationEnabled: isLocationEnabled,
+      locationCity: locationCity,
       sourceUrl: decodeURIComponent(options.source) 
     });
 
@@ -252,30 +258,51 @@ Page({
 
   /* 获取定位 */
   onGetLocation() {
-    // wx.showToast({
-    //   title: '定位功能未实现',
-    //   icon: 'none'
-    // });
-    const that = this;
-    wx.openSetting({
-     
-      success (res) {
-        console.log(res.authSetting)
-        const hasLocationAuth = res.authSetting && res.authSetting['scope.userLocation'];
-        if (hasLocationAuth) {
-          console.log('✅ 用户已授权位置信息');
-          that.initLocation()
-        }else{
-          wx.showToast({
-            title: '您拒绝了定位授权,请重新授权',
-            icon: 'none'
-          });
+    if (this.data.isLocationEnabled) {
+      const cityName = this.data.locationCity;
+      const cityLetter = '';
+      const city = {
+        cityName,
+        cityLetter
+      };
+      // 已开启定位 - 跳转到城市选择页面
+      this.selectCity(city);
+
+      let url = '/pages/storeSelect/storeSelect';
+      url += `?city=${city.cityName}`;
+      url += `&source=${this.data.sourceUrl}`;
+      url += `&store=${this.data.currentStore}`;
+      console.log("url:",url);
+      wx.navigateTo({
+        url: url,
+      });
+    } else {
+      // 未开启定位 - 获取当前位置
+      const that = this;
+      wx.openSetting({
+        success (res) {
+          console.log(res.authSetting)
+          const hasLocationAuth = res.authSetting && res.authSetting['scope.userLocation'];
+          if (hasLocationAuth) {
+            console.log('✅ 用户已授权位置信息');
+            that.setData({
+              isLocationEnabled: true,
+            });
+            wx.setStorageSync('isLocationEnabled', true);
+            that.initLocation()
+          }else{
+            wx.showToast({
+              title: '您拒绝了定位授权,请重新授权',
+              icon: 'none'
+            });
+          }
+        },
+        fail: () => {
+          this._exitMiniProgram(reject, error)
         }
-      },
-      fail: () => {
-        this._exitMiniProgram(reject, error)
-      }
-    });
+      });
+    }
+    
   },
 
   initLocation() {
@@ -310,8 +337,9 @@ Page({
               city = city.replace(/市$/, '');
               
               this.setData({
-                currentCity: city,
+                locationCity: city,
               });
+              wx.setStorageSync('locationCity', city);
             } else {
               wx.showToast({
                 title: '获取城市失败',
@@ -347,6 +375,7 @@ Page({
   /* 选择城市（热门/全部） */
   onSelectCity(e) {
     const city = e.currentTarget.dataset.city;
+    console.log("city2222,",city);
     this.selectCity(city);
 
     let url = '/pages/storeSelect/storeSelect';
@@ -375,23 +404,26 @@ Page({
     }
 
 
-    // 更新历史城市（最多2个，右侧最新）
-    let arr = this.data.historyCities || [];
-    const idx = arr.findIndex(h => h.cityName === city.cityName);
-    if (idx !== -1) {
-      arr.splice(idx, 1);
-    }
-    arr.push(city);
-    while (arr.length > 2) {
-      arr.shift();
-    }
-    this.setData({ historyCities: arr });
-    wx.setStorageSync('historyCities', arr);
+    if(city.cityName !== this.data.locationCity){
+      // 更新历史城市（最多2个，右侧最新）
+      let arr = this.data.historyCities || [];
+      const idx = arr.findIndex(h => h.cityName === city.cityName);
+      if (idx !== -1) {
+        arr.splice(idx, 1);
+      }
+      arr.push(city);
+      while (arr.length > 2) {
+        arr.shift();
+      }
+      this.setData({ historyCities: arr });
+      wx.setStorageSync('historyCities', arr);
 
-    wx.showToast({
-      title: `已选择：${city.cityName}`,
-      icon: 'none'
-    });
+      wx.showToast({
+        title: `已选择：${city.cityName}`,
+        icon: 'none'
+      });
+    }
+    
   },
 
   /* 右侧导航点击 */

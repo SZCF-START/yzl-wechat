@@ -48,9 +48,9 @@
         <view class="block-title">当前/历史</view>
         <view class="city-row">
           <view class="city-box location-box" bindtap="onGetLocation">
-            <image class="loc-icon" src="../../assets/position.png" wx:if="{{!currentCity}}"/>
-            <text wx:if="{{currentCity}}">{{currentCity}}</text>
-            <text wx:if="{{!currentCity}}">开启定位</text>
+            <image class="loc-icon" src="../../assets/position.png" wx:if="{{!isLocationEnabled}}"/>
+            <text wx:if="{{isLocationEnabled}}">{{locationCity}}</text>
+            <text wx:if="{{!isLocationEnabled}}">开启定位</text>
           </view>
           <block wx:for="{{historyCities}}" wx:key="cityName">
             <view class="city-box" bindtap="onHistoryTap" data-city="{{item}}">

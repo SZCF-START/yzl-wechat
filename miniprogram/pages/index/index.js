@@ -88,7 +88,7 @@ Page({
     let pickupDate = this.formatDate(new Date(pickupDateTimestamp));
     // 如果 returnDate 为空，则默认为 pickupDate 的后一天
     let returnDateTimestamp = returnDateTimestampStorage ? returnDateTimestampStorage 
-    : this.data.activeTab === 'monthly' ? new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000).getTime() : new Date(now.getTime() + 24 * 60 * 60 * 1000).getTime();
+    : this.data.activeTab === 'monthly' ? new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000).getTime() : new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).getTime();
     let returnDate = this.formatDate(new Date(returnDateTimestamp));
   
     // 处理取车时间：如果为空则使用 formatTime 计算当前时间（不加小时）；如果有值则取其 "HH:mm" 部分，加上 pickupDate 对应的星期
@@ -248,6 +248,9 @@ Page({
                 isLocationEnabled: true,
               });
               wx.setStorageSync('currentCity', city);
+              wx.setStorageSync('locationCity', city);
+              wx.setStorageSync('isLocationEnabled', true);
+
             } else {
               wx.showToast({
                 title: '获取城市失败',

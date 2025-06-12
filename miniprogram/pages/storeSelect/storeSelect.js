@@ -384,16 +384,19 @@ Page({
       sourceUrl: decodeURIComponent(options.source) ,
       currentStore: options.store
     });
+    this.initMap()
   },
 
   // 初始化地图数据
   initMap() {
     const myAmapFun = new amapFile.AMapWX({ key: config.WECHAT_AMAP_KEY });
-
+    console.log("555555555554444444", this.data.latitude, this.data.longitude);
     wx.getLocation({
       type: 'gcj02',
       success: res => {
         const { latitude, longitude } = res;
+        console.log("55555555555", this.data.latitude, this.data.longitude);
+        console.log("5555555555554322222", res);
         this.setData({ latitude, longitude });
 
         // 模拟门店打点
