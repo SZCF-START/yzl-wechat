@@ -10,14 +10,7 @@ Page({
     latitude: 28.2282,
     longitude: 112.9388,
     markers: [
-      {
-        id: 1,
-        latitude: 28.2282,
-        longitude: 112.9388,
-        iconPath: '/assets/marker.png',
-        width: 30,
-        height: 30
-      }
+      
     ],
     selectedAreaIndex: 0,
     areaOffsets: [],
@@ -389,40 +382,108 @@ Page({
 
   // 初始化地图数据
   initMap() {
-    const myAmapFun = new amapFile.AMapWX({ key: config.WECHAT_AMAP_KEY });
-    console.log("555555555554444444", this.data.latitude, this.data.longitude);
-    wx.getLocation({
-      type: 'gcj02',
-      success: res => {
-        const { latitude, longitude } = res;
-        console.log("55555555555", this.data.latitude, this.data.longitude);
-        console.log("5555555555554322222", res);
-        this.setData({ latitude, longitude });
-
-        // 模拟门店打点
-        const markers = [
-          {
-            id: 1,
-            latitude: latitude + 0.002,
-            longitude: longitude + 0.002,
-            iconPath: '/assets/marker.png',
-            width: 30,
-            height: 30,
-            title: '门店1'
+    const currentCity = this.data.currentCity;
+    console.log("currentCity:",currentCity);
+    const amapKey = config.AMAP_KEY;
+    if (!currentCity) {
+      console.warn('当前城市为空');
+      return;
+    }
+    
+    const queryCity = (cityName) => {
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: 'https://restapi.amap.com/v3/geocode/geo',
+          method: 'GET',
+          data: {
+            key: amapKey,
+            address: cityName
           },
-          {
-            id: 2,
-            latitude: latitude - 0.001,
-            longitude: longitude - 0.001,
-            iconPath: '/assets/marker.png',
-            width: 30,
-            height: 30,
-            title: '门店2'
+          success(res) {
+            if (res.data.status === '1' && res.data.geocodes.length > 0) {
+              const locationStr = res.data.geocodes[0].location;
+              const [lng, lat] = locationStr.split(',');
+              resolve({ longitude: parseFloat(lng), latitude: parseFloat(lat) });
+            } else {
+              reject(new Error('未能获取经纬度'));
+            }
+          },
+          fail(err) {
+            reject(err);
           }
-        ];
-        this.setData({ markers });
+        });
+      });
+    };
+
+    // 调用查询
+    queryCity(currentCity).catch(() => {
+      // 若失败，加上“市”再试一次
+      if (!currentCity.endsWith('市')) {
+        return queryCity(currentCity + '市');
       }
+      throw new Error('城市解析失败');
+    }).then(location => {
+      
+      const latitude = location.latitude;
+      const longitude = location.longitude;
+      // 修改 markers 配置
+      const markers = [
+        {
+          id: 1,
+          latitude: latitude + 0.002,
+          longitude: longitude + 0.002,
+          // 1. 检查图标路径 - 确保文件存在
+          iconPath: '/assets/marker.png', // 使用绝对路径
+          width: 30,
+          height: 30,
+          title: '门店1',
+          // 2. 添加更多属性确保显示
+          alpha: 1, // 透明度
+          rotate: 0, // 旋转角度
+          // 3. 使用 label 作为备选显示方案
+          label: {
+            content: '门店1',
+            color: '#000000',
+            fontSize: 12,
+            borderRadius: 4,
+            bgColor: '#ffffff',
+            padding: 4,
+            textAlign: 'center'
+          }
+        },
+        {
+          id: 2,
+          latitude: latitude - 0.001,
+          longitude: longitude - 0.001,
+          iconPath: '/assets/marker.png',
+          width: 30,
+          height: 30,
+          title: '门店2',
+          alpha: 1,
+          rotate: 0,
+          label: {
+            content: '门店2',
+            color: '#000000',
+            fontSize: 12,
+            borderRadius: 4,
+            bgColor: '#ffffff',
+            padding: 4,
+            textAlign: 'center'
+          }
+        }
+      ];
+      // 设置数据或初始化地图组件
+      this.setData({
+        latitude: latitude,
+        longitude: longitude,
+        markers
+      });
+      // 你还可以在这里调用 wx.createMapContext 或其他地图渲染逻辑
+    }).catch(err => {
+      console.error('地图初始化失败:', err);
     });
+
+    
   },
 
   onCityTap() {

@@ -370,6 +370,15 @@ Page({
   onHistoryTap(e) {
     const city = e.currentTarget.dataset.city;
     this.selectCity(city);
+
+    let url = '/pages/storeSelect/storeSelect';
+    url += `?city=${city.cityName}`;
+    url += `&source=${this.data.sourceUrl}`;
+    url += `&store=${this.data.currentStore}`;
+    console.log("url:",url);
+    wx.navigateTo({
+      url: url,
+    });
   },
 
   /* 选择城市（热门/全部） */
