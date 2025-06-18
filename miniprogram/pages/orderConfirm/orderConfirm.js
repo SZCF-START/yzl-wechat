@@ -100,6 +100,15 @@ Page({
       days: 2
     });
   },
+
+  // 选择会员
+  selectMembership: function() {
+    const newSelection = !this.data.selectedMembership;
+    this.setData({
+      selectedMembership: newSelection
+    });
+    this.calculateTotal();
+  },
   
   selectInsurance: function(e) {
     const type = e.currentTarget.dataset.type;
@@ -116,19 +125,52 @@ Page({
     this.calculateTotal();
   },
   
+  // 应用会员折扣
+  applyMemberDiscount: function() {
+    const basePrice = this.data.car.basePrice;
+    const discountRate = 0.1; // 10%折扣
+    const discount = basePrice * discountRate * this.data.days;
+    
+    this.setData({
+      memberDiscount: discount.toFixed(2)
+    });
+  },
+
   calculateTotal: function() {
     let insurancePrice = 0;
+    let membershipFee = 0;
+    let memberDiscount = 0;
+    let totalDiscount = 0;
     
     // 如果选择了保险，计算保险费用
     if (this.data.selectedInsurance) {
       insurancePrice = this.data.insurancePrices[this.data.selectedInsurance] * this.data.days;
     }
     
+    // 计算会员相关费用
+    const isMember = this.data.userInfo.isMember;
+    const selectedMembership = this.data.selectedMembership;
+    
+    if (isMember || selectedMembership) {
+      // 计算会员折扣
+      const basePrice = this.data.car.basePrice;
+      const discountRate = 0.1; // 10%折扣
+      memberDiscount = basePrice * discountRate;
+      totalDiscount = memberDiscount;
+      
+      // 如果选择购买会员且当前不是会员
+      if (selectedMembership && !isMember) {
+        membershipFee = this.data.membershipPrice;
+      }
+    }
+    
     // 计算总价
-    const total = this.data.car.basePrice + insurancePrice;
+    const total = this.data.car.basePrice + insurancePrice + membershipFee - memberDiscount;
     
     this.setData({
       insurancePrice: insurancePrice.toFixed(2),
+      memberDiscount: memberDiscount.toFixed(2),
+      totalDiscount: totalDiscount.toFixed(2),
       totalPrice: total.toFixed(2)
     });
   },
@@ -146,6 +188,10 @@ Page({
         icon: 'success',
         duration: 2000,
         success: () => {
+          // 如果用户购买了会员，更新本地会员状态
+          if (this.data.selectedMembership && !this.data.userInfo.isMember) {
+            wx.setStorageSync('userMembership', true);
+          }
           // 可以跳转到支付页面或订单页面
           // wx.navigateTo({
           //   url: '/pages/payment/payment?orderId=123&amount=' + this.data.totalPrice,
@@ -209,4 +255,11 @@ Page({
       icon: 'none'
     });
   },
+  // 查看会员权益
+  showMembershipBenefits: function() {
+    wx.showToast({
+      title: '查看会员权益',
+      icon: 'none'
+    });
+  }
 });

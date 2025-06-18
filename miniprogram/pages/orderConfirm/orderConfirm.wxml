@@ -97,6 +97,60 @@
     </view>
   </view>
 
+  <!-- 会员购买卡片 -->
+  <view class="membership-card" wx:if="{{!userInfo.isMember}}">
+    <view class="membership-header">
+      <view class="membership-title-area">
+        <text class="membership-title">会员专享·更低价格</text>
+        <view class="membership-badge">限时优惠</view>
+      </view>
+      <view class="membership-rules">会员权益 ></view>
+    </view>
+    
+    <view class="price-comparison">
+      <view class="price-item">
+        <text class="price-label">普通用户</text>
+        <text class="original-price">¥{{originalDailyPrice}}/天</text>
+      </view>
+      <view class="arrow">→</view>
+      <view class="price-item">
+        <text class="price-label">会员价格</text>
+        <text class="member-price">¥{{memberDailyPrice}}/天</text>
+      </view>
+      <view class="savings">
+        <text class="savings-text">省¥{{dailySavings}}/天</text>
+      </view>
+    </view>
+    
+    <view class="membership-option {{selectedMembership ? 'selected' : ''}}" bindtap="selectMembership">
+      <view class="membership-content">
+        <view class="membership-icon">
+          <text class="crown">👑</text>
+        </view>
+        <view class="membership-info">
+          <text class="membership-name">年度会员</text>
+          <text class="membership-desc">全年享受会员价，无限次使用</text>
+          <view class="membership-benefits">
+            <text class="benefit-item">✓ 租车9折优惠</text>
+            <text class="benefit-item">✓ 免费道路救援</text>
+            <text class="benefit-item">✓ 专属客服</text>
+          </view>
+        </view>
+      </view>
+      <view class="membership-price-area">
+        <view class="membership-prices">
+          <text class="original-membership-price">¥399</text>
+          <text class="current-membership-price">¥299</text>
+        </view>
+        <radio class="membership-radio" checked="{{selectedMembership}}" />
+      </view>
+    </view>
+    
+    <view class="membership-note">
+      <text class="note-text">本次订单立享会员价，年费可分摊至每单仅需几元</text>
+    </view>
+  </view>
+
   <!-- 额外卡片位置 -->
   <view class="additional-card">
     <view class="card-header">

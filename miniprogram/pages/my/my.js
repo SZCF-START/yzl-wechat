@@ -1,5 +1,6 @@
 const loginCheck = require('../../behaviors/loginCheck.js');
 import config from '../../config/config.js'
+import { startEid } from '../../mp_ecard_sdk/main'
 Page({
   behaviors: [loginCheck],
   /**
@@ -68,14 +69,14 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    // this.getEidToken()
+    this.getEidToken()
   },
 
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady() {
-
+    this.getEidToken()
   },
 
   /**
@@ -83,7 +84,7 @@ Page({
    */
   onShow() {
     // 如果需要重新加载数据
-    this.reloadData();
+
   },
 
   /**
@@ -144,7 +145,8 @@ Page({
     }
     // 如果是实名认证页面，先进行人脸核身
     if (url === "/pages/auth/auth") {
-      if (!this.data.token) {
+      console.log("this.data.eidToken:",this.data.eidToken);
+      if (!this.data.eidToken) {
         wx.showToast({
           title: "获取 Token 失败，请稍后重试",
           icon: "none"
@@ -153,10 +155,42 @@ Page({
       }
 
       wx.showLoading({ title: "实名认证中..." });
+      
 
-      startEid({
-        data: { token: this.data.token }, // 传入身份验证 Token
+
+      this.goSDK(this.data.eidToken)
+    } else {
+      // 普通页面直接跳转
+      wx.navigateTo({
+        url: url
+      });
+    }
+  },  
+
+  // 🔹 获取 e 证通身份验证 Token
+  getEidToken() {
+    wx.request({
+      url: config.baseUrl + 'wechat/tencent/realnameauth/getEidToken', 
+      method: "GET",
+      data: {},
+      success: (res) => {
+        console.log("res4444444:",res.data.result.EidToken);
+        
+        if (res.data && res.data.result.EidToken) {
+          console.log("9999999999999999");
+          this.setData({ eidToken: res.data.result.EidToken });
+        }
+      }
+    });
+  },
+
+  goSDK(token) {
+    startEid({
+        data: {
+          token,
+        },
         verifyCallback: (res) => {
+          console.log("44444444444444");
           wx.hideLoading();
           const { verifyDone } = res;
 
@@ -176,36 +210,6 @@ Page({
               icon: "none"
             });
           }
-        }
-      });
-
-    } else {
-      // 普通页面直接跳转
-      wx.navigateTo({
-        url: url
-      });
-    }
-  },  
-
-  // 🔹 获取 e 证通身份验证 Token
-  getEidToken() {
-    wx.request({
-      url: config.baseUrl + 'wechat/tencent/realnameauth/getEidToken', 
-      method: "GET",
-      data: {},
-      success: (res) => {
-        res.result.EidToken
-        if (res.result && res.result.EidToken) {
-          this.setData({ eidToken: res.result.EidToken });
-        }
-      }
-    });
-  },
-
-  goSDK(eidToken) {
-    startEid({
-        data: {
-          eidToken,
         },
         verifyDoneCallback(res) {  
             const { token, verifyDone } = res;

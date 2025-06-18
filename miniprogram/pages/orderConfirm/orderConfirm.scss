@@ -254,6 +254,170 @@
   border-radius: 4px;
 }
 
+/* 会员卡片样式 */
+.membership-card {
+  composes: card;
+}
+
+.membership-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.membership-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.membership-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 6rpx;
+}
+
+.membership-pricing {
+  text-align: right;
+}
+
+.original-price {
+  font-size: 24rpx;
+  color: #ccc;
+  text-decoration: line-through;
+}
+
+.member-price {
+  font-size: 28rpx;
+  color: #f60;
+  font-weight: bold;
+  margin-top: 6rpx;
+}
+
+/* 权益列表 */
+.membership-benefits {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24rpx;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+}
+
+.benefit-icon {
+  font-size: 28rpx;
+  margin-right: 8rpx;
+}
+
+.benefit-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 购买选项 */
+.membership-options {
+  margin-top: 24rpx;
+}
+
+.membership-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx;
+  border: 1rpx solid #eee;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+  background-color: #fafafa;
+}
+
+.membership-option.selected {
+  border-color: #f60;
+  background-color: #fff7f0;
+}
+
+.option-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.option-duration {
+  font-weight: bold;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.option-price {
+  font-size: 26rpx;
+  color: #f60;
+  margin: 8rpx 0;
+}
+
+.option-average {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.membership-radio {
+  margin-left: 16rpx;
+}
+
+.membership-savings {
+  font-size: 26rpx;
+  color: #4CAF50;
+  margin-top: 12rpx;
+}
+
+/* 已是会员卡片 */
+.member-status-card {
+  composes: card;
+}
+
+.member-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.member-badge {
+  display: flex;
+  align-items: center;
+}
+
+.member-icon {
+  font-size: 28rpx;
+  margin-right: 6rpx;
+}
+
+.member-text {
+  font-size: 28rpx;
+  color: #f60;
+  font-weight: bold;
+}
+
+.member-discount {
+  font-size: 24rpx;
+  color: #4CAF50;
+}
+
+.member-pricing-display {
+  margin-top: 20rpx;
+}
+
+.original-price-display {
+  font-size: 24rpx;
+  color: #ccc;
+  text-decoration: line-through;
+  margin-right: 12rpx;
+}
+
+.member-price-display {
+  font-size: 28rpx;
+  color: #f60;
+  font-weight: bold;
+}
+
 /* 额外卡片样式 */
 .additional-card {
   background: #fff;
