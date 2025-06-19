@@ -254,168 +254,271 @@
   border-radius: 4px;
 }
 
-/* 会员卡片样式 */
+/* 会员购买卡片样式 */
 .membership-card {
-  composes: card;
+  background: linear-gradient(135deg, #fef7e0 0%, #fff9e6 100%);
+  border: 1px solid #f6d55c;
+  padding: 16px;
+  margin: 16px 16px 0;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.membership-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50px;
+  width: 100px;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+  transform: rotate(15deg);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .membership-header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.membership-title-area {
+  display: flex;
   align-items: center;
+  flex: 1;
 }
 
 .membership-title {
-  font-size: 32rpx;
+  font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: #d4860d;
+  margin-right: 8px;
 }
 
-.membership-subtitle {
-  font-size: 24rpx;
+.membership-badge {
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+}
+
+.membership-rules {
+  font-size: 14px;
+  color: #d4860d;
+  text-decoration: underline;
+}
+
+/* 价格对比区域 */
+.price-comparison {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border: 1px dashed #f6d55c;
+}
+
+.price-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.price-label {
+  font-size: 12px;
   color: #999;
-  margin-top: 6rpx;
-}
-
-.membership-pricing {
-  text-align: right;
+  margin-bottom: 4px;
 }
 
 .original-price {
-  font-size: 24rpx;
-  color: #ccc;
+  font-size: 16px;
+  color: #999;
   text-decoration: line-through;
+  font-family: Arial, sans-serif;
 }
 
 .member-price {
-  font-size: 28rpx;
-  color: #f60;
+  font-size: 18px;
+  color: #d4860d;
   font-weight: bold;
-  margin-top: 6rpx;
+  font-family: Arial, sans-serif;
 }
 
-/* 权益列表 */
-.membership-benefits {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 24rpx;
+.arrow {
+  font-size: 16px;
+  color: #d4860d;
+  margin: 0 12px;
+  animation: bounce 2s ease-in-out infinite;
 }
 
-.benefit-item {
+@keyframes bounce {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+}
+
+.savings {
   display: flex;
+  flex-direction: column;
   align-items: center;
 }
 
-.benefit-icon {
-  font-size: 28rpx;
-  margin-right: 8rpx;
+.savings-text {
+  font-size: 14px;
+  color: #ff6b35;
+  font-weight: bold;
+  background: rgba(255, 107, 53, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
-.benefit-text {
-  font-size: 24rpx;
-  color: #666;
-}
-
-/* 购买选项 */
-.membership-options {
-  margin-top: 24rpx;
-}
-
+/* 会员选项 */
 .membership-option {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 24rpx;
-  border: 1rpx solid #eee;
-  border-radius: 12rpx;
-  margin-bottom: 16rpx;
-  background-color: #fafafa;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .membership-option.selected {
-  border-color: #f60;
-  background-color: #fff7f0;
+  border-color: #d4860d;
+  box-shadow: 0 4px 12px rgba(212, 134, 13, 0.2);
+  transform: translateY(-2px);
 }
 
-.option-info {
+.membership-content {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.membership-icon {
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: linear-gradient(45deg, #ffd700, #f6d55c);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.crown {
+  font-size: 24px;
+}
+
+.membership-info {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
-.option-duration {
+.membership-name {
+  font-size: 16px;
   font-weight: bold;
-  font-size: 28rpx;
   color: #333;
+  margin-bottom: 4px;
 }
 
-.option-price {
-  font-size: 26rpx;
-  color: #f60;
-  margin: 8rpx 0;
+.membership-desc {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
 }
 
-.option-average {
-  font-size: 22rpx;
+.membership-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.benefit-item {
+  font-size: 12px;
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.membership-price-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 12px;
+}
+
+.membership-prices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-bottom: 8px;
+}
+
+.original-membership-price {
+  font-size: 14px;
   color: #999;
+  text-decoration: line-through;
+  font-family: Arial, sans-serif;
+}
+
+.current-membership-price {
+  font-size: 20px;
+  color: #d4860d;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
 }
 
 .membership-radio {
-  margin-left: 16rpx;
+  margin: 0;
+  transform: scale(1.2);
 }
 
-.membership-savings {
-  font-size: 26rpx;
-  color: #4CAF50;
-  margin-top: 12rpx;
+.membership-note {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(212, 134, 13, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #d4860d;
 }
 
-/* 已是会员卡片 */
-.member-status-card {
-  composes: card;
-}
-
-.member-status-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.member-badge {
-  display: flex;
-  align-items: center;
-}
-
-.member-icon {
-  font-size: 28rpx;
-  margin-right: 6rpx;
-}
-
-.member-text {
-  font-size: 28rpx;
-  color: #f60;
-  font-weight: bold;
-}
-
-.member-discount {
-  font-size: 24rpx;
-  color: #4CAF50;
-}
-
-.member-pricing-display {
-  margin-top: 20rpx;
-}
-
-.original-price-display {
-  font-size: 24rpx;
-  color: #ccc;
-  text-decoration: line-through;
-  margin-right: 12rpx;
-}
-
-.member-price-display {
-  font-size: 28rpx;
-  color: #f60;
-  font-weight: bold;
+.note-text {
+  font-size: 12px;
+  color: #d4860d;
+  line-height: 1.4;
 }
 
 /* 额外卡片样式 */
@@ -483,23 +586,127 @@
   font-size: 16px;
   font-weight: bold;
 }
+/* 费用明细中的会员项样式 */
+.fee-item.member-discount {
+  color: #4CAF50;
+}
+
+.fee-item.member-discount .fee-value {
+  color: #4CAF50;
+}
+
+.fee-item.member-discount .fee-value::before {
+  content: '-';
+}
+
+.fee-item.membership-fee {
+  color: #d4860d;
+}
+
+.fee-item.membership-fee .fee-value {
+  color: #d4860d;
+}
 
 /* 取车须知样式 */
-.notice-item {
-  margin-top: 12px;
+.pickup-notice-card {
+  background: #ffffff;
+  border-radius: 12rpx;
+  margin: 16px 16px 0;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.additional-card {
+  background: #ffffff;
+  padding: 16px;
+  margin: 16px 16px 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.notice-title {
-  font-size: 14px;
-  color: #333;
+.pickup-notice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 32rpx 24rpx 32rpx;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
+  border-radius: 12rpx 12rpx 0 0;
+}
+
+.pickup-notice-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.pickup-notice-icon {
+  font-size: 40rpx;
+}
+
+.pickup-notice-list {
+  padding: 0;
+}
+
+.pickup-notice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+  position: relative;
+}
+
+.pickup-notice-item:last-child {
+  border-bottom: none;
+}
+
+.pickup-notice-item:active {
+  background-color: #f8f8f8;
+}
+
+.pickup-notice-item-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333333;
+  flex-shrink: 0;
+}
+
+.pickup-notice-item-right {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.pickup-notice-item-desc {
+  font-size: 26rpx;
+  color: #999999;
+  margin-right: 16rpx;
+}
+
+.pickup-notice-arrow {
+  font-size: 28rpx;
+  color: #cccccc;
   font-weight: bold;
-  display: block;
-  margin-bottom: 4px;
 }
 
-.notice-content {
-  font-size: 14px;
-  color: #666;
+.agreement-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32rpx 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.agreement-text {
+  font-size: 24rpx;
+  color: #999999;
+  margin-right: 8rpx;
+}
+
+.agreement-link {
+  font-size: 24rpx;
+  color: #ff6b35;
+  text-decoration: underline;
 }
 
 /* 底部占位符，确保内容不被底部栏遮挡 */
@@ -578,11 +785,11 @@
   padding-top: 8rpx;
 }
 
-.discount-text {
-  font-size: 24rpx;
-  color: #999;
-  margin-top: 8rpx;
-}
+// .discount-text {
+//   font-size: 24rpx;
+//   color: #999;
+//   margin-top: 8rpx;
+// }
 
 .confirm-btn {
   background-color: #ff7000;
@@ -805,4 +1012,295 @@
   color: #ff7000;
   font-weight: bold;
   font-family: Arial, sans-serif;
+}
+
+/* 价格加载和动效样式 */
+
+/* 费用值容器 */
+.fee-value-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 价格跳动动画 */
+.price-animating {
+  animation: priceJump 0.6s ease-in-out;
+  transform-origin: center;
+}
+
+@keyframes priceJump {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.1);
+    color: #ff7000;
+  }
+  60% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 加载点动画 */
+.loading-dots {
+  display: flex;
+  margin-left: 8rpx;
+}
+
+.loading-dots .dot {
+  width: 6rpx;
+  height: 6rpx;
+  border-radius: 50%;
+  background-color: #ff7000;
+  margin: 0 2rpx;
+  animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+.loading-dots .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.loading-dots .dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.loading-dots .dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* 价格脉冲效果 */
+.price-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border: 2rpx solid #ff7000;
+  border-radius: 8rpx;
+  animation: pulseBorder 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes pulseBorder {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* 底部支付栏相关动效 */
+
+/* 总价容器 */
+.total-price-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 价格加载骨架屏 */
+.price-loading {
+  display: flex;
+  align-items: center;
+}
+
+.skeleton-price {
+  width: 160rpx;
+  height: 48rpx;
+  background: linear-gradient(90deg, #f0f0f0 25%, transparent 37%, #f0f0f0 63%);
+  background-size: 400% 100%;
+  border-radius: 8rpx;
+  animation: skeletonLoading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonLoading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 底部栏价格弹跳动画 */
+.price-bounce {
+  animation: priceBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform-origin: center bottom;
+}
+
+@keyframes priceBounce {
+  0% {
+    transform: scale(1) translateY(0);
+  }
+  25% {
+    transform: scale(1.15) translateY(-8rpx);
+    color: #ff9500;
+  }
+  50% {
+    transform: scale(0.95) translateY(4rpx);
+  }
+  75% {
+    transform: scale(1.05) translateY(-2rpx);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 价格闪烁效果 */
+.price-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(255, 112, 0, 0.3), transparent);
+  border-radius: 8rpx;
+  animation: priceFlash 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes priceFlash {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* 优惠提示动画 */
+.discount-text {
+  position: relative;
+  overflow: hidden;
+}
+
+.discount-tip {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%) translateX(100%);
+  background: linear-gradient(45deg, #4CAF50, #66BB6A);
+  color: white;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  opacity: 0;
+  transition: all 0.5s ease;
+  box-shadow: 0 2rpx 8rpx rgba(76, 175, 80, 0.3);
+}
+
+.discount-tip.show {
+  transform: translateY(-50%) translateX(-120%);
+  opacity: 1;
+  animation: tipSlideIn 2s ease-in-out;
+}
+
+@keyframes tipSlideIn {
+  0% {
+    transform: translateY(-50%) translateX(100%);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-50%) translateX(-120%);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-50%) translateX(-120%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50%) translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* 支付按钮加载状态 */
+.confirm-btn.btn-loading {
+  background-color: #ccc;
+  position: relative;
+  overflow: hidden;
+}
+
+.confirm-btn.btn-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: buttonLoading 1.5s linear infinite;
+}
+
+@keyframes buttonLoading {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 响应式优化 */
+@media (max-width: 375px) {
+  .skeleton-price {
+    width: 140rpx;
+  }
+  
+  .discount-tip {
+    font-size: 18rpx;
+    padding: 2rpx 8rpx;
+  }
+}
+
+/* 高性能优化 */
+.price-animating,
+.price-bounce,
+.price-flash,
+.price-pulse {
+  will-change: transform, opacity;
+}
+
+/* 减少动画在低端设备上的性能影响 */
+@media (prefers-reduced-motion: reduce) {
+  .price-animating,
+  .price-bounce,
+  .loading-dots .dot,
+  .skeleton-price,
+  .price-flash,
+  .price-pulse,
+  .discount-tip,
+  .confirm-btn.btn-loading::before {
+    animation: none;
+  }
+  
+  .price-animating {
+    color: #ff7000;
+  }
 }

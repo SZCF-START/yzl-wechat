@@ -104,7 +104,7 @@
         <text class="membership-title">会员专享·更低价格</text>
         <view class="membership-badge">限时优惠</view>
       </view>
-      <view class="membership-rules">会员权益 ></view>
+      <view class="membership-rules" bindtap="showMembershipBenefits">会员权益 ></view>
     </view>
     
     <view class="price-comparison">
@@ -152,7 +152,7 @@
   </view>
 
   <!-- 额外卡片位置 -->
-  <view class="additional-card">
+  <!-- <view class="additional-card">
     <view class="card-header">
       <text class="card-title">门店信息</text>
     </view>
@@ -163,55 +163,128 @@
         <text class="store-hours">营业时间: 08:00-22:00</text>
       </view>
     </view>
-  </view>
-
+  </view> -->
+  <!-- 费用明细卡片 -->
   <view class="additional-card">
     <view class="card-header">
       <text class="card-title">费用明细</text>
-      <text class="view-details">明细 ></text>
+      <text class="view-details" bindtap="showPriceDetail">明细 ></text>
     </view>
     <view class="card-content">
       <view class="fee-item">
         <text class="fee-name">基础租金</text>
         <text class="fee-value">¥{{car.basePrice}}</text>
       </view>
+      <!-- 保险费用 -->
       <view class="fee-item" wx:if="{{selectedInsurance}}">
         <text class="fee-name">{{insuranceNames[selectedInsurance]}}保险</text>
-        <text class="fee-value">¥{{insurancePrice}}</text>
+        <view class="fee-value-container">
+          <text class="fee-value {{priceAnimating ? 'price-animating' : ''}}">¥{{insurancePrice}}</text>
+          <view class="loading-dots" wx:if="{{priceLoading}}">
+            <view class="dot"></view>
+            <view class="dot"></view>
+            <view class="dot"></view>
+          </view>
+        </view>
       </view>
+
+      <!-- 会员年费（如果选择了购买会员） -->
+      <view class="fee-item membership-fee" wx:if="{{selectedMembership && !userInfo.isMember}}">
+        <text class="fee-name">年度会员费</text>
+        <view class="fee-value-container">
+          <text class="fee-value {{priceAnimating ? 'price-animating' : ''}}">¥{{membershipPrice}}</text>
+        </view>
+      </view>
+      
+      <!-- 会员折扣（如果是会员或选择了购买会员） -->
+      <view class="fee-item member-discount" wx:if="{{(userInfo.isMember || selectedMembership) && memberDiscount > 0}}">
+        <text class="fee-name">会员折扣</text>
+        <view class="fee-value-container">
+          <text class="fee-value {{priceAnimating ? 'price-animating' : ''}}">-¥{{memberDiscount}}</text>
+        </view>
+      </view>
+      <!-- 总计 -->
       <view class="fee-item total">
         <text class="fee-name">总计</text>
-        <text class="fee-value highlight">¥{{totalPrice}}</text>
+        <view class="fee-value-container">
+          <text class="fee-value highlight {{priceAnimating ? 'price-animating' : ''}}">¥{{totalPrice}}</text>
+          <view class="price-pulse" wx:if="{{priceAnimating}}"></view>
+        </view>
+      </view>
+
+      <!-- 总优惠显示 -->
+      <view class="fee-item" wx:if="{{totalDiscount > 0}}">
+        <text class="fee-name" style="color: #4CAF50;">总计优惠</text>
+        <view class="fee-value-container">
+          <text class="fee-value {{priceAnimating ? 'price-animating' : ''}}" style="color: #4CAF50;">-¥{{totalDiscount}}</text>
+        </view>
       </view>
     </view>
   </view>
 
-  <view class="additional-card">
-    <view class="card-header">
-      <text class="card-title">取车须知</text>
+  <!-- 取车须知卡片 -->
+  <!-- 取车须知卡片 WXML代码 -->
+  <view class="pickup-notice-card">
+    <view class="pickup-notice-header">
+      <text class="pickup-notice-title">出车须知</text>
+      <!-- <view class="pickup-notice-icon">📋</view> -->
     </view>
-    <view class="card-content">
-      <view class="notice-item">
-        <text class="notice-title">所需证件</text>
-        <text class="notice-content">本人有效身份证、驾驶证原件</text>
+    
+    <view class="pickup-notice-list">
+      <view class="pickup-notice-item" bindtap="showCancelRule">
+        <text class="pickup-notice-item-title">取车前退订规则</text>
+        <view class="pickup-notice-item-right">
+          <text class="pickup-notice-item-desc">部分情况收取退改费</text>
+          <text class="pickup-notice-arrow">></text>
+        </view>
       </view>
-      <view class="notice-item">
-        <text class="notice-title">押金说明</text>
-        <text class="notice-content">信用授权或现金押金 ¥3000</text>
+      
+      <view class="pickup-notice-item" bindtap="showModifyRule">
+        <text class="pickup-notice-item-title">租赁中修改规则</text>
+        <view class="pickup-notice-item-right">
+          <text class="pickup-notice-item-desc">部分情况收取改签费</text>
+          <text class="pickup-notice-arrow">></text>
+        </view>
       </view>
-      <view class="notice-item">
-        <text class="notice-title">油量政策</text>
-        <text class="notice-content">取还车同等油量</text>
+      
+      <view class="pickup-notice-item" bindtap="showDocumentRule">
+        <text class="pickup-notice-item-title">出车凭证</text>
+        <view class="pickup-notice-item-right">
+          <text class="pickup-notice-item-desc">两证，双免更便捷</text>
+          <text class="pickup-notice-arrow">></text>
+        </view>
       </view>
+      
+      <view class="pickup-notice-item" bindtap="showDepositRule">
+        <text class="pickup-notice-item-title">押金支付</text>
+        <view class="pickup-notice-item-right">
+          <text class="pickup-notice-item-desc">车辆押金，现金支付</text>
+          <text class="pickup-notice-arrow">></text>
+        </view>
+      </view>
+      
+      <!-- <view class="pickup-notice-item" bindtap="showInvoiceRule">
+        <text class="pickup-notice-item-title">发票</text>
+        <view class="pickup-notice-item-right">
+          <text class="pickup-notice-item-desc">可在"我的一嗨"申请</text>
+          <text class="pickup-notice-arrow">></text>
+        </view>
+      </view> -->
     </view>
+  </view>
+
+  <!-- 协议同意区域 - 移到卡片外面 -->
+  <view class="agreement-section">
+    <text class="agreement-text">提交订单则表示您已同意并接受</text>
+    <text class="agreement-link" bindtap="showRulesDetail">《规则说明》</text>
   </view>
 
   <!-- 底部占位，确保内容不被底部栏遮挡 -->
   <view class="footer-placeholder"></view>
 </scroll-view>
 
-<!-- 价格明细弹窗 -->
-<view class="price-detail-popup {{showPriceDetail ? 'show' : ''}}">
+  <!-- 价格明细弹窗 -->
+  <view class="price-detail-popup {{showPriceDetail ? 'show' : ''}}">
     <view class="popup-content">
       <view class="popup-header">
         <view class="close-btn" bindtap="hidePriceDetail">×</view>
@@ -288,10 +361,10 @@
           </view>
         </view>
         
-        <!-- 总额显示 -->
+        <!-- 总额显示 - 与底部栏同步 -->
         <view class="total-area">
           <text>订单总额</text>
-          <text class="total-price">¥546</text>
+          <text class="total-price">¥{{footerPrice.total}}</text>
         </view>
       </view>
     </view>
@@ -300,7 +373,7 @@
   <!-- 提示区域 -->
   <view class="notice-area">
     <view class="notice-icon">👍</view>
-    <view class="notice-text">支付成功后生成订单，取车前可免费取消，无惧计划有变！</view>
+    <view class="notice-text">支付成功后生成订单，出车前可免费取消，无惧计划有变！</view>
   </view>
   
   <!-- 底部支付栏 -->
@@ -308,10 +381,29 @@
     <view class="price-info">
       <view class="price-row">
         <text class="total-label">总价</text>
-        <text class="total-price">¥546</text>
+        <view class="total-price-container">
+          <!-- 价格加载动画 -->
+          <view class="price-loading" wx:if="{{priceLoading}}">
+            <view class="skeleton-price"></view>
+          </view>
+          <!-- 实际价格显示 -->
+          <text class="total-price {{priceAnimating ? 'price-bounce' : ''}}" wx:else>¥{{footerPrice.total}}</text>
+          <!-- 价格变化闪烁效果 -->
+          <view class="price-flash" wx:if="{{priceAnimating}}"></view>
+        </view>
         <view class="detail-btn" bindtap="showPriceDetail">明细 ></view>
       </view>
-      <view class="discount-text">已优惠¥0</view>
+      <view class="discount-text">
+        <text wx:if="{{footerPrice.discount > 0}}">已优惠¥{{footerPrice.discount}}</text>
+        <text wx:else>已优惠¥0</text>
+        <!-- 优惠金额变化时的提示 -->
+        <view class="discount-tip {{priceAnimating ? 'show' : ''}}" wx:if="{{footerPrice.discount > 0}}">
+          <text class="tip-text">省钱了！</text>
+        </view>
+      </view>
     </view>
-    <button class="confirm-btn" bindtap="goToPayment">去支付</button>
+    <button class="confirm-btn {{priceLoading ? 'btn-loading' : ''}}" bindtap="goToPayment" disabled="{{priceLoading}}">
+      <text wx:if="{{priceLoading}}">计算中...</text>
+      <text wx:else>去支付</text>
+    </button>
   </view>

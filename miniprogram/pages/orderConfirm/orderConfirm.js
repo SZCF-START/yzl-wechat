@@ -44,12 +44,52 @@ Page({
     deposits: [
       { name: '违章押金', price: 2000.00, refundable: true },
       { name: '车辆押金', exempted: true }
-    ]
+    ],
+    // 用户信息
+    userInfo: {
+      isMember: false, // 是否为会员
+    },
+    // 新增：价格加载状态
+    priceLoading: false,
+    priceAnimating: false,
+    // 会员相关数据
+    selectedMembership: false, // 是否选择购买会员
+    membershipPrice: 299, // 会员年费
+    originalMembershipPrice: 399, // 会员原价
+    originalDailyPrice: 120, // 普通用户日租价
+    memberDailyPrice: 100, // 会员日租价
+    dailySavings: 20, // 每天节省金额
+    
+    // 计算相关
+    memberDiscount: 0, // 会员折扣金额
+    totalDiscount: 0, // 总折扣
+
+    // 新增：底部栏显示的价格数据
+    footerPrice: {
+      total: '546.00',
+      discount: '0'
+    }
   },
   
   onLoad: function(options) {
+    this.initializeData(options);
+  },
+
+  // 页面显示时重新加载价格
+  onShow: function() {
+    console.log('页面显示，重新计算价格');
+    this.refreshPriceData();
+  },
+  
+  // 应用从后台进入前台时重新加载
+  onShow: function() {
+    this.refreshPriceData();
+  },
+
+  // 初始化数据
+  initializeData: function(options) {
     // 接收上一页面传来的数据
-    if (options.carId) {
+    if (options && options.carId) {
       // 这里可以根据carId从上一页面获取详细信息
       // 或者发起请求获取车辆详情
       this.fetchCarDetails(options.carId);
@@ -57,8 +97,86 @@ Page({
     
     // 计算租车天数
     this.calculateDays();
+    // 检查用户会员状态
+    this.checkMembershipStatus();
+    // 计算价格相关数据
+    this.calculatePriceComparison();
+    this.calculateTotalWithAnimation();
   },
   
+  // 刷新价格数据（页面重新显示时调用）
+  refreshPriceData: function() {
+    this.showPriceLoadingAnimation();
+    
+    // 模拟网络请求延迟
+    setTimeout(() => {
+      this.checkMembershipStatus();
+      this.calculateTotalWithAnimation();
+    }, 500);
+  },
+  
+  // 显示价格加载动画
+  showPriceLoadingAnimation: function() {
+    this.setData({
+      priceLoading: true
+    });
+    
+    setTimeout(() => {
+      this.setData({
+        priceLoading: false
+      });
+    }, 800);
+  },
+  
+  // 带动画的价格计算
+  calculateTotalWithAnimation: function() {
+    // 先显示加载状态
+    this.setData({
+      priceAnimating: true
+    });
+    
+    // 延迟计算，营造加载效果
+    setTimeout(() => {
+      this.calculateTotal();
+      
+      // 价格数字跳动动画
+      this.animatePriceChange();
+      
+      setTimeout(() => {
+        this.setData({
+          priceAnimating: false
+        });
+      }, 600);
+    }, 200);
+  },
+  
+  // 价格数字跳动动画
+  animatePriceChange: function() {
+    const currentTotal = parseFloat(this.data.totalPrice);
+    const targetTotal = currentTotal;
+    const steps = 15;
+    const stepValue = targetTotal / steps;
+    let currentStep = 0;
+    
+    const animate = () => {
+      if (currentStep <= steps) {
+        const animatedValue = (stepValue * currentStep).toFixed(2);
+        this.setData({
+          'footerPrice.total': animatedValue
+        });
+        currentStep++;
+        setTimeout(animate, 30);
+      } else {
+        // 确保最终值准确
+        this.setData({
+          'footerPrice.total': targetTotal.toFixed(2)
+        });
+      }
+    };
+    
+    animate();
+  },
+
   fetchCarDetails: function(carId) {
     // 这里可以发起请求获取车辆详情
     // wx.request({...})
@@ -100,15 +218,6 @@ Page({
       days: 2
     });
   },
-
-  // 选择会员
-  selectMembership: function() {
-    const newSelection = !this.data.selectedMembership;
-    this.setData({
-      selectedMembership: newSelection
-    });
-    this.calculateTotal();
-  },
   
   selectInsurance: function(e) {
     const type = e.currentTarget.dataset.type;
@@ -122,20 +231,46 @@ Page({
         selectedInsurance: type
       });
     }
-    this.calculateTotal();
+    // 带动画的价格计算
+    this.calculateTotalWithAnimation();
   },
-  
-  // 应用会员折扣
-  applyMemberDiscount: function() {
-    const basePrice = this.data.car.basePrice;
-    const discountRate = 0.1; // 10%折扣
-    const discount = basePrice * discountRate * this.data.days;
-    
+
+  // 检查用户会员状态
+  checkMembershipStatus: function() {
+    // 从本地存储或服务器获取用户会员状态
+    const isMember = wx.getStorageSync('userMembership') || false;
     this.setData({
-      memberDiscount: discount.toFixed(2)
+      'userInfo.isMember': isMember
     });
   },
 
+  // 计算价格对比数据
+  calculatePriceComparison: function() {
+    const basePrice = this.data.car.basePrice;
+    const days = this.data.days;
+    
+    // 计算普通用户和会员的日租价格
+    const originalDaily = Math.round(basePrice / days);
+    const memberDaily = Math.round(originalDaily * 0.9); // 9折
+    const savings = originalDaily - memberDaily;
+    
+    this.setData({
+      originalDailyPrice: originalDaily,
+      memberDailyPrice: memberDaily,
+      dailySavings: savings
+    });
+  },
+
+  // 选择会员
+  selectMembership: function() {
+    const newSelection = !this.data.selectedMembership;
+    this.setData({
+      selectedMembership: newSelection
+    });
+    // 带动画的价格计算
+    this.calculateTotalWithAnimation();
+  },
+  // 计算总价（核心逻辑）
   calculateTotal: function() {
     let insurancePrice = 0;
     let membershipFee = 0;
@@ -152,7 +287,7 @@ Page({
     const selectedMembership = this.data.selectedMembership;
     
     if (isMember || selectedMembership) {
-      // 计算会员折扣
+      // 计算会员折扣（基础租金的10%折扣）
       const basePrice = this.data.car.basePrice;
       const discountRate = 0.1; // 10%折扣
       memberDiscount = basePrice * discountRate;
@@ -171,7 +306,27 @@ Page({
       insurancePrice: insurancePrice.toFixed(2),
       memberDiscount: memberDiscount.toFixed(2),
       totalDiscount: totalDiscount.toFixed(2),
-      totalPrice: total.toFixed(2)
+      totalPrice: total.toFixed(2),
+      // 更新底部栏数据
+      'footerPrice.total': total.toFixed(2),
+      'footerPrice.discount': totalDiscount.toFixed(2)
+    });
+    console.log('价格计算完成:', {
+      basePrice: this.data.car.basePrice,
+      insurancePrice,
+      membershipFee,
+      memberDiscount,
+      total: total.toFixed(2)
+    });
+  },
+
+  // 显示会员权益详情
+  showMembershipBenefits: function() {
+    wx.showModal({
+      title: '会员权益',
+      content: '• 租车享9折优惠\n• 免费全国道路救援\n• 专属客服优先服务\n• 免费升级车型（有条件）\n• 积分奖励翻倍\n• 专享活动优惠',
+      showCancel: false,
+      confirmText: '我知道了'
     });
   },
   
@@ -203,11 +358,24 @@ Page({
 
   // 显示价格明细
   showPriceDetail: function() {
+    // 确保数据同步
+    this.syncPriceData();
     this.setData({
       showPriceDetail: true
     });
   },
   
+  // 同步价格数据
+  syncPriceData: function() {
+    const totalPrice = this.data.totalPrice;
+    const totalDiscount = this.data.totalDiscount;
+    
+    this.setData({
+      'footerPrice.total': totalPrice,
+      'footerPrice.discount': totalDiscount
+    });
+  },
+
   // 隐藏价格明细
   hidePriceDetail: function() {
     this.setData({
@@ -217,10 +385,22 @@ Page({
   
   // 跳转到支付页面
   goToPayment: function() {
+    // 最后一次价格同步确认
+    this.syncPriceData();
     // 这里可以添加实际的支付逻辑
     wx.showLoading({
       title: '正在跳转支付...',
     });
+
+    const paymentData = {
+      totalAmount: this.data.footerPrice.total,
+      discount: this.data.footerPrice.discount,
+      carInfo: this.data.car,
+      insurance: this.data.selectedInsurance,
+      membership: this.data.selectedMembership
+    };
+    
+    console.log('支付数据:', paymentData);
     
     // 模拟跳转
     setTimeout(function() {
@@ -229,6 +409,11 @@ Page({
         title: '跳转到支付页面',
         icon: 'success'
       });
+
+      // 实际项目中跳转到支付页面
+      // wx.navigateTo({
+      //   url: '/pages/payment/payment?data=' + JSON.stringify(paymentData)
+      // });
     }, 1500);
   },
   
