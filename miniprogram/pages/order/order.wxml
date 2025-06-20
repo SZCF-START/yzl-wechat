@@ -52,21 +52,47 @@
           <view class="time-info">{{item.returnTime}}</view>
         </view>
         <view class="order-actions">
+          <!-- 更多下拉菜单 - 只在有菜单项时显示 -->
           <view class="more-action" 
+                wx:if="{{item.orderStatus == 0 || item.orderStatus == 1 || item.orderStatus == 2 || item.orderStatus == 3}}"
                 bindtap="showMoreActions" 
+                catchtap="showMoreActions"
                 data-id="{{item.id}}">更多
             <!-- 更多下拉菜单 -->
-            <view class="more-dropdown {{item.id === activeMoreId ? 'show' : ''}} {{item.isLeftAligned ? 'left-aligned' : ''}}">
+            <view class="more-dropdown {{item.id === activeMoreId ? 'show' : ''}} {{item.isLeftAligned ? 'left-aligned' : ''}}" catchtap="stopPropagation">
+              <!-- 车辆详情 - 所有状态都有 -->
               <view class="dropdown-item" bindtap="viewCarDetails" data-id="{{item.id}}">车辆详情</view>
-              <view class="dropdown-item" bindtap="modifyOrder" data-id="{{item.id}}">修改订单</view>
-              <view class="dropdown-item" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</view>
+              
+              <!-- 修改订单 - 预约中和租赁中状态有 -->
+              <view class="dropdown-item" 
+                    wx:if="{{item.orderStatus == 0 || item.orderStatus == 1}}" 
+                    bindtap="modifyOrder" 
+                    data-id="{{item.id}}">修改订单</view>
+              
+              <!-- 取消订单 - 只有预约中状态有 -->
+              <view class="dropdown-item" 
+                    wx:if="{{item.orderStatus == 0}}" 
+                    bindtap="cancelOrder" 
+                    data-id="{{item.id}}">取消订单</view>
             </view>
           </view>
-          <view class="action-button highlight" bindtap="handleConsult" data-id="{{item.id}}">咨询</view>
-          <view class="action-button highlight" bindtap="handlePickupGuide" data-id="{{item.id}}">取车门店指引</view>
-          <view class="action-button highlight" bindtap="handleInvoice" data-id="{{item.id}}">续租</view>
+          
+          <!-- 预约中状态的按钮：咨询、取车门店指引、取车 -->
+          <block wx:if="{{item.orderStatus == 0}}">
+            <view class="action-button highlight" bindtap="handleConsult" data-id="{{item.id}}">咨询</view>
+            <view class="action-button highlight" bindtap="handlePickupGuide" data-id="{{item.id}}">取车门店指引</view>
+            <view class="action-button highlight" bindtap="handlePickup" data-id="{{item.id}}">取车</view>
+          </block>
+          
+          <!-- 租赁中状态的按钮：取车门店指引、续租、还车 -->
+          <block wx:elif="{{item.orderStatus == 1}}">
+            <view class="action-button highlight" bindtap="handlePickupGuide" data-id="{{item.id}}">取车门店指引</view>
+            <view class="action-button highlight" bindtap="handleRenewal" data-id="{{item.id}}">续租</view>
+            <view class="action-button highlight" bindtap="handleReturn" data-id="{{item.id}}">还车</view>
+          </block>
+          
+          <!-- 已完成和已取消状态：没有操作按钮 -->
         </view>
-        <!-- <view class="car-details-btn" bindtap="viewCarDetails" data-id="{{item.id}}">车辆详情1</view> -->
       </view>
     </block>
     <view class="no-order" wx:else>
@@ -80,16 +106,5 @@
       <text wx:elif="{{hasMoreOrders}}" bindtap="loadMoreOrders">加载更多</text>
       <text wx:else>没有更多数据了</text>
     </view>
-    
-    <!-- 分页信息 -->
-    <!-- <view class="pagination-info" wx:if="{{orderList.length > 0}}">
-      <text>共{{totalCount}}条 {{pageNum-1}}/{{totalPage}}页</text>
-    </view> -->
   </view>
-  
-  <!-- 搜索按钮 -->
-  <!-- <view class="search-btn" bindtap="searchOrder">
-    <image src="/images/search.png" mode="aspectFit"></image>
-    <text>订单搜索</text>
-  </view> -->
 </view>

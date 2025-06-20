@@ -84,8 +84,9 @@
   border-radius: 12rpx;
   margin-bottom: 20rpx;
   padding: 30rpx;
-  /* position: relative; */
   box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+  overflow: visible; /* 允许子元素溢出 */
+  position: relative; /* 为了定位弹窗 */
 }
 
 .order-header {
@@ -154,26 +155,7 @@
   align-items: center;
   margin: 20rpx 0;
   padding: 15rpx 0;
-  /* position: relative; */
 }
-
-/* .rental-time::before,
-.rental-time::after {
-  content: '';
-  position: absolute;
-  height: 1px;
-  width: 100%;
-  background-color: #f0f0f0;
-  left: 0;
-} */
-
-/* .rental-time::before {
-  top: 0;
-}
-
-.rental-time::after {
-  bottom: 0;
-} */
 
 .time-info {
   font-size: 24rpx;
@@ -191,19 +173,6 @@
   font-weight: 500;
 }
 
-/* .order-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20rpx;
-}
-
-.more-action {
-  font-size: 26rpx;
-  color: #999;
-  padding: 10rpx 20rpx;
-  margin-right: auto;
-} */
-
 .order-actions {
   display: flex;
   justify-content: flex-end;
@@ -219,21 +188,32 @@
   padding: 10rpx 0 20rpx;
   margin-right: auto;
   position: relative;
-
+  z-index: 50;
 }
 
-/* 更多选项弹出层 */
+/* 更多选项弹出层 - 修改后的样式 */
 .more-dropdown {
   position: absolute;
   top: 60rpx;
-  right: 0;
-  left: auto;
+  left: 0; /* 改为从左侧开始 */
+  min-width: 200rpx;
+  max-width: 300rpx; /* 限制最大宽度 */
   background-color: #fff;
-  border-radius: 10rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.15);
-  z-index: 100;
-  overflow: visible;
+  border-radius: 12rpx; /* 增加圆角 */
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.12); /* 优化阴影 */
+  z-index: 999;
+  overflow: hidden; /* 防止内容溢出 */
   display: none;
+  transform-origin: top left; /* 改为左上角为原点 */
+  white-space: nowrap;
+  /* 确保不会超出屏幕右边界 */
+  right: auto;
+}
+
+/* 当弹窗可能超出右边界时，调整到右对齐 */
+.more-dropdown.left-aligned {
+  left: auto;
+  right: 0;
   transform-origin: top right;
 }
 
@@ -242,55 +222,53 @@
   content: '';
   position: absolute;
   top: -16rpx;
-  right: 20rpx;
+  left: 30rpx; /* 默认箭头在左侧 */
   width: 0;
   height: 0;
   border-left: 16rpx solid transparent;
   border-right: 16rpx solid transparent;
   border-bottom: 16rpx solid #fff;
+  z-index: 1000;
 }
 
-/* 如果dropdown弹出到左侧 */
-.more-dropdown.left-aligned {
-  right: auto;
-  left: 0;
-  transform-origin: top left;
-}
-
+/* 右对齐时箭头位置调整 */
 .more-dropdown.left-aligned::before {
-  right: auto;
-  left: 20rpx;
+  left: auto;
+  right: 30rpx;
 }
 
 .more-dropdown.show {
   display: block;
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.2s ease-out forwards;
 }
 
 .dropdown-item {
   white-space: nowrap;
-  padding: 20rpx 30rpx;
+  padding: 24rpx 30rpx; /* 增加垂直内边距 */
   font-size: 28rpx;
   color: #333;
   border-bottom: 1rpx solid #f0f0f0;
+  transition: background-color 0.2s ease;
+  line-height: 1.4; /* 增加行高 */
 }
 
 .dropdown-item:last-child {
   border-bottom: none;
 }
 
-.dropdown-item:active {
-  background-color: #f9f9f9;
+.dropdown-item:active,
+.dropdown-item:hover {
+  background-color: #f8f8f8;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10rpx);
+    transform: translateY(-10rpx) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -301,6 +279,11 @@
   border-radius: 30rpx;
   padding: 8rpx 20rpx;
   margin-left: 15rpx;
+  transition: all 0.2s ease;
+}
+
+.action-button:active {
+  background-color: #f5f5f5;
 }
 
 .highlight {

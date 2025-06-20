@@ -121,7 +121,7 @@ Page({
     setTimeout(() => {
       // 模拟后台返回的分页数据结构
       const responseData = this.getMockResponseData(params);
-      
+      console.log("responseData4444444:",responseData);
       if (isRefresh) {
         this.setData({
           orderList: responseData.list,
@@ -243,6 +243,7 @@ Page({
       mockOrders.push({
         id: `order_${Date.now()}_${i}_${pageNum}_${orderType}_${orderStatus}`,
         statusText: statusText,
+        orderStatus: orderStatus,
         price: price,
         carModel: carModels[randomCarIndex],
         carImage: carImages[randomCarIndex % carImages.length],
@@ -251,7 +252,8 @@ Page({
         pickupTime: formatDate(pickupDate),
         returnTime: formatDate(returnDate),
         rentalDays: rentalDays,
-        orderType: orderType
+        orderType: orderType,
+        isLeftAligned: false // 初始化对齐方式
       });
     }
     
@@ -265,115 +267,197 @@ Page({
     };
   },
   
-  // 查看车辆详情
-  viewCarDetails: function(e) {
+  /**
+   * 显示更多操作菜单
+   */
+  showMoreActions(e) {
     const orderId = e.currentTarget.dataset.id;
-    wx.showToast({
-      title: '查看车辆详情: ' + orderId,
-      icon: 'none'
-    });
-  },
-  
-  // 显示更多操作
-  showMoreActions: function(e) {
-    const id = e.currentTarget.dataset.id;
+    const currentActiveId = this.data.activeMoreId;
     
-    // 如果点击同一个更多按钮，则关闭菜单
-    if (this.data.activeMoreId === id) {
-      this.setData({ activeMoreId: null });
-      return;
-    }
-    
-    // 先设置为激活状态
-    this.setData({ activeMoreId: id });
-    
-    // 获取按钮和屏幕位置信息
-    const query = wx.createSelectorQuery();
-    query.select('.more-action').boundingClientRect();
-    query.selectViewport().scrollOffset();
-    query.exec((res) => {
-      if (res && res[0]) {
-        const buttonRect = res[0];
-        const screenWidth = wx.getSystemInfoSync().windowWidth;
-        
-        // 检查下拉菜单是否会超出屏幕右侧（假设下拉菜单宽度为180rpx）
-        // 注意：rpx需要转换为px进行比较
-        const dropdownWidthInPx = 180 * screenWidth / 750; // 转换rpx为px
-        const rightEdgePos = buttonRect.right;
-        const willOverflowRight = rightEdgePos + dropdownWidthInPx > screenWidth;
-        
-        // 根据不同设备换算的px值可能有差异，我们设置一个阈值
-        const SCREEN_EDGE_THRESHOLD = 20; // px
-        
-        // 设置下拉菜单的对齐方式
-        if (willOverflowRight || (screenWidth - rightEdgePos < SCREEN_EDGE_THRESHOLD)) {
-          // 找到当前激活的下拉菜单
-          setTimeout(() => {
-            const menuQuery = wx.createSelectorQuery();
-            menuQuery.select('.more-dropdown.show').boundingClientRect();
-            menuQuery.exec((menuRes) => {
-              if (menuRes && menuRes[0]) {
-                // 添加left-aligned类
-                const activeMenuId = this.data.activeMoreId;
-                const orderList = this.data.orderList.map(item => {
-                  if (item.id === activeMenuId) {
-                    item.isLeftAligned = true;
-                  }
-                  return item;
-                });
-                
-                this.setData({ orderList });
-              }
-            });
-          }, 50);
-        }
-      }
-    });
-  },
-
-  // 点击页面其他区域关闭下拉菜单
-  onTap: function() {
-    if (this.data.activeMoreId) {
+    // 如果点击的是已经激活的项，则关闭
+    if (currentActiveId === orderId) {
       this.setData({
         activeMoreId: null
       });
+      return;
     }
+
+    // 设置新的激活项
+    this.setData({
+      activeMoreId: orderId
+    });
+
+    // 延迟执行位置计算，确保DOM更新完成
+    setTimeout(() => {
+      this.calculateDropdownPosition(orderId);
+    }, 50);
   },
 
-  // 查看车辆详情
-  viewCarDetails: function(e) {
-    const id = e.currentTarget.dataset.id;
-    // 关闭下拉菜单
+  /**
+   * 计算弹窗位置，防止超出屏幕
+   */
+  calculateDropdownPosition(orderId) {
+    const query = wx.createSelectorQuery();
+    
+    // 获取屏幕信息
+    // 获取窗口信息
+    const windowInfo = wx.getWindowInfo();
+    const screenWidth = windowInfo.windowWidth;
+    
+    // 获取更多按钮的位置信息
+    query.selectAll('.more-action').boundingClientRect((rects) => {
+      if (rects && rects.length > 0) {
+        // 找到对应订单的更多按钮
+        const targetIndex = this.data.orderList.findIndex(item => item.id === orderId);
+        
+        if (targetIndex >= 0 && rects[targetIndex]) {
+          const buttonRect = rects[targetIndex];
+          const dropdownWidth = 200; // 弹窗的大概宽度(rpx)
+          const dropdownWidthPx = dropdownWidth * (screenWidth / 750); // 转换为px
+          
+          // 判断是否会超出右边界
+          const willOverflow = (buttonRect.right + dropdownWidthPx) > screenWidth;
+          
+          // 更新订单列表，添加位置标识
+          const updatedOrderList = this.data.orderList.map((item, index) => {
+            if (item.id === orderId) {
+              return {
+                ...item,
+                isLeftAligned: willOverflow // 如果会溢出，则右对齐
+              };
+            }
+            return item;
+          });
+          
+          this.setData({
+            orderList: updatedOrderList
+          });
+        }
+      }
+    }).exec();
+  },
+
+  /**
+   * 关闭所有弹窗（点击其他地方时调用）
+   */
+  closeAllDropdowns() {
     this.setData({
       activeMoreId: null
     });
-    wx.navigateTo({
-      url: `/pages/carDetail/index?id=${id}`
-    });
   },
 
-  // 修改订单
-  modifyOrder: function(e) {
-    const id = e.currentTarget.dataset.id;
-    this.setData({ activeMoreId: null });
-    wx.navigateTo({
-      url: `/pages/orderModify/index?id=${id}`
-    });
+  // 检查下拉菜单位置并调整对齐方式
+  // checkDropdownPosition: function(orderId) {
+  //   const query = wx.createSelectorQuery();
+    
+  //   // 获取屏幕信息
+  //   const systemInfo = wx.getSystemInfoSync();
+  //   const screenWidth = systemInfo.windowWidth;
+    
+  //   // 查找当前激活的更多按钮
+  //   query.selectAll('.more-action').boundingClientRect();
+  //   query.exec((res) => {
+  //     if (res && res[0] && res[0].length > 0) {
+  //       // 找到当前激活的更多按钮
+  //       const currentOrderIndex = this.data.orderList.findIndex(item => item.id === orderId);
+  //       if (currentOrderIndex !== -1 && res[0][currentOrderIndex]) {
+  //         const buttonRect = res[0][currentOrderIndex];
+          
+  //         // 下拉菜单的预估宽度（单位：px）
+  //         const dropdownWidth = 120; // 根据实际菜单宽度调整
+  //         const rightEdgePos = buttonRect.right;
+  //         const margin = 20; // 距离屏幕边缘的安全距离
+          
+  //         // 判断是否会超出屏幕右侧
+  //         const willOverflowRight = (rightEdgePos + dropdownWidth) > (screenWidth - margin);
+          
+  //         if (willOverflowRight) {
+  //           // 更新对应订单的对齐方式
+  //           const orderList = this.data.orderList.map(item => {
+  //             if (item.id === orderId) {
+  //               item.isLeftAligned = true;
+  //             }
+  //             return item;
+  //           });
+            
+  //           this.setData({ orderList: orderList });
+  //         }
+  //       }
+  //     }
+  //   });
+  // },
+
+  /**
+   * 处理页面点击事件，用于关闭弹窗
+   */
+  onPageTap() {
+    if (this.data.activeMoreId) {
+      this.closeAllDropdowns();
+    }
   },
 
-  // 取消订单
-  cancelOrder: function(e) {
-    const id = e.currentTarget.dataset.id;
-    this.setData({ activeMoreId: null });
+  /**
+   * 查看车辆详情
+   */
+  viewCarDetails(e) {
+    const orderId = e.currentTarget.dataset.id;
+    this.closeAllDropdowns();
+    
+    // 这里添加查看车辆详情的逻辑
+    console.log('查看车辆详情:', orderId);
+    // 弹窗提示“敬请期待”
+    wx.showToast({
+      title: '功能开发中,敬请期待!',
+      icon: 'none',
+      duration: 2000
+    });
+    // wx.navigateTo({
+    //   url: `/pages/car-details/car-details?orderId=${orderId}`
+    // });
+  },
+
+  /**
+   * 修改订单
+   */
+  modifyOrder(e) {
+    const orderId = e.currentTarget.dataset.id;
+    this.closeAllDropdowns();
+    
+    // 这里添加修改订单的逻辑
+    console.log('修改订单:', orderId);
+    // 弹窗提示“敬请期待”
+    wx.showToast({
+      title: '功能开发中,敬请期待!',
+      icon: 'none',
+      duration: 2000
+    });
+    // wx.navigateTo({
+    //   url: `/pages/modify-order/modify-order?orderId=${orderId}`
+    // });
+  },
+
+  /**
+   * 取消订单
+   */
+  cancelOrder(e) {
+    const orderId = e.currentTarget.dataset.id;
+    this.closeAllDropdowns();
+    
+    // 显示确认弹窗
     wx.showModal({
-      title: '提示',
-      content: '确定要取消该订单吗？',
+      title: '确认取消',
+      content: '确定要取消此订单吗？',
       success: (res) => {
         if (res.confirm) {
-          // 这里处理取消订单的逻辑
+          // 这里添加取消订单的API调用
+          console.log('取消订单:', orderId);
+          // 调用取消订单接口
+          // this.cancelOrderAPI(orderId);
+          // 弹窗提示“敬请期待”
           wx.showToast({
-            title: '订单已取消',
-            icon: 'success'
+            title: '功能开发中,敬请期待!',
+            icon: 'none',
+            duration: 2000
           });
         }
       }
@@ -393,16 +477,34 @@ Page({
   handlePickupGuide: function(e) {
     const orderId = e.currentTarget.dataset.id;
     wx.showToast({
-      title: '取车门店指引: ' + orderId,
+      title: '取车门店指引功能开发中',
       icon: 'none'
     });
   },
   
-  // 开发票
-  handleInvoice: function(e) {
+  // 取车 - 预约中状态
+  handlePickup: function(e) {
     const orderId = e.currentTarget.dataset.id;
     wx.showToast({
-      title: '开发票: ' + orderId,
+      title: '取车功能开发中',
+      icon: 'none'
+    });
+  },
+  
+  // 续租 - 租赁中状态
+  handleRenewal: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    wx.showToast({
+      title: '续租功能开发中',
+      icon: 'none'
+    });
+  },
+  
+  // 还车 - 租赁中状态
+  handleReturn: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    wx.showToast({
+      title: '还车功能开发中', 
       icon: 'none'
     });
   },
