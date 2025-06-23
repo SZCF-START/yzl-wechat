@@ -485,10 +485,14 @@ Page({
   // 取车 - 预约中状态
   handlePickup: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    wx.showToast({
-      title: '取车功能开发中',
-      icon: 'none'
+
+    wx.navigateTo({
+      url: `/pages/pickup/pickup`,
     });
+    // wx.showToast({
+    //   title: '取车功能开发中',
+    //   icon: 'none'
+    // });
   },
   
   // 续租 - 租赁中状态
