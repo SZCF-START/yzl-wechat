@@ -29,7 +29,9 @@
     "pages/mapGuide/mapGuide",
     "pages/carSelect/carSelect",
     "pages/orderConfirm/orderConfirm",
-    "pages/pickup/pickup"
+    "pages/pickup/pickup",
+    "pages/pickup-success/pickup-success",
+    "pages/return-car/return-car"
   ],
   "permission": {
     "scope.userLocation": {

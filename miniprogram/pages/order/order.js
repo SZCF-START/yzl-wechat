@@ -507,9 +507,12 @@ Page({
   // 还车 - 租赁中状态
   handleReturn: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    wx.showToast({
-      title: '还车功能开发中', 
-      icon: 'none'
+    // wx.showToast({
+    //   title: '还车功能开发中', 
+    //   icon: 'none'
+    // });
+    wx.navigateTo({
+      url: `/pages/return-car/return-car`,
     });
   },
   

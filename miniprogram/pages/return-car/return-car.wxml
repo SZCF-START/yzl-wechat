@@ -1,0 +1,172 @@
+<view class="return-container">
+  <!-- 订单信息 -->
+  <view class="order-info">
+    <view class="info-header">
+      <text class="info-title">门店信息</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">门店名称：</text>
+      <text class="info-value">{{orderInfo.storeName}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">管理员：</text>
+      <text class="info-value">{{orderInfo.managerName}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">联系电话：</text>
+      <text class="info-value">{{orderInfo.managerPhone}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">车型名称：</text>
+      <text class="info-value">{{orderInfo.carModel}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">租赁时间：</text>
+      <text class="info-value">{{orderInfo.startTime}} —— {{orderInfo.endTime}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">租赁天数：</text>
+      <text class="info-value highlight">{{orderInfo.rentalDays}}天</text>
+    </view>
+  </view>
+
+  <!-- 出车时仪表盘数据 -->
+  <view class="dashboard-info">
+    <view class="info-header">
+      <text class="info-title">出车时仪表盘数据</text>
+    </view>
+    <view class="dashboard-display">
+      <text class="dashboard-value">{{orderInfo.initialHours}}小时</text>
+    </view>
+  </view>
+
+  <!-- 还车时仪表盘数据输入 -->
+  <view class="input-section">
+    <view class="info-header">
+      <text class="info-title">还车时仪表盘数据</text>
+    </view>
+    <view class="input-row">
+      <text class="input-label">工作小时数：</text>
+      <input 
+        class="hour-input" 
+        type="digit" 
+        placeholder="请输入工作小时数"
+        value="{{returnHours}}"
+        bindinput="onReturnHoursChange"
+      />
+      <text class="input-unit">小时</text>
+    </view>
+  </view>
+
+  <!-- 仪表盘图片上传 -->
+  <view class="upload-section">
+    <view class="info-header">
+      <text class="info-title">仪表盘照片</text>
+      <text class="upload-tip">（上传1张）</text>
+    </view>
+    <view class="dashboard-upload">
+      <view class="upload-item" wx:if="{{dashboardImage}}">
+        <image class="upload-image" src="{{dashboardImage}}" mode="aspectFill"></image>
+        <view class="delete-btn" bindtap="deleteDashboardImage">×</view>
+      </view>
+      <view class="upload-add" wx:else bindtap="uploadDashboardImage">
+        <text class="add-icon">+</text>
+        <text class="add-text">添加照片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 车辆图片上传 -->
+  <view class="upload-section">
+    <view class="info-header">
+      <text class="info-title">车辆照片</text>
+      <text class="upload-tip">（最多上传6张）</text>
+    </view>
+    <view class="vehicle-upload">
+      <view class="upload-item" wx:for="{{vehicleImages}}" wx:key="index">
+        <image class="upload-image" src="{{item}}" mode="aspectFill"></image>
+        <view class="delete-btn" bindtap="deleteVehicleImage" data-index="{{index}}">×</view>
+      </view>
+      <view class="upload-add" wx:if="{{vehicleImages.length < 6}}" bindtap="uploadVehicleImage">
+        <text class="add-icon">+</text>
+        <text class="add-text">添加照片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 超时计算结果 -->
+  <view class="overtime-result" wx:if="{{showOvertimeResult}}">
+    <view class="info-header">
+      <text class="info-title">超时计算结果</text>
+      <text class="question-icon" bindtap="showOvertimeDetail">?</text>
+    </view>
+    <view class="overtime-info">
+      <text class="overtime-text" wx:if="{{overtimeDays > 0}}">
+        您的还车超时了 <text class="highlight">{{overtimeDays}}天</text>
+      </text>
+      <text class="overtime-text" wx:else>
+        还车未超时
+      </text>
+    </view>
+  </view>
+
+  <!-- 价格选择 -->
+  <view class="price-selection" wx:if="{{overtimeDays > 0}}">
+    <view class="info-header">
+      <text class="info-title">选择计费方式</text>
+    </view>
+    <view class="price-options">
+      <view class="price-card {{selectedPriceType === 'overtime' ? 'selected' : ''}}" 
+            bindtap="selectPriceType" data-type="overtime">
+        <view class="price-type">超时单价</view>
+        <view class="price-value">¥{{overtimePrice}}/天</view>
+        <view class="total-price">总计：¥{{overtimeTotalPrice}}</view>
+      </view>
+      <view class="price-card {{selectedPriceType === 'renewal' ? 'selected' : ''}}" 
+            bindtap="selectPriceType" data-type="renewal">
+        <view class="price-type">续租单价</view>
+        <view class="price-value">¥{{renewalPrice}}/天</view>
+        <view class="total-price">总计：¥{{renewalTotalPrice}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最终支付金额 -->
+  <view class="final-payment" wx:if="{{showFinalPayment}}">
+    <view class="payment-info">
+      <text class="payment-label">需要支付：</text>
+      <text class="payment-amount">¥{{finalPaymentAmount}}</text>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-section">
+    <button class="submit-btn" bindtap="submitReturn" disabled="{{!canSubmit}}">
+      提交还车申请
+    </button>
+  </view>
+</view>
+
+<!-- 超时详情弹窗 -->
+<view class="modal-mask" wx:if="{{showOvertimeModal}}" bindtap="hideOvertimeDetail">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">超时计算详情</text>
+      <text class="modal-close" bindtap="hideOvertimeDetail">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="detail-item">
+        <text class="detail-title">租期时间计算：</text>
+        <text class="detail-content">{{timeOvertimeDetail}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-title">工作小时数计算：</text>
+        <text class="detail-content">{{hoursOvertimeDetail}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-title">最终超时原因：</text>
+        <text class="detail-content">{{finalOvertimeReason}}</text>
+      </view>
+    </view>
+  </view>
+</view>

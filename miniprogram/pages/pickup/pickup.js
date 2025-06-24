@@ -183,19 +183,36 @@ Page({
   chooseImage: function() {
     const remainingCount = this.data.maxImageCount - this.data.uploadedImages.length;
     console.log('点击上传图片'); // ✅调试是否点击触发
-    wx.chooseImage({
-      count: remainingCount,
-      sizeType: ['compressed'],
-      sourceType: ['album', 'camera'],
-      success: (res) => {
-        const tempFilePaths = res.tempFilePaths;
-        this.setData({
-          uploadedImages: [...this.data.uploadedImages, ...tempFilePaths]
-        });
-        this.checkCanSubmit();
-      }
+    this.setData({
+      uploadedImages: [
+        ...this.data.uploadedImages,
+        'https://yh-file.chwhyun.cn/test/2025/2/27/3ad37d272788c112eea181f7f4aea19(1)_1894946277376921601.jpg'
+      ]
     });
-  },
+    this.checkCanSubmit();
+    // wx.chooseMedia({
+    //   count: remainingCount,
+    //   mediaType: ['image'],
+    //   sizeType: ['compressed'],
+    //   sourceType: ['album', 'camera'],
+    //   success: (res) => {
+    //     // 提取图片临时路径
+    //     const tempFilePaths = res.tempFiles.map(file => file.tempFilePath);
+    //     console.log("9999999999900000000");
+    //     this.setData({
+    //       uploadedImages: [...this.data.uploadedImages, ...tempFilePaths]
+    //     });
+    //     this.checkCanSubmit();
+    //   },
+    //   fail: (err) => {
+    //     console.error('选择失败:', err); // 看控制台是否报错
+    //   },
+    //   complete: () => {
+    //     console.log('chooseMedia调用完成');
+    //   }
+      
+    // });
+  },  
 
   // 删除图片
   deleteImage: function(e) {

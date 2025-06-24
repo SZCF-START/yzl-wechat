@@ -61,6 +61,7 @@ Page({
   async checkLocationPermission() {
     try {
       const res = await privacyStatusManager.getPrivacyStatus();
+      console.log("5555555555555555",res);
       if (res.needAuthorization) {
         await privacyStatusManager.showPrivacyAuthorizationPopup({
           scope: 'userLocation'
