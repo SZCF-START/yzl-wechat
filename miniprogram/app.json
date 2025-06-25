@@ -31,7 +31,9 @@
     "pages/orderConfirm/orderConfirm",
     "pages/pickup/pickup",
     "pages/pickup-success/pickup-success",
-    "pages/return-car/return-car"
+    "pages/return-car/return-car",
+    "pages/return-review/return-review",
+    "pages/payment-after-review/payment-after-review"
   ],
   "permission": {
     "scope.userLocation": {

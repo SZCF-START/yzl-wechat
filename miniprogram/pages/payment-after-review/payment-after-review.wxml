@@ -1,4 +1,4 @@
-<view class="return-container">
+<view class="payment-container">
   <!-- 订单信息 -->
   <view class="order-info">
     <view class="info-header">
@@ -37,83 +37,67 @@
     </view>
   </view>
 
-  <!-- 还车时仪表盘数据输入 -->
-  <view class="input-section">
+  <!-- 用户还车时仪表盘数据 -->
+  <view class="dashboard-info">
     <view class="info-header">
-      <text class="info-title">还车时仪表盘数据</text>
+      <text class="info-title">用户还车时仪表盘数据</text>
     </view>
-    <view class="input-row">
-      <text class="input-label">工作小时数：</text>
-      <input 
-        class="hour-input" 
-        type="digit" 
-        placeholder="请输入工作小时数"
-        value="{{returnHours}}"
-        bindinput="onReturnHoursChange"
-        bindblur="onReturnHoursBlur"
-      />
-      <text class="input-unit">小时</text>
-    </view>
-    <view class="input-tip">*请精确到小数点后一位</view>
-    <view class="error-tip" wx:if="{{hoursErrorTip}}">
-      <text class="error-text">{{hoursErrorTip}}</text>
+    <view class="dashboard-display">
+      <text class="dashboard-value">{{returnData.userReturnHours}}小时</text>
     </view>
   </view>
 
-  <!-- 仪表盘图片上传 -->
-  <view class="upload-section">
+  <!-- 管理员审核后修改的数据 -->
+  <view class="review-section">
     <view class="info-header">
-      <text class="info-title">仪表盘照片</text>
-      <text class="upload-tip">（上传1张）</text>
+      <text class="info-title">管理员审核后修改的数据</text>
     </view>
-    <view class="dashboard-upload">
-      <view class="upload-item" wx:if="{{dashboardImage}}">
-        <image class="upload-image" src="{{dashboardImage}}" mode="aspectFill"></image>
-        <view class="delete-btn" bindtap="deleteDashboardImage">×</view>
-      </view>
-      <view class="upload-add" wx:else bindtap="uploadDashboardImage">
-        <text class="add-icon">+</text>
-        <text class="add-text">添加照片</text>
-      </view>
+    <view class="review-item">
+      <text class="review-label">修改后仪表盘数据：</text>
+      <text class="review-value highlight">{{returnData.adminReturnHours}}小时</text>
     </view>
-  </view>
-
-  <!-- 车辆图片上传 -->
-  <view class="upload-section">
-    <view class="info-header">
-      <text class="info-title">车辆照片</text>
-      <text class="upload-tip">（最多上传6张）</text>
+    <view class="review-item">
+      <text class="review-label">实际还车时间：</text>
+      <text class="review-value">{{returnData.actualReturnTime}}</text>
     </view>
-    <view class="vehicle-upload">
-      <view class="upload-item" wx:for="{{vehicleImages}}" wx:key="index">
-        <image class="upload-image" src="{{item}}" mode="aspectFill"></image>
-        <view class="delete-btn" bindtap="deleteVehicleImage" data-index="{{index}}">×</view>
-      </view>
-      <view class="upload-add" wx:if="{{vehicleImages.length < 6}}" bindtap="uploadVehicleImage">
-        <text class="add-icon">+</text>
-        <text class="add-text">添加照片</text>
-      </view>
+    <view class="review-item">
+      <text class="review-label">仪表盘照片：</text>
+    </view>
+    <view class="dashboard-image">
+      <image class="review-image" src="{{returnData.dashboardImage}}" mode="aspectFill"></image>
     </view>
   </view>
 
   <!-- 超时计算结果 -->
-  <view class="overtime-result" wx:if="{{showOvertimeResult}}">
+  <view class="overtime-result">
     <view class="info-header">
       <text class="info-title">超时计算结果</text>
       <text class="question-icon" bindtap="showOvertimeDetail">?</text>
     </view>
     <view class="overtime-info">
-      <text class="overtime-text" wx:if="{{overtimeDays > 0}}">
-        您的还车超时了 <text class="highlight">{{overtimeDays}}天</text>
-      </text>
-      <text class="overtime-text" wx:else>
-        还车未超时
+      <text class="overtime-text">
+        最终超时了 <text class="highlight">{{finalOvertimeDays}}天</text>
       </text>
     </view>
   </view>
 
+  <!-- 已支付和剩余支付 -->
+  <view class="payment-status">
+    <view class="info-header">
+      <text class="info-title">支付状态</text>
+    </view>
+    <view class="payment-item">
+      <text class="payment-label">已支付超时天数：</text>
+      <text class="payment-value">{{paidOvertimeDays}}天</text>
+    </view>
+    <view class="payment-item">
+      <text class="payment-label">剩余需支付天数：</text>
+      <text class="payment-value highlight">{{remainingOvertimeDays}}天</text>
+    </view>
+  </view>
+
   <!-- 价格选择 -->
-  <view class="price-selection" wx:if="{{overtimeDays > 0}}">
+  <view class="price-selection" wx:if="{{remainingOvertimeDays > 0}}">
     <view class="info-header">
       <text class="info-title">选择计费方式</text>
     </view>
@@ -134,17 +118,28 @@
   </view>
 
   <!-- 最终支付金额 -->
-  <view class="final-payment" wx:if="{{showFinalPayment}}">
+  <view class="final-payment" wx:if="{{remainingOvertimeDays > 0}}">
     <view class="payment-info">
       <text class="payment-label">需要支付：</text>
       <text class="payment-amount">¥{{finalPaymentAmount}}</text>
     </view>
   </view>
 
-  <!-- 提交按钮 -->
+  <!-- 无需支付提示 -->
+  <view class="no-payment" wx:if="{{remainingOvertimeDays <= 0}}">
+    <view class="no-payment-info">
+      <text class="no-payment-text">无需额外支付</text>
+      <text class="no-payment-desc">已支付金额已覆盖所有超时费用</text>
+    </view>
+  </view>
+
+  <!-- 支付按钮 -->
   <view class="submit-section">
-    <button class="submit-btn" bindtap="submitReturn" disabled="{{!canSubmit}}">
-      {{submitButtonText}}
+    <button class="submit-btn" bindtap="submitPayment" disabled="{{!canPayment}}" wx:if="{{remainingOvertimeDays > 0}}">
+      支付
+    </button>
+    <button class="submit-btn completed" bindtap="goToComplete" wx:else>
+      订单已完成
     </button>
   </view>
 </view>

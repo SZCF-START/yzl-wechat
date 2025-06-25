@@ -52,9 +52,9 @@
           <view class="time-info">{{item.returnTime}}</view>
         </view>
         <view class="order-actions">
-          <!-- 更多下拉菜单 - 只在有菜单项时显示 -->
+          <!-- 更多下拉菜单 -->
           <view class="more-action" 
-                wx:if="{{item.orderStatus == 0 || item.orderStatus == 1 || item.orderStatus == 2 || item.orderStatus == 3}}"
+                wx:if="{{item.orderStatus == 0 || item.orderStatus == 1 || item.orderStatus == 2 || item.orderStatus == 3 || item.orderStatus == 4 || item.orderStatus == 5}}"
                 bindtap="showMoreActions" 
                 catchtap="showMoreActions"
                 data-id="{{item.id}}">更多
@@ -63,7 +63,7 @@
               <!-- 车辆详情 - 所有状态都有 -->
               <view class="dropdown-item" bindtap="viewCarDetails" data-id="{{item.id}}">车辆详情</view>
               
-              <!-- 修改订单 - 预约中和租赁中状态有 -->
+              <!-- 修改订单 - 预约中和正常租赁中状态有 -->
               <view class="dropdown-item" 
                     wx:if="{{item.orderStatus == 0 || item.orderStatus == 1}}" 
                     bindtap="modifyOrder" 
@@ -84,11 +84,21 @@
             <view class="action-button highlight" bindtap="handlePickup" data-id="{{item.id}}">取车</view>
           </block>
           
-          <!-- 租赁中状态的按钮：取车门店指引、续租、还车 -->
+          <!-- 租赁中状态(1)的按钮：取车门店指引、续租、还车 -->
           <block wx:elif="{{item.orderStatus == 1}}">
             <view class="action-button highlight" bindtap="handlePickupGuide" data-id="{{item.id}}">取车门店指引</view>
             <view class="action-button highlight" bindtap="handleRenewal" data-id="{{item.id}}">续租</view>
             <view class="action-button highlight" bindtap="handleReturn" data-id="{{item.id}}">还车</view>
+          </block>
+          
+          <!-- 还车审核中状态(4)的按钮：还车审核中 -->
+          <block wx:elif="{{item.orderStatus == 4}}">
+            <view class="action-button highlight" bindtap="handleReturnAudit" data-id="{{item.id}}">还车审核中</view>
+          </block>
+          
+          <!-- 待支付状态(5)的按钮：去支付 -->
+          <block wx:elif="{{item.orderStatus == 5}}">
+            <view class="action-button highlight" bindtap="handlePayment" data-id="{{item.id}}">去支付</view>
           </block>
           
           <!-- 已完成和已取消状态：没有操作按钮 -->

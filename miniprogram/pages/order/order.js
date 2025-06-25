@@ -61,7 +61,6 @@ Page({
       // 模拟后台返回的订单状态数据
       const statusList = [
         { id: 0, name: "预约中" },
-        // { id: 1, name: "候补中" },
         { id: 1, name: "租赁中" },
         { id: 2, name: "已完成" },
         { id: 3, name: "已取消" }
@@ -175,16 +174,14 @@ Page({
     // 模拟分页数据
     // 根据订单类型和状态设置不同的总数据量
     let totalCount;
-    if (orderType === 0) { // 自驾订单
+    if (orderType === 0) { // 挖机订单
       if (orderStatus === 0) totalCount = 35; // 预约中
-      // else if (orderStatus === 1) totalCount = 18; // 候补中
-      else if (orderStatus === 1) totalCount = 27; // 租赁中
+      else if (orderStatus === 1) totalCount = 45; // 租赁中（包含状态1,4,5）
       else if (orderStatus === 2) totalCount = 42; // 已完成
       else totalCount = 15; // 已取消
-    } else { // 他人代订
+    } else { // 属具订单
       if (orderStatus === 0) totalCount = 20; // 预约中
-      // else if (orderStatus === 1) totalCount = 8; // 候补中
-      else if (orderStatus === 1) totalCount = 12; // 租赁中
+      else if (orderStatus === 1) totalCount = 25; // 租赁中（包含状态1,4,5）
       else if (orderStatus === 2) totalCount = 25; // 已完成
       else totalCount = 5; // 已取消
     }
@@ -235,15 +232,41 @@ Page({
         return `${month < 10 ? '0' + month : month}月${day < 10 ? '0' + day : day}日 ${hour}:00`;
       };
       
-      // 获取订单状态文本
-      const statusText = this.data.statusList.length > 0 ? 
-                        this.data.statusList[orderStatus].name : 
-                        ["预约中", "候补中", "租赁中", "已完成", "已取消"][orderStatus];
+      // 根据大状态确定实际的订单状态
+      let actualOrderStatus = orderStatus;
+      let statusText = "";
+      
+      if (orderStatus === 1) { // 租赁中大状态
+        // 随机分配实际状态：1(租赁中), 4(还车审核中), 5(待支付)
+        const rentalStatuses = [1, 4, 5];
+        actualOrderStatus = rentalStatuses[Math.floor(Math.random() * rentalStatuses.length)];
+        
+        switch (actualOrderStatus) {
+          case 1:
+            statusText = "租赁中";
+            break;
+          case 4:
+            statusText = "还车审核中";
+            break;
+          case 5:
+            statusText = "待支付";
+            break;
+        }
+      } else {
+        // 其他大状态保持原有逻辑
+        const statusMap = {
+          0: "预约中",
+          2: "已完成", 
+          3: "已取消"
+        };
+        statusText = statusMap[orderStatus];
+      }
       
       mockOrders.push({
         id: `order_${Date.now()}_${i}_${pageNum}_${orderType}_${orderStatus}`,
         statusText: statusText,
-        orderStatus: orderStatus,
+        orderStatus: actualOrderStatus, // 实际的订单状态
+        displayStatus: orderStatus, // 显示的大状态
         price: price,
         carModel: carModels[randomCarIndex],
         carImage: carImages[randomCarIndex % carImages.length],
@@ -346,47 +369,6 @@ Page({
     });
   },
 
-  // 检查下拉菜单位置并调整对齐方式
-  // checkDropdownPosition: function(orderId) {
-  //   const query = wx.createSelectorQuery();
-    
-  //   // 获取屏幕信息
-  //   const systemInfo = wx.getSystemInfoSync();
-  //   const screenWidth = systemInfo.windowWidth;
-    
-  //   // 查找当前激活的更多按钮
-  //   query.selectAll('.more-action').boundingClientRect();
-  //   query.exec((res) => {
-  //     if (res && res[0] && res[0].length > 0) {
-  //       // 找到当前激活的更多按钮
-  //       const currentOrderIndex = this.data.orderList.findIndex(item => item.id === orderId);
-  //       if (currentOrderIndex !== -1 && res[0][currentOrderIndex]) {
-  //         const buttonRect = res[0][currentOrderIndex];
-          
-  //         // 下拉菜单的预估宽度（单位：px）
-  //         const dropdownWidth = 120; // 根据实际菜单宽度调整
-  //         const rightEdgePos = buttonRect.right;
-  //         const margin = 20; // 距离屏幕边缘的安全距离
-          
-  //         // 判断是否会超出屏幕右侧
-  //         const willOverflowRight = (rightEdgePos + dropdownWidth) > (screenWidth - margin);
-          
-  //         if (willOverflowRight) {
-  //           // 更新对应订单的对齐方式
-  //           const orderList = this.data.orderList.map(item => {
-  //             if (item.id === orderId) {
-  //               item.isLeftAligned = true;
-  //             }
-  //             return item;
-  //           });
-            
-  //           this.setData({ orderList: orderList });
-  //         }
-  //       }
-  //     }
-  //   });
-  // },
-
   /**
    * 处理页面点击事件，用于关闭弹窗
    */
@@ -405,15 +387,12 @@ Page({
     
     // 这里添加查看车辆详情的逻辑
     console.log('查看车辆详情:', orderId);
-    // 弹窗提示“敬请期待”
+    // 弹窗提示"敬请期待"
     wx.showToast({
       title: '功能开发中,敬请期待!',
       icon: 'none',
       duration: 2000
     });
-    // wx.navigateTo({
-    //   url: `/pages/car-details/car-details?orderId=${orderId}`
-    // });
   },
 
   /**
@@ -425,15 +404,12 @@ Page({
     
     // 这里添加修改订单的逻辑
     console.log('修改订单:', orderId);
-    // 弹窗提示“敬请期待”
+    // 弹窗提示"敬请期待"
     wx.showToast({
       title: '功能开发中,敬请期待!',
       icon: 'none',
       duration: 2000
     });
-    // wx.navigateTo({
-    //   url: `/pages/modify-order/modify-order?orderId=${orderId}`
-    // });
   },
 
   /**
@@ -453,7 +429,7 @@ Page({
           console.log('取消订单:', orderId);
           // 调用取消订单接口
           // this.cancelOrderAPI(orderId);
-          // 弹窗提示“敬请期待”
+          // 弹窗提示"敬请期待"
           wx.showToast({
             title: '功能开发中,敬请期待!',
             icon: 'none',
@@ -489,10 +465,6 @@ Page({
     wx.navigateTo({
       url: `/pages/pickup/pickup`,
     });
-    // wx.showToast({
-    //   title: '取车功能开发中',
-    //   icon: 'none'
-    // });
   },
   
   // 续租 - 租赁中状态
@@ -507,12 +479,24 @@ Page({
   // 还车 - 租赁中状态
   handleReturn: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    // wx.showToast({
-    //   title: '还车功能开发中', 
-    //   icon: 'none'
-    // });
     wx.navigateTo({
       url: `/pages/return-car/return-car`,
+    });
+  },
+
+  // 还车审核中状态的按钮
+  handleReturnAudit: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/return-review/return-review`,
+    });
+  },
+
+  // 去支付 - 待支付状态
+  handlePayment: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/payment-after-review/payment-after-review`,
     });
   },
   
@@ -523,6 +507,7 @@ Page({
       icon: 'none'
     });
   },
+  
   // 页面触摸开始时关闭所有下拉菜单
   onPageTouch: function() {
     if (this.data.activeMoreId) {
