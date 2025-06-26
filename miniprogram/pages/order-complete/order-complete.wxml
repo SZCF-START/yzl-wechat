@@ -1,0 +1,146 @@
+<view class="complete-container">
+  <!-- 成功图标和标题 -->
+  <view class="success-header">
+    <view class="success-icon">
+      <text class="checkmark">✓</text>
+    </view>
+    <text class="success-title">订单已完成</text>
+    <text class="success-subtitle">感谢您的使用，祝您工作顺利！</text>
+  </view>
+
+  <!-- 订单摘要信息 -->
+  <view class="order-summary">
+    <view class="info-header">
+      <text class="info-title">订单摘要</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">订单编号：</text>
+      <text class="info-value">{{orderInfo.id}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">门店名称：</text>
+      <text class="info-value">{{orderInfo.storeName}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">车型名称：</text>
+      <text class="info-value">{{orderInfo.carModel}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">租赁时间：</text>
+      <text class="info-value">{{orderInfo.startTime}} —— {{orderInfo.endTime}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">租赁天数：</text>
+      <text class="info-value highlight">{{orderInfo.rentalDays}}天</text>
+    </view>
+  </view>
+
+  <!-- 费用明细 -->
+  <view class="cost-detail">
+    <view class="info-header">
+      <text class="info-title">费用明细</text>
+    </view>
+    <view class="cost-item">
+      <text class="cost-label">租赁费用：</text>
+      <text class="cost-value">¥{{costDetail.rentalCost}}</text>
+    </view>
+    <view class="cost-item" wx:if="{{costDetail.overtimeCost > 0}}">
+      <text class="cost-label">超时费用：</text>
+      <text class="cost-value">¥{{costDetail.overtimeCost}}</text>
+    </view>
+    <view class="cost-item" wx:if="{{costDetail.depositRefund > 0}}">
+      <text class="cost-label">押金退还：</text>
+      <text class="cost-value refund">-¥{{costDetail.depositRefund}}</text>
+    </view>
+    <view class="cost-divider"></view>
+    <view class="cost-item total">
+      <text class="cost-label">总计费用：</text>
+      <text class="cost-value">¥{{costDetail.totalCost}}</text>
+    </view>
+  </view>
+
+  <!-- 工作时长统计 -->
+  <view class="work-stats">
+    <view class="info-header">
+      <text class="info-title">工作统计</text>
+    </view>
+    <view class="stats-display">
+      <view class="stat-item">
+        <text class="stat-value">{{workStats.totalHours}}</text>
+        <text class="stat-label">总工作小时</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value">{{workStats.averageDaily}}</text>
+        <text class="stat-label">日均工作小时</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value">{{workStats.efficiency}}</text>
+        <text class="stat-label">工作效率</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系信息 -->
+  <view class="contact-info">
+    <view class="info-header">
+      <text class="info-title">服务联系</text>
+    </view>
+    <view class="contact-item">
+      <text class="contact-label">门店经理：</text>
+      <text class="contact-name">{{orderInfo.managerName}}</text>
+      <text class="phone-link" bindtap="makePhoneCall" data-phone="{{orderInfo.managerPhone}}">{{orderInfo.managerPhone}}</text>
+    </view>
+    <view class="contact-item">
+      <text class="contact-label">客服热线：</text>
+      <text class="phone-link" bindtap="makePhoneCall" data-phone="400-888-0000">400-888-0000</text>
+    </view>
+  </view>
+
+  <!-- 评价和建议 -->
+  <view class="feedback-section">
+    <view class="info-header">
+      <text class="info-title">服务评价</text>
+    </view>
+    <view class="rating-container">
+      <text class="rating-label">请为本次服务打分：</text>
+      <view class="stars-container">
+        <text class="star {{item <= rating ? 'active' : ''}}" 
+              wx:for="{{starArray}}" 
+              wx:key="item"
+              bindtap="setRating" 
+              data-rating="{{item}}">★</text>
+      </view>
+    </view>
+    <view class="feedback-input">
+      <textarea class="feedback-textarea" 
+                placeholder="请输入您的意见和建议（选填）" 
+                value="{{feedback}}"
+                bindinput="onFeedbackInput"
+                maxlength="200"></textarea>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="action-btn secondary" bindtap="submitFeedback" wx:if="{{rating > 0 || feedback}}">
+      提交评价
+    </button>
+    <button class="action-btn primary" bindtap="backToHome">
+      返回首页
+    </button>
+  </view>
+</view>
+
+<!-- 成功提示弹窗 -->
+<view class="modal-mask" wx:if="{{showSuccessModal}}" bindtap="hideSuccessModal">
+  <view class="modal-content success-modal" catchtap="stopPropagation">
+    <view class="modal-success-icon">
+      <text class="checkmark">✓</text>
+    </view>
+    <view class="modal-title">评价提交成功</view>
+    <view class="modal-subtitle">感谢您的宝贵意见！</view>
+    <button class="modal-btn" bindtap="hideSuccessModal">确定</button>
+  </view>
+</view>

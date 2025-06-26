@@ -33,7 +33,9 @@
     "pages/pickup-success/pickup-success",
     "pages/return-car/return-car",
     "pages/return-review/return-review",
-    "pages/payment-after-review/payment-after-review"
+    "pages/payment-after-review/payment-after-review",
+    "pages/order-complete/order-complete",
+    "pages/renewal-car/renewal-car"
   ],
   "permission": {
     "scope.userLocation": {

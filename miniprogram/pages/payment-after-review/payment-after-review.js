@@ -86,7 +86,7 @@ Page({
       dashboardImage: '/images/dashboard-sample.jpg', // 仪表盘照片
       overtimePrice: 800, // 超时单价：800元/天
       renewalPrice: 600, // 续租单价：600元/天
-      paidOvertimeDays: 2 // 已支付2天超时费用
+      paidOvertimeDays: 0 // 已支付2天超时费用
     };
 
     // 处理时间戳转换
@@ -453,7 +453,9 @@ Page({
                 success: () => {
                   // 跳转到订单完成页面
                   wx.redirectTo({
-                    url: '/pages/order-complete/order-complete?orderId=' + this.data.orderInfo.id
+                    // url: '/pages/order-complete/order-complete?orderId='
+                    //  + this.data.orderInfo.id
+                     url: '/pages/order-complete/order-complete'
                   });
                 }
               });

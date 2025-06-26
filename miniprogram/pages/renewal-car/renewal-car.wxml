@@ -1,0 +1,204 @@
+<view class="renew-container">
+  <!-- 订单信息 -->
+  <view class="order-info">
+    <view class="info-header">
+      <text class="info-title">订单信息</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">门店名称：</text>
+      <text class="info-value">{{orderInfo.storeName}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">管理员：</text>
+      <text class="info-value">{{orderInfo.managerName}}</text>
+      <text class="phone-link" bindtap="makePhoneCall" data-phone="{{orderInfo.managerPhone}}">{{orderInfo.managerPhone}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">车型名称：</text>
+      <text class="info-value">{{orderInfo.carModel}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">原租期：</text>
+      <text class="info-value">{{orderInfo.originalStartTime}} —— {{orderInfo.originalEndTime}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">原租天数：</text>
+      <text class="info-value highlight">{{orderInfo.originalDays}}天</text>
+    </view>
+  </view>
+
+  <!-- 会员购买卡片 -->
+  <view class="member-card" wx:if="{{showMemberCard}}">
+    <view class="info-header">
+      <text class="info-title">会员特权</text>
+    </view>
+    <view class="member-content">
+      <view class="member-benefits">
+        <view class="benefit-item">
+          <text class="benefit-icon">🎉</text>
+          <text class="benefit-text">续租享受{{membershipInfo.discountText}}优惠</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">⚡</text>
+          <text class="benefit-text">专属客服优先服务</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">🔧</text>
+          <text class="benefit-text">免费设备检测服务</text>
+        </view>
+      </view>
+      <view class="member-purchase">
+        <view class="purchase-option">
+          <checkbox-group bindchange="onPurchaseMembershipChange">
+            <label class="checkbox-label">
+              <checkbox value="true" checked="{{purchaseMembership}}" color="#ff7200"/>
+              <text class="purchase-text">购买会员</text>
+              <text class="member-price">¥{{membershipInfo.price}}</text>
+            </label>
+          </checkbox-group>
+        </view>
+        <view class="member-tip">
+          <text class="tip-text">本次续租立即享受会员价格</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 续租设置 -->
+  <view class="renew-section">
+    <view class="info-header">
+      <text class="info-title">续租设置</text>
+    </view>
+    <view class="renew-input-row">
+      <text class="input-label">续租天数：</text>
+      <input 
+        class="day-input" 
+        type="number" 
+        placeholder="请输入续租天数"
+        value="{{renewDays}}"
+        bindinput="onRenewDaysChange"
+        bindblur="onRenewDaysBlur"
+        min="1"
+      />
+      <text class="input-unit">天</text>
+    </view>
+    <view class="input-tip">*最少续租1天</view>
+    <view class="error-tip" wx:if="{{daysErrorTip}}">
+      <text class="error-text">{{daysErrorTip}}</text>
+    </view>
+    
+    <!-- 新租期显示 -->
+    <view class="new-period" wx:if="{{showNewPeriod}}">
+      <view class="period-header">
+        <text class="period-title">新租期</text>
+      </view>
+      <view class="period-display">
+        <text class="period-text">{{newStartTime}} —— {{newEndTime}}</text>
+        <text class="period-days">(共{{totalDays}}天)</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 支付明细 -->
+  <view class="payment-detail" wx:if="{{showPaymentDetail}}">
+    <view class="info-header">
+      <text class="info-title">支付明细</text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">续租天数：</text>
+      <text class="detail-value">{{renewDays}}天</text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">续租单价：</text>
+      <text class="detail-value">
+        ¥{{currentRenewPrice}}/天
+        <text class="original-price" wx:if="{{(isMember || purchaseMembership) && currentRenewPrice != renewPrice}}">
+          原价¥{{renewPrice}}
+        </text>
+      </text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">续租小计：</text>
+      <text class="detail-value">¥{{renewSubtotal}}</text>
+    </view>
+    
+    <!-- 会员费用 -->
+    <view class="detail-row" wx:if="{{purchaseMembership && membershipFee > 0}}">
+      <text class="detail-label">会员费用：</text>
+      <text class="detail-value member-fee">¥{{membershipFee}}</text>
+    </view>
+    
+    <view class="detail-row subtotal-row">
+      <text class="detail-label">服务费前小计：</text>
+      <text class="detail-value">¥{{serviceSubtotal}}</text>
+    </view>
+    
+    <!-- 系统服务费 -->
+    <view class="detail-row">
+      <text class="detail-label">系统服务费({{serviceRateDisplay}}%)：</text>
+      <text class="detail-value service-fee">¥{{serviceFee}}</text>
+    </view>
+    
+    <view class="detail-row total-row">
+      <text class="detail-label">总计：</text>
+      <text class="detail-value total-price">¥{{totalAmount}}</text>
+    </view>
+  </view>
+
+  <!-- 底部支付区域 -->
+  <view class="payment-section">
+    <view class="payment-left">
+      <text class="payment-label">需要支付：</text>
+      <text class="payment-amount">¥{{totalAmount || '0.00'}}</text>
+    </view>
+    <button class="payment-btn" bindtap="submitPayment" disabled="{{!canPay}}">
+      {{paymentButtonText}}
+    </button>
+  </view>
+</view>
+
+<!-- 支付确认弹窗 -->
+<view class="modal-mask" wx:if="{{showPaymentModal}}" bindtap="hidePaymentModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">确认支付</text>
+      <text class="modal-close" bindtap="hidePaymentModal">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="confirm-detail">
+        <view class="confirm-row">
+          <text class="confirm-label">续租天数：</text>
+          <text class="confirm-value">{{renewDays}}天</text>
+        </view>
+        <view class="confirm-row">
+          <text class="confirm-label">续租单价：</text>
+          <text class="confirm-value">¥{{currentRenewPrice}}/天</text>
+        </view>
+        <view class="confirm-row">
+          <text class="confirm-label">续租小计：</text>
+          <text class="confirm-value">¥{{renewSubtotal}}</text>
+        </view>
+        <view class="confirm-row" wx:if="{{purchaseMembership && membershipFee > 0}}">
+          <text class="confirm-label">会员费用：</text>
+          <text class="confirm-value">¥{{membershipFee}}</text>
+        </view>
+        <view class="confirm-row">
+          <text class="confirm-label">系统服务费：</text>
+          <text class="confirm-value">¥{{serviceFee}}</text>
+        </view>
+        <view class="confirm-row">
+          <text class="confirm-label">新租期：</text>
+          <text class="confirm-value">{{newStartTime}} —— {{newEndTime}}</text>
+        </view>
+        <view class="confirm-row total-confirm">
+          <text class="confirm-label">支付金额：</text>
+          <text class="confirm-value highlight">¥{{totalAmount}}</text>
+        </view>
+      </view>
+      <view class="modal-buttons">
+        <button class="cancel-btn" bindtap="hidePaymentModal">取消</button>
+        <button class="confirm-btn" bindtap="confirmPayment">确认支付</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -470,9 +470,8 @@ Page({
   // 续租 - 租赁中状态
   handleRenewal: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    wx.showToast({
-      title: '续租功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: `/pages/renewal-car/renewal-car`,
     });
   },
   
