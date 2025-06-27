@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "续租成功",
+  "navigationBarBackgroundColor": "#ff7200",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f5f7fa",
+  "backgroundTextStyle": "dark",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50,
+  "disableScroll": false,
+  "usingComponents": {}
+}

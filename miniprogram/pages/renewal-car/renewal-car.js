@@ -7,8 +7,8 @@ Page({
       managerName: '',
       managerPhone: '',
       carModel: '',
-      originalStartTime: '',
-      originalEndTime: '',
+      originalStartTime: 0, // 时间戳
+      originalEndTime: 0, // 时间戳
       originalDays: 0
     },
     
@@ -20,7 +20,7 @@ Page({
     
     // 系统服务费率
     serviceRate: 0.006, // 默认0.6%，从后台获取
-    serviceRateDisplay: '0.6%', // 默认0.6%，从后台获取
+    serviceRatePercent: '0.6', // 用于页面显示的百分比文本
     
     // 会员相关
     isMember: false, // 用户是否是会员
@@ -31,6 +31,10 @@ Page({
       discountText: '8折'
     },
     purchaseMembership: false, // 是否购买会员
+    
+    // 格式化后的时间显示
+    originalStartTimeText: '',
+    originalEndTimeText: '',
     
     // 计算结果
     showNewPeriod: false,
@@ -85,60 +89,231 @@ Page({
 
   // 获取订单信息
   async getOrderInfo(orderId) {
-    if (!orderId) {
-      // 使用模拟数据
+    const DataManager = require('../../utils/data-manager.js');
+    
+    try {
+      // 使用智能数据获取（优先使用缓存）
+      const orderData = await DataManager.getOrderDataSmart(
+        orderId, 
+        this.fetchOrderFromAPI.bind(this),
+        false // 不强制刷新
+      );
+
+      // 设置页面数据
       this.setData({
         orderInfo: {
-          orderId: 'mock_order_001',
-          storeName: '重庆渝北区分店',
-          managerName: '张经理',
-          managerPhone: '138****8888',
-          carModel: '现代挖掘机R225LC-9T',
-          originalStartTime: '09月16日 21:00',
-          originalEndTime: '09月18日 21:00',
-          originalDays: 2
+          orderId: orderData.orderId,
+          storeName: orderData.storeName,
+          managerName: orderData.managerName,
+          managerPhone: orderData.managerPhone,
+          carModel: orderData.carModel,
+          originalStartTime: orderData.originalStartTime,
+          originalEndTime: orderData.originalEndTime,
+          originalDays: orderData.originalDays
         },
-        renewPrice: 800,
-        memberRenewPrice: 640 // 8折
+        originalStartTimeText: this.formatDateTime(new Date(orderData.originalStartTime)),
+        originalEndTimeText: this.formatDateTime(new Date(orderData.originalEndTime)),
+        renewPrice: orderData.renewPrice || 800,
+        memberRenewPrice: orderData.memberRenewPrice || 640
       });
-      return;
+      
+    } catch (error) {
+      console.error('获取订单信息失败', error);
+      // 使用模拟数据作为备用
+      this.useDefaultOrderData(orderId);
     }
+  },
 
+  // 从API获取订单数据
+  async fetchOrderFromAPI(orderId) {
     try {
-      // 实际API调用
       const response = await this.requestAPI({
         url: '/api/order/detail',
         method: 'GET',
         data: { orderId }
       });
 
-      if (response.success) {
-        this.setData({
-          orderInfo: response.data.orderInfo,
-          renewPrice: response.data.renewPrice,
-          memberRenewPrice: response.data.memberRenewPrice
-        });
-      } else {
+      if (!response.success) {
         throw new Error(response.message || '获取订单信息失败');
       }
+
+      return {
+        orderId: response.data.orderId,
+        storeName: response.data.storeName,
+        managerName: response.data.managerName,
+        managerPhone: response.data.managerPhone,
+        carModel: response.data.carModel,
+        originalStartTime: response.data.originalStartTime,
+        originalEndTime: response.data.originalEndTime,
+        originalDays: response.data.originalDays,
+        renewPrice: response.data.renewPrice,
+        memberRenewPrice: response.data.memberRenewPrice
+      };
+    } catch (error) {
+      // API调用失败，抛出错误让上层处理
+      throw error;
+    }
+  },
+
+  // 使用默认订单数据
+  useDefaultOrderData(orderId) {
+    const mockData = {
+      orderId: orderId || 'mock_order_001',
+      storeName: '重庆渝北区分店',
+      managerName: '张经理',
+      managerPhone: '138****8888',
+      carModel: '现代挖掘机R225LC-9T',
+      originalStartTime: 1726488000000,
+      originalEndTime: 1726660800000,
+      originalDays: 2,
+      renewPrice: 800,
+      memberRenewPrice: 640
+    };
+    
+    this.setData({
+      orderInfo: {
+        orderId: mockData.orderId,
+        storeName: mockData.storeName,
+        managerName: mockData.managerName,
+        managerPhone: mockData.managerPhone,
+        carModel: mockData.carModel,
+        originalStartTime: mockData.originalStartTime,
+        originalEndTime: mockData.originalEndTime,
+        originalDays: mockData.originalDays
+      },
+      originalStartTimeText: this.formatDateTime(new Date(mockData.originalStartTime)),
+      originalEndTimeText: this.formatDateTime(new Date(mockData.originalEndTime)),
+      renewPrice: mockData.renewPrice,
+      memberRenewPrice: mockData.memberRenewPrice
+    });
+
+    // 缓存模拟数据
+    const DataManager = require('../../utils/data-manager.js');
+    DataManager.cacheOrderData(mockData.orderId, mockData);
+  },
+  async initPage(options) {
+    wx.showLoading({
+      title: '加载中...'
+    });
+
+    try {
+      // 并行获取基础数据
+      await Promise.all([
+        this.getOrderInfo(options.orderId),
+        this.checkUserMembership(),
+        this.getServiceRate()
+      ]);
+      
+      wx.hideLoading();
+    } catch (error) {
+      wx.hideLoading();
+      console.error('页面初始化失败', error);
+      wx.showToast({
+        title: '加载失败，请重试',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 获取订单信息
+  async getOrderInfo(orderId) {
+    // 引入数据管理工具
+    const DataManager = require('../../utils/data-manager.js');
+    
+    try {
+      // 使用智能数据获取（优先使用缓存）
+      const orderData = await DataManager.getOrderDataSmart(
+        orderId, 
+        this.fetchOrderFromAPI.bind(this),
+        false // 不强制刷新
+      );
+
+      // 设置页面数据
+      this.setData({
+        orderInfo: {
+          orderId: orderData.orderId,
+          storeName: orderData.storeName,
+          managerName: orderData.managerName,
+          managerPhone: orderData.managerPhone,
+          carModel: orderData.carModel,
+          originalStartTime: orderData.originalStartTime,
+          originalEndTime: orderData.originalEndTime,
+          originalDays: orderData.originalDays
+        },
+        originalStartTimeText: this.formatDateTime(new Date(orderData.originalStartTime)),
+        originalEndTimeText: this.formatDateTime(new Date(orderData.originalEndTime)),
+        renewPrice: orderData.renewPrice,
+        memberRenewPrice: orderData.memberRenewPrice
+      });
+      
     } catch (error) {
       console.error('获取订单信息失败', error);
       // 使用模拟数据作为备用
-      this.setData({
-        orderInfo: {
-          orderId: orderId || 'mock_order_001',
-          storeName: '重庆渝北区分店',
-          managerName: '张经理',
-          managerPhone: '138****8888',
-          carModel: '现代挖掘机R225LC-9T',
-          originalStartTime: '09月16日 21:00',
-          originalEndTime: '09月18日 21:00',
-          originalDays: 2
-        },
-        renewPrice: 800,
-        memberRenewPrice: 640
-      });
+      this.useDefaultOrderData(orderId);
     }
+  },
+
+  // 从API获取订单数据
+  async fetchOrderFromAPI(orderId) {
+    const response = await this.requestAPI({
+      url: '/api/order/detail',
+      method: 'GET',
+      data: { orderId }
+    });
+
+    if (!response.success) {
+      throw new Error(response.message || '获取订单信息失败');
+    }
+
+    return {
+      orderId: response.data.orderId,
+      storeName: response.data.storeName,
+      managerName: response.data.managerName,
+      managerPhone: response.data.managerPhone,
+      carModel: response.data.carModel,
+      originalStartTime: response.data.originalStartTime,
+      originalEndTime: response.data.originalEndTime,
+      originalDays: response.data.originalDays,
+      renewPrice: response.data.renewPrice,
+      memberRenewPrice: response.data.memberRenewPrice
+    };
+  },
+
+  // 使用默认订单数据
+  useDefaultOrderData(orderId) {
+    const mockData = {
+      orderId: orderId || 'mock_order_001',
+      storeName: '重庆渝北区分店',
+      managerName: '张经理',
+      managerPhone: '138****8888',
+      carModel: '现代挖掘机R225LC-9T',
+      originalStartTime: 1726488000000,
+      originalEndTime: 1726660800000,
+      originalDays: 2,
+      renewPrice: 800,
+      memberRenewPrice: 640
+    };
+    
+    this.setData({
+      orderInfo: {
+        orderId: mockData.orderId,
+        storeName: mockData.storeName,
+        managerName: mockData.managerName,
+        managerPhone: mockData.managerPhone,
+        carModel: mockData.carModel,
+        originalStartTime: mockData.originalStartTime,
+        originalEndTime: mockData.originalEndTime,
+        originalDays: mockData.originalDays
+      },
+      originalStartTimeText: this.formatDateTime(new Date(mockData.originalStartTime)),
+      originalEndTimeText: this.formatDateTime(new Date(mockData.originalEndTime)),
+      renewPrice: mockData.renewPrice,
+      memberRenewPrice: mockData.memberRenewPrice
+    });
+
+    // 缓存模拟数据
+    const DataManager = require('../../utils/data-manager.js');
+    DataManager.cacheOrderData(mockData.orderId, mockData);
   },
 
   // 检查用户会员状态
@@ -185,27 +360,24 @@ Page({
         method: 'GET'
       });
 
-      let serviceRate = 0.006; // 默认值
       if (response.success) {
-        serviceRate = response.data.serviceRate || 0.006;
+        const rate = response.data.serviceRate || 0.006;
+        this.setData({
+          serviceRate: rate,
+          serviceRatePercent: (rate * 100).toFixed(1)
+        });
       } else {
         throw new Error(response.message || '获取服务费率失败');
       }
-
-      this.setData({
-        serviceRate,
-        serviceRateDisplay: (serviceRate * 100).toFixed(1)
-      });
     } catch (error) {
       console.error('获取服务费率失败', error);
-      const defaultRate = 0.006;
+      // 使用默认值0.6%
       this.setData({
-        serviceRate: defaultRate,
-        serviceRateDisplay: (defaultRate * 100).toFixed(1)
+        serviceRate: 0.006,
+        serviceRatePercent: '0.6'
       });
     }
   },
-
 
   // API请求封装
   requestAPI(options) {
@@ -286,8 +458,10 @@ Page({
 
   // 购买会员选择切换
   onPurchaseMembershipChange(e) {
+    // checkbox-group返回的是数组，如果选中则包含值，未选中则为空数组
+    const selected = e.detail.value.length > 0;
     this.setData({
-      purchaseMembership: e.detail.value
+      purchaseMembership: selected
     });
     
     // 重新计算价格
@@ -303,12 +477,11 @@ Page({
       return;
     }
 
-    // 计算新的租期
-    const originalEndDate = this.parseDateTime(this.data.orderInfo.originalEndTime);
-    const originalStartDate = this.parseDateTime(this.data.orderInfo.originalStartTime);
+    // 计算新的租期 - 从时间戳计算
+    const originalEndDate = new Date(this.data.orderInfo.originalEndTime);
     const newEndDate = new Date(originalEndDate.getTime() + days * 24 * 60 * 60 * 1000);
     
-    const newStartTime = this.data.orderInfo.originalStartTime;
+    const newStartTime = this.data.originalEndTimeText;
     const newEndTime = this.formatDateTime(newEndDate);
     const totalDays = this.data.orderInfo.originalDays + days;
 
@@ -386,18 +559,7 @@ Page({
     });
   },
 
-  // 解析日期时间字符串
-  parseDateTime(dateTimeStr) {
-    const currentYear = new Date().getFullYear();
-    const match = dateTimeStr.match(/(\d{2})月(\d{1,2})日\s+(\d{1,2}):(\d{2})/);
-    if (match) {
-      const [, month, day, hour, minute] = match;
-      return new Date(currentYear, parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
-    }
-    return new Date();
-  },
-
-  // 格式化日期时间
+  // 格式化日期时间 - 处理时间戳
   formatDateTime(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -484,17 +646,60 @@ Page({
       });
 
       if (response.success) {
+        // 更新订单数据到缓存
+        const DataManager = require('../../utils/data-manager.js');
+        const updatedOrderData = {
+          ...this.data.orderInfo,
+          status: 'renewed',
+          newEndTime: this.data.newEndTime,
+          totalDays: this.data.totalDays,
+          lastRenewalTime: Date.now()
+        };
+        
+        DataManager.updateOrderData(this.data.orderInfo.orderId, updatedOrderData);
+
         wx.showToast({
           title: '支付成功',
           icon: 'success',
           duration: 1500
         });
         
-        // 跳转到续租成功页面
+        // 跳转到续租成功页面，传递完整数据
         setTimeout(() => {
-          wx.redirectTo({
-            url: `/pages/renew-success/renew-success?orderId=${this.data.orderInfo.orderId}&renewDays=${this.data.renewDays}&totalAmount=${this.data.totalAmount}&newEndTime=${this.data.newEndTime}&purchaseMembership=${this.data.purchaseMembership}`
-          });
+          const NavigationUtils = require('../../utils/navigation-utils.js');
+          
+          // 准备传递给成功页面的完整数据
+          const successData = {
+            orderId: this.data.orderInfo.orderId,
+            renewDays: this.data.renewDays,
+            totalAmount: this.data.totalAmount,
+            newEndTime: this.data.newEndTime,
+            purchaseMembership: this.data.purchaseMembership,
+            // 传递详细的支付信息
+            paymentDetails: {
+              renewAmount: this.data.renewSubtotal,
+              membershipAmount: this.data.membershipFee,
+              serviceFee: this.data.serviceFee,
+              totalAmount: this.data.totalAmount,
+              payTime: Date.now()
+            },
+            // 传递完整的订单信息
+            orderInfo: {
+              orderId: this.data.orderInfo.orderId,
+              carModel: this.data.orderInfo.carModel,
+              managerName: this.data.orderInfo.managerName,
+              managerPhone: this.data.orderInfo.managerPhone,
+              storeName: this.data.orderInfo.storeName,
+              originalStartTime: this.data.orderInfo.originalStartTime,
+              originalEndTime: this.data.orderInfo.originalEndTime,
+              originalDays: this.data.orderInfo.originalDays
+            }
+          };
+
+          // 将完整数据设置到全局，避免成功页面重新查询
+          DataManager.setGlobalOrderData(successData);
+          
+          NavigationUtils.toRenewalSuccessPage(successData);
         }, 1500);
       } else {
         throw new Error(response.message || '支付失败');
@@ -506,6 +711,18 @@ Page({
       const paymentSuccess = Math.random() > 0.1; // 90%成功率
       
       if (paymentSuccess) {
+        // 更新订单数据到缓存
+        const DataManager = require('../../utils/data-manager.js');
+        const updatedOrderData = {
+          ...this.data.orderInfo,
+          status: 'renewed',
+          newEndTime: this.data.newEndTime,
+          totalDays: this.data.totalDays,
+          lastRenewalTime: Date.now()
+        };
+        
+        DataManager.updateOrderData(this.data.orderInfo.orderId, updatedOrderData);
+
         wx.showToast({
           title: '支付成功',
           icon: 'success',
@@ -513,9 +730,40 @@ Page({
         });
         
         setTimeout(() => {
-          wx.redirectTo({
-            url: `/pages/renew-success/renew-success?orderId=${this.data.orderInfo.orderId}&renewDays=${this.data.renewDays}&totalAmount=${this.data.totalAmount}&newEndTime=${this.data.newEndTime}&purchaseMembership=${this.data.purchaseMembership}`
-          });
+          const NavigationUtils = require('../../utils/navigation-utils.js');
+          
+          // 准备传递给成功页面的完整数据
+          const successData = {
+            orderId: this.data.orderInfo.orderId,
+            renewDays: this.data.renewDays,
+            totalAmount: this.data.totalAmount,
+            newEndTime: this.data.newEndTime,
+            purchaseMembership: this.data.purchaseMembership,
+            // 传递详细的支付信息
+            paymentDetails: {
+              renewAmount: this.data.renewSubtotal,
+              membershipAmount: this.data.membershipFee,
+              serviceFee: this.data.serviceFee,
+              totalAmount: this.data.totalAmount,
+              payTime: Date.now()
+            },
+            // 传递完整的订单信息
+            orderInfo: {
+              orderId: this.data.orderInfo.orderId,
+              carModel: this.data.orderInfo.carModel,
+              managerName: this.data.orderInfo.managerName,
+              managerPhone: this.data.orderInfo.managerPhone,
+              storeName: this.data.orderInfo.storeName,
+              originalStartTime: this.data.orderInfo.originalStartTime,
+              originalEndTime: this.data.orderInfo.originalEndTime,
+              originalDays: this.data.orderInfo.originalDays
+            }
+          };
+
+          // 将完整数据设置到全局，避免成功页面重新查询
+          DataManager.setGlobalOrderData(successData);
+          
+          NavigationUtils.toRenewalSuccessPage(successData);
         }, 1500);
       } else {
         wx.showToast({

@@ -1,0 +1,125 @@
+<view class="success-container">
+  <!-- 成功状态 -->
+  <view class="success-header">
+    <view class="success-icon-wrapper">
+      <view class="success-icon">
+        <text class="icon-check">✓</text>
+      </view>
+      <view class="success-ripple"></view>
+    </view>
+    <text class="success-title">续租成功</text>
+    <text class="success-subtitle">您的设备租期已成功延长</text>
+  </view>
+
+  <!-- 订单信息卡片 -->
+  <view class="order-card">
+    <view class="card-header">
+      <text class="card-title">订单详情</text>
+      <text class="order-id" bindtap="copyOrderId">订单号：{{orderInfo.orderId}}</text>
+    </view>
+    
+    <view class="order-details">
+      <view class="detail-item">
+        <text class="detail-label">设备名称</text>
+        <text class="detail-value">{{orderInfo.carModel}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">续租天数</text>
+        <text class="detail-value highlight">{{renewInfo.days}}天</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">新租期</text>
+        <text class="detail-value period-text">{{renewInfo.newPeriod}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 支付信息卡片 -->
+  <view class="payment-card">
+    <view class="card-header">
+      <text class="card-title">支付详情</text>
+      <text class="payment-time">{{paymentInfo.payTime}}</text>
+    </view>
+    
+    <view class="payment-details">
+      <view class="payment-item" wx:if="{{paymentInfo.renewAmount > 0}}">
+        <text class="payment-label">续租费用</text>
+        <text class="payment-value">¥{{paymentInfo.renewAmount}}</text>
+      </view>
+      <view class="payment-item" wx:if="{{paymentInfo.membershipAmount > 0}}">
+        <text class="payment-label">会员费用</text>
+        <text class="payment-value member-fee">¥{{paymentInfo.membershipAmount}}</text>
+      </view>
+      <view class="payment-item" wx:if="{{paymentInfo.serviceFee > 0}}">
+        <text class="payment-label">系统服务费</text>
+        <text class="payment-value service-fee">¥{{paymentInfo.serviceFee}}</text>
+      </view>
+      <view class="payment-item total-item">
+        <text class="payment-label">实付金额</text>
+        <text class="payment-value total-amount">¥{{paymentInfo.totalAmount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 会员升级提示 -->
+  <view class="member-upgrade" wx:if="{{showMemberUpgrade}}">
+    <view class="upgrade-icon">🎉</view>
+    <view class="upgrade-content">
+      <text class="upgrade-title">恭喜您成为会员！</text>
+      <text class="upgrade-desc">享受续租8折优惠及更多专属服务</text>
+    </view>
+  </view>
+
+  <!-- 服务联系 -->
+  <view class="service-card">
+    <view class="service-header">
+      <text class="service-title">需要帮助？</text>
+    </view>
+    <view class="service-content">
+      <view class="service-item" bindtap="contactManager">
+        <view class="service-icon">📞</view>
+        <view class="service-info">
+          <text class="service-name">联系管理员</text>
+          <text class="service-desc">{{orderInfo.managerName}} {{orderInfo.managerPhone}}</text>
+        </view>
+        <view class="service-arrow">></view>
+      </view>
+      <view class="service-item" bindtap="rateService">
+        <view class="service-icon">⭐</view>
+        <view class="service-info">
+          <text class="service-name">服务评价</text>
+          <text class="service-desc">为本次续租服务打分</text>
+        </view>
+        <view class="service-arrow">></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions" wx:if="{{orderInfo.orderId}}">
+    <view class="quick-action-item" bindtap="savePaymentProof">
+      <view class="action-icon">📄</view>
+      <text class="action-text">保存凭证</text>
+    </view>
+    <view class="quick-action-item" bindtap="copyOrderId">
+      <view class="action-icon">📋</view>
+      <text class="action-text">复制订单号</text>
+    </view>
+    <view class="quick-action-item" bindtap="rateService">
+      <view class="action-icon">⭐</view>
+      <text class="action-text">评价服务</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="btn-secondary" bindtap="backToList">返回订单列表</button>
+    <button class="btn-primary" bindtap="viewOrderDetail">查看订单详情</button>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="bottom-tips">
+    <text class="tip-text">租期到期前我们会提前通知您</text>
+    <text class="tip-text">如有疑问请及时联系管理员</text>
+  </view>
+</view>

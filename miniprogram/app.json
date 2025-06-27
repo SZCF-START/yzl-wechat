@@ -35,7 +35,8 @@
     "pages/return-review/return-review",
     "pages/payment-after-review/payment-after-review",
     "pages/order-complete/order-complete",
-    "pages/renewal-car/renewal-car"
+    "pages/renewal-car/renewal-car",
+    "pages/renewal-success/renewal-success"
   ],
   "permission": {
     "scope.userLocation": {

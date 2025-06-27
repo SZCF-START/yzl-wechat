@@ -19,7 +19,7 @@
     </view>
     <view class="info-row">
       <text class="info-label">原租期：</text>
-      <text class="info-value">{{orderInfo.originalStartTime}} —— {{orderInfo.originalEndTime}}</text>
+      <text class="info-value">{{originalStartTimeText}} —— {{originalEndTimeText}}</text>
     </view>
     <view class="info-row">
       <text class="info-label">原租天数：</text>
@@ -51,7 +51,7 @@
         <view class="purchase-option">
           <checkbox-group bindchange="onPurchaseMembershipChange">
             <label class="checkbox-label">
-              <checkbox value="true" checked="{{purchaseMembership}}" color="#ff7200"/>
+              <checkbox value="purchase" checked="{{purchaseMembership}}" color="#ff7200"/>
               <text class="purchase-text">购买会员</text>
               <text class="member-price">¥{{membershipInfo.price}}</text>
             </label>
@@ -135,7 +135,7 @@
     
     <!-- 系统服务费 -->
     <view class="detail-row">
-      <text class="detail-label">系统服务费({{serviceRateDisplay}}%)：</text>
+      <text class="detail-label">系统服务费({{serviceRatePercent}}%)：</text>
       <text class="detail-value service-fee">¥{{serviceFee}}</text>
     </view>
     
