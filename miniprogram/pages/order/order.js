@@ -146,13 +146,13 @@ Page({
         const responseData = await this.fetchOrderListFromAPI(params);
         
         // 缓存列表数据（1分钟过期）
-        DataManager.cacheOrderData(cacheKey, responseData, 60 * 1000);
+        // DataManager.cacheOrderData(cacheKey, responseData, 60 * 1000);
         
         // 同时缓存每个订单的详细信息（5分钟过期）
-        responseData.list.forEach(order => {
-          const orderDetail = this.buildOrderDetailFromListItem(order);
-          DataManager.cacheOrderData(order.id, orderDetail, 5 * 60 * 1000);
-        });
+        // responseData.list.forEach(order => {
+        //   const orderDetail = this.buildOrderDetailFromListItem(order);
+        //   DataManager.cacheOrderData(order.id, orderDetail, 5 * 60 * 1000);
+        // });
         
         this.handleOrderListResponse(responseData, isRefresh);
       }
@@ -244,15 +244,85 @@ Page({
     this.getOrderList(false);
   },
   
-  // 模拟API响应数据（保持原有逻辑，确保数据一致性）
+  // 模拟API响应数据（增加仪表盘数据和设备信息）
   getMockResponseData: function(params) {
     const { orderType, orderStatus, pageNum, pageSize } = params;
     
     // 模拟不同状态的订单数据
-    const carModels = ["现代挖掘机R225LC-9T", "三一SY16C", "徐工XE27E", "柳工915E", "临工LG6150"];
-    const stores = ["重庆渝北区分店", "长沙岳麓区店", "长沙火车南站店", "长沙五一广场店", "长沙黄花机场店"];
-    const managers = ["张经理", "李经理", "王经理", "刘经理", "陈经理"];
-    const phones = ["138****8888", "139****6666", "187****1234", "150****9999", "186****5555"];
+    const equipmentModels = [
+      {
+        model: "现代挖掘机R225LC-9T",
+        equipmentId: "EQ001",
+        brand: "现代",
+        category: "挖掘机"
+      },
+      {
+        model: "三一SY16C",
+        equipmentId: "EQ002", 
+        brand: "三一",
+        category: "挖掘机"
+      },
+      {
+        model: "徐工XE27E",
+        equipmentId: "EQ003",
+        brand: "徐工", 
+        category: "挖掘机"
+      },
+      {
+        model: "柳工915E",
+        equipmentId: "EQ004",
+        brand: "柳工",
+        category: "挖掘机"
+      },
+      {
+        model: "临工LG6150",
+        equipmentId: "EQ005",
+        brand: "临工",
+        category: "装载机"
+      }
+    ];
+    
+    const stores = [
+      {
+        name: "重庆渝北区分店",
+        storeId: "ST001",
+        address: "重庆市渝北区龙溪街道",
+        phone: "023-67788999"
+      },
+      {
+        name: "长沙岳麓区店", 
+        storeId: "ST002",
+        address: "长沙市岳麓区桐梓坡路",
+        phone: "0731-88889999"
+      },
+      {
+        name: "长沙火车南站店",
+        storeId: "ST003", 
+        address: "长沙市雨花区劳动东路",
+        phone: "0731-85556666"
+      },
+      {
+        name: "长沙五一广场店",
+        storeId: "ST004",
+        address: "长沙市芙蓉区五一大道",
+        phone: "0731-82223333"
+      },
+      {
+        name: "长沙黄花机场店",
+        storeId: "ST005", 
+        address: "长沙市长沙县黄花镇",
+        phone: "0731-96777888"
+      }
+    ];
+    
+    const managers = [
+      { name: "张经理", phone: "138****8888", managerId: "MG001" },
+      { name: "李经理", phone: "139****6666", managerId: "MG002" },
+      { name: "王经理", phone: "187****1234", managerId: "MG003" },
+      { name: "刘经理", phone: "150****9999", managerId: "MG004" },
+      { name: "陈经理", phone: "186****5555", managerId: "MG005" }
+    ];
+    
     const carImages = [
       "../../assets/rsg.png", 
       "../../assets/rsg.png", 
@@ -299,10 +369,14 @@ Page({
     
     // 随机生成订单数据
     for (let i = 0; i < currentPageItemCount; i++) {
-      const randomCarIndex = Math.floor(Math.random() * carModels.length);
+      const randomEquipmentIndex = Math.floor(Math.random() * equipmentModels.length);
       const randomStoreIndex = Math.floor(Math.random() * stores.length);
       const randomManagerIndex = Math.floor(Math.random() * managers.length);
       const rentalDays = Math.floor(Math.random() * 7) + 1;
+      
+      const selectedEquipment = equipmentModels[randomEquipmentIndex];
+      const selectedStore = stores[randomStoreIndex];
+      const selectedManager = managers[randomManagerIndex];
       
       const pickupDate = new Date(startDate);
       pickupDate.setDate(startDate.getDate() + Math.floor(Math.random() * 10));
@@ -349,23 +423,91 @@ Page({
       
       const orderId = `ORDER_${Date.now()}_${i}_${pageNum}_${orderType}_${orderStatus}`;
       
+      // 模拟仪表盘数据（根据订单状态）
+      let dashboardData = null;
+      if (actualOrderStatus >= 1) { // 已出车的订单有仪表盘数据
+        dashboardData = {
+          pickupReading: Math.floor(Math.random() * 10000) + 5000, // 取车时读数
+          currentReading: actualOrderStatus === 1 ? Math.floor(Math.random() * 12000) + 7000 : null, // 当前读数（仅租赁中有）
+          returnReading: actualOrderStatus >= 2 ? Math.floor(Math.random() * 15000) + 8000 : null, // 还车读数（已完成有）
+          fuelLevel: Math.floor(Math.random() * 100), // 燃油量百分比
+          lastUpdateTime: Date.now() - Math.floor(Math.random() * 3600000) // 最后更新时间
+        };
+      }
+      
+      // 模拟照片数据
+      const photoData = {
+        pickupPhotos: actualOrderStatus >= 1 ? [
+          { url: '../../assets/pickup1.jpg', type: 'front', timestamp: pickupDate.getTime() },
+          { url: '../../assets/pickup2.jpg', type: 'side', timestamp: pickupDate.getTime() },
+          { url: '../../assets/pickup3.jpg', type: 'dashboard', timestamp: pickupDate.getTime() }
+        ] : [],
+        returnPhotos: actualOrderStatus >= 2 ? [
+          { url: '../../assets/return1.jpg', type: 'front', timestamp: returnDate.getTime() },
+          { url: '../../assets/return2.jpg', type: 'side', timestamp: returnDate.getTime() },
+          { url: '../../assets/return3.jpg', type: 'dashboard', timestamp: returnDate.getTime() }
+        ] : []
+      };
+      
       mockOrders.push({
         id: orderId,
         statusText: statusText,
         orderStatus: actualOrderStatus,
         displayStatus: orderStatus,
         price: price,
-        carModel: carModels[randomCarIndex],
-        carImage: carImages[randomCarIndex % carImages.length],
-        pickupStore: stores[randomStoreIndex],
-        returnStore: stores[randomStoreIndex],
-        managerName: managers[randomManagerIndex],
-        managerPhone: phones[randomManagerIndex],
+        
+        // 设备信息
+        equipmentId: selectedEquipment.equipmentId,
+        equipmentModel: selectedEquipment.model,
+        carModel: selectedEquipment.model, // 保持兼容性
+        equipmentBrand: selectedEquipment.brand,
+        equipmentCategory: selectedEquipment.category,
+        carImage: carImages[randomEquipmentIndex % carImages.length],
+        
+        // 门店信息
+        storeId: selectedStore.storeId,
+        pickupStore: selectedStore.name,
+        returnStore: selectedStore.name,
+        storeAddress: selectedStore.address,
+        storePhone: selectedStore.phone,
+        
+        // 管理员信息
+        managerId: selectedManager.managerId,
+        managerName: selectedManager.name,
+        managerPhone: selectedManager.phone,
+        
+        // 时间信息
         pickupTime: formatDate(pickupDate),
         returnTime: formatDate(returnDate),
         rentalDays: rentalDays,
+        pickupTimestamp: pickupDate.getTime(),
+        returnTimestamp: returnDate.getTime(),
+        
+        // 业务数据
         orderType: orderType,
-        isLeftAligned: false
+        isLeftAligned: false,
+        
+        // 仪表盘数据
+        dashboardData: dashboardData,
+        
+        // 照片数据
+        pickupPhotos: photoData.pickupPhotos,
+        returnPhotos: photoData.returnPhotos,
+        
+        // 续租相关
+        renewPrice: 800, // 标准续租价格
+        memberRenewPrice: 640, // 会员续租价格
+        
+        // 额外业务字段
+        operatorInfo: actualOrderStatus >= 1 ? {
+          name: "操作员" + (i + 1),
+          phone: "159****" + String(1000 + i).substr(1),
+          certNo: "操作证" + String(10000 + i).substr(1)
+        } : null,
+        
+        // 版本控制
+        dataVersion: this.generateDataVersion(),
+        lastUpdateTime: Date.now()
       });
     }
     
@@ -376,6 +518,11 @@ Page({
       totalCount: totalCount,
       totalPage: totalPage
     };
+  },
+
+  // 生成数据版本号
+  generateDataVersion() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
   },
   
   /**
@@ -537,8 +684,25 @@ Page({
   // 续租 - 租赁中状态
   handleRenewal: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    const NavigationUtils = require('../../utils/navigation-utils.js');
-    NavigationUtils.toRenewalPage(orderId);
+    
+    // 检查导航工具类是否可用
+    try {
+      const NavigationUtils = require('../../utils/navigation-utils.js');
+      NavigationUtils.toRenewalPage(orderId);
+    } catch (error) {
+      console.error('导航工具类加载失败:', error);
+      // 降级处理：直接使用wx.navigateTo
+      wx.navigateTo({
+        url: `/pages/rental-car/rental-car?orderId=${orderId}`,
+        fail: (err) => {
+          console.error('跳转续租页面失败', err);
+          wx.showToast({
+            title: '跳转失败，请重试',
+            icon: 'none'
+          });
+        }
+      });
+    }
   },
   
   // 还车 - 租赁中状态

@@ -72,11 +72,14 @@
   border-radius: 2rpx;
 }
 
-/* 订单列表 */
+/* 订单列表 - 修改这里的样式 */
 .order-list {
   flex: 1;
   overflow-y: auto;
-  padding: 200rpx 20rpx 120rpx;  /* 上方留出固定导航的空间 */
+  margin-top: 180rpx; /* 给固定导航留出空间 */
+  padding: 20rpx 20rpx 120rpx;  /* 减少上方padding，因为已经用margin-top留出空间 */
+  height: calc(100vh - 180rpx - 120rpx); /* 明确设置高度，确保滚动区域正确 */
+  box-sizing: border-box;
 }
 
 .order-item {
@@ -340,15 +343,4 @@
   border-radius: 30rpx;
   padding: 15rpx 25rpx;
   box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
-}
-
-.search-btn image {
-  width: 36rpx;
-  height: 36rpx;
-  margin-right: 10rpx;
-}
-
-.search-btn text {
-  font-size: 26rpx;
-  color: #666;
 }

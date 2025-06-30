@@ -77,18 +77,28 @@ Page({
     }
   },
 
-  // 从全局数据设置页面数据
+  // 从全局数据设置页面数据（设备租赁业务版本）
   setDataFromGlobal(globalData, options) {
     this.setData({
       orderInfo: {
         orderId: globalData.orderInfo?.orderId || options.orderId,
-        carModel: globalData.orderInfo?.carModel || '设备名称',
+        equipmentId: globalData.orderInfo?.equipmentId,
+        equipmentModel: globalData.orderInfo?.equipmentModel || globalData.orderInfo?.carModel || '设备名称',
+        equipmentBrand: globalData.orderInfo?.equipmentBrand,
+        equipmentCategory: globalData.orderInfo?.equipmentCategory,
+        storeId: globalData.orderInfo?.storeId,
+        storeName: globalData.orderInfo?.storeName,
+        storeAddress: globalData.orderInfo?.storeAddress,
+        managerId: globalData.orderInfo?.managerId,
         managerName: globalData.orderInfo?.managerName || '管理员',
-        managerPhone: globalData.orderInfo?.managerPhone || ''
+        managerPhone: globalData.orderInfo?.managerPhone || '',
+        operatorInfo: globalData.orderInfo?.operatorInfo,
+        dashboardData: globalData.orderInfo?.dashboardData
       },
       renewInfo: {
         days: parseInt(globalData.renewDays || options.renewDays || '0'),
-        newPeriod: globalData.newEndTime ? `续租至 ${globalData.newEndTime}` : ''
+        newPeriod: globalData.newEndTime ? `续租至 ${globalData.newEndTime}` : '',
+        equipmentUsage: this.calculateEquipmentUsage(globalData.orderInfo?.dashboardData)
       },
       paymentInfo: {
         renewAmount: globalData.paymentDetails?.renewAmount || '0.00',
@@ -97,22 +107,35 @@ Page({
         totalAmount: globalData.paymentDetails?.totalAmount || options.totalAmount || '0.00',
         payTime: this.formatPaymentTime(globalData.paymentDetails?.payTime || Date.now())
       },
-      showMemberUpgrade: globalData.purchaseMembership === true || options.purchaseMembership === 'true'
+      showMemberUpgrade: globalData.purchaseMembership === true || options.purchaseMembership === 'true',
+      // 设备信息显示
+      showEquipmentInfo: !!globalData.orderInfo?.equipmentId,
+      showDashboard: !!globalData.orderInfo?.dashboardData
     });
   },
 
-  // 从缓存数据设置页面数据
+  // 从缓存数据设置页面数据（设备租赁业务版本）
   setDataFromCache(cachedData, options) {
     this.setData({
       orderInfo: {
         orderId: cachedData.orderId,
-        carModel: cachedData.carModel,
+        equipmentId: cachedData.equipmentId,
+        equipmentModel: cachedData.equipmentModel || cachedData.carModel,
+        equipmentBrand: cachedData.equipmentBrand,
+        equipmentCategory: cachedData.equipmentCategory,
+        storeId: cachedData.storeId,
+        storeName: cachedData.storeName || cachedData.pickupStore,
+        storeAddress: cachedData.storeAddress,
+        managerId: cachedData.managerId,
         managerName: cachedData.managerName,
-        managerPhone: cachedData.managerPhone
+        managerPhone: cachedData.managerPhone,
+        operatorInfo: cachedData.operatorInfo,
+        dashboardData: cachedData.dashboardData
       },
       renewInfo: {
         days: parseInt(options.renewDays || '0'),
-        newPeriod: options.newEndTime ? `续租至 ${decodeURIComponent(options.newEndTime)}` : ''
+        newPeriod: options.newEndTime ? `续租至 ${decodeURIComponent(options.newEndTime)}` : '',
+        equipmentUsage: this.calculateEquipmentUsage(cachedData.dashboardData)
       },
       // 支付信息需要从URL参数计算
       paymentInfo: {
@@ -122,22 +145,46 @@ Page({
         totalAmount: options.totalAmount || '0.00',
         payTime: this.formatPaymentTime(Date.now())
       },
-      showMemberUpgrade: options.purchaseMembership === 'true'
+      showMemberUpgrade: options.purchaseMembership === 'true',
+      // 设备信息显示
+      showEquipmentInfo: !!cachedData.equipmentId,
+      showDashboard: !!cachedData.dashboardData
     });
   },
 
-  // 设置默认数据
+  // 设置默认数据（设备租赁业务版本）
   setDefaultData(options) {
+    const defaultDashboardData = {
+      pickupReading: 5280,
+      currentReading: 7150,
+      fuelLevel: 75,
+      lastUpdateTime: Date.now() - 1800000
+    };
+
     this.setData({
       orderInfo: {
         orderId: options.orderId || 'unknown',
-        carModel: '现代挖掘机R225LC-9T', // 默认设备
+        equipmentId: 'EQ001',
+        equipmentModel: '现代挖掘机R225LC-9T', // 默认设备
+        equipmentBrand: '现代',
+        equipmentCategory: '挖掘机',
+        storeId: 'ST001',
+        storeName: '重庆渝北区分店',
+        storeAddress: '重庆市渝北区龙溪街道',
+        managerId: 'MG001',
         managerName: '张经理', // 默认管理员
-        managerPhone: '138****8888' // 默认电话
+        managerPhone: '138****8888', // 默认电话
+        operatorInfo: {
+          name: "操作员李师傅",
+          phone: "159****3698",
+          certNo: "操作证12345"
+        },
+        dashboardData: defaultDashboardData
       },
       renewInfo: {
         days: parseInt(options.renewDays || '0'),
-        newPeriod: options.newEndTime ? `续租至 ${decodeURIComponent(options.newEndTime)}` : ''
+        newPeriod: options.newEndTime ? `续租至 ${decodeURIComponent(options.newEndTime)}` : '',
+        equipmentUsage: this.calculateEquipmentUsage(defaultDashboardData)
       },
       paymentInfo: {
         renewAmount: this.calculateDefaultRenewAmount(options),
@@ -146,8 +193,118 @@ Page({
         totalAmount: options.totalAmount || '0.00',
         payTime: this.formatPaymentTime(Date.now())
       },
-      showMemberUpgrade: options.purchaseMembership === 'true'
+      showMemberUpgrade: options.purchaseMembership === 'true',
+      // 设备信息显示
+      showEquipmentInfo: true,
+      showDashboard: true
     });
+  },
+
+  // 计算设备使用情况
+  calculateEquipmentUsage(dashboardData) {
+    if (!dashboardData || !dashboardData.pickupReading || !dashboardData.currentReading) {
+      return {
+        totalHours: '数据不足',
+        averageDaily: '数据不足',
+        fuelEfficiency: '数据不足'
+      };
+    }
+
+    const hoursUsed = dashboardData.currentReading - dashboardData.pickupReading;
+    const daysUsed = Math.max(1, Math.floor((Date.now() - dashboardData.lastUpdateTime) / (24 * 60 * 60 * 1000)));
+    const averageDaily = Math.round(hoursUsed / daysUsed * 10) / 10;
+    
+    return {
+      totalHours: hoursUsed.toString(),
+      averageDaily: averageDaily.toString(),
+      fuelEfficiency: dashboardData.fuelLevel ? `${Math.round(hoursUsed / (100 - dashboardData.fuelLevel) * 10) / 10}小时/10%油耗` : '数据不足'
+    };
+  },
+
+  // 查看设备详情
+  viewEquipmentDetail() {
+    const equipmentId = this.data.orderInfo.equipmentId;
+    if (!equipmentId) {
+      wx.showToast({
+        title: '设备信息异常',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.navigateTo({
+      url: `/pages/equipment-detail/equipment-detail?equipmentId=${equipmentId}&orderId=${this.data.orderInfo.orderId}`,
+      fail: () => {
+        wx.showToast({
+          title: '功能开发中，敬请期待',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 查看仪表盘历史
+  viewDashboardHistory() {
+    const orderId = this.data.orderInfo.orderId;
+    if (!orderId) {
+      wx.showToast({
+        title: '订单信息异常',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.navigateTo({
+      url: `/pages/dashboard-history/dashboard-history?orderId=${orderId}`,
+      fail: () => {
+        wx.showToast({
+          title: '功能开发中，敬请期待',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 联系操作员
+  contactOperator() {
+    const operatorInfo = this.data.orderInfo.operatorInfo;
+    if (!operatorInfo?.phone) {
+      wx.showToast({
+        title: '操作员信息异常',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.showModal({
+      title: '联系操作员',
+      content: `是否拨打操作员电话：${operatorInfo.name} ${operatorInfo.phone}？`,
+      success: (res) => {
+        if (res.confirm) {
+          wx.makePhoneCall({
+            phoneNumber: operatorInfo.phone.replace(/\*/g, ''),
+            fail: () => {
+              wx.showToast({
+                title: '拨打电话失败',
+                icon: 'none'
+              });
+            }
+          });
+        }
+      }
+    });
+  },
+
+  // 分享续租成功
+  shareRenewalSuccess() {
+    const orderInfo = this.data.orderInfo;
+    const renewInfo = this.data.renewInfo;
+
+    return {
+      title: `设备续租成功 - ${orderInfo.equipmentModel}`,
+      path: `/pages/renew-success/renew-success?orderId=${orderInfo.orderId}`,
+      imageUrl: '../../assets/share-success.png'
+    };
   },
 
   // 计算续租金额（基于缓存数据）

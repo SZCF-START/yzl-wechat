@@ -1,132 +1,161 @@
 <view class="pickup-container">
-  <!-- 订单信息头部 -->
-  <view class="order-info-header">
-    <view class="section-title1">订单信息</view>
-    <view class="store-info">
-      <view class="info-row">
-        <text class="label">门店名称：</text>
-        <text class="value">{{orderInfo.storeName}}</text>
-      </view>
-      <view class="info-row">
-        <text class="label">管理员：</text>
-        <text class="value">{{orderInfo.managerName}}</text>
-        <text class="phone" bindtap="callManager" data-phone="{{orderInfo.managerPhone}}">{{orderInfo.managerPhone}}</text>
-      </view>
-      <view class="info-row">
-        <text class="label">车型：</text>
-        <text class="value">{{orderInfo.carModel}}</text>
-      </view>
-      <view class="info-row">
-        <text class="label">租赁时间：</text>
-        <text class="value">{{orderInfo.rentalTime}}</text>
-      </view>
-      <view class="info-row">
-      <text class="label">租赁天数：</text>
-      <text class="days">{{orderInfo.rentalDays}}天</text>
-    </view>
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载订单信息中...</text>
     </view>
   </view>
 
-  <!-- 车辆选择区域 -->
-  <view class="vehicle-selection">
-    <view class="section-title">选择车辆</view>
-    
-    <!-- 车辆列表 -->
-    <view class="vehicle-list">
-      <view class="vehicle-card {{selectedVehicleId === item.id ? 'selected' : ''}}" 
-            wx:for="{{vehicleList}}" 
-            wx:key="id"
-            bindtap="selectVehicle"
-            data-id="{{item.id}}">
-        <!-- 车辆图片 -->
-        <view class="vehicle-image-container">
-          <image class="vehicle-image" src="{{item.image}}" mode="aspectFit"></image>
-          <view class="vehicle-year">{{item.year}}年</view>
+  <!-- 主要内容 -->
+  <view wx:else>
+    <!-- 订单信息头部 -->
+    <view class="order-info-header">
+      <view class="info-header">
+        <view class="section-title1">订单信息</view>
+      </view>
+      <view class="store-info">
+        <view class="info-row">
+          <text class="label">订单编号：</text>
+          <text class="value">{{orderInfo.orderId}}</text>
         </view>
-        
-        <!-- 车辆信息 -->
-        <view class="vehicle-info">
-          <view class="vehicle-name">{{item.name}}</view>
-          <view class="vehicle-details">
-            <view class="detail-item">
-              <text class="detail-label">工作小时：</text>
-              <text class="detail-value">{{item.workHours}}h</text>
-            </view>
-            <view class="detail-item">
-              <text class="detail-label">油量：</text>
-              <text class="detail-value">{{item.fuelLevel}}%</text>
-            </view>
-            <view class="detail-item">
-              <text class="detail-label">状态：</text>
-              <text class="detail-value status-available">{{item.status}}</text>
-            </view>
+        <view class="info-row">
+          <text class="label">门店名称：</text>
+          <text class="value">{{orderInfo.storeName}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">管理员：</text>
+          <text class="value">{{orderInfo.managerName}}</text>
+          <text class="phone" bindtap="callManager" data-phone="{{orderInfo.managerPhone}}">{{orderInfo.managerPhone}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">车型：</text>
+          <text class="value">{{orderInfo.carModel}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">租赁时间：</text>
+          <text class="value">{{orderInfo.rentalTime}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">租赁天数：</text>
+          <text class="days">{{orderInfo.rentalDays}}天</text>
+        </view>
+        <view class="info-row">
+          <text class="label">租赁费用：</text>
+          <text class="value highlight">¥{{orderInfo.price}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 车辆选择区域 -->
+    <view class="vehicle-selection">
+      <view class="section-title">选择车辆</view>
+      
+      <!-- 车辆列表 -->
+      <view class="vehicle-list">
+        <view class="vehicle-card {{selectedVehicleId === item.id ? 'selected' : ''}}" 
+              wx:for="{{vehicleList}}" 
+              wx:key="id"
+              bindtap="selectVehicle"
+              data-id="{{item.id}}">
+          <!-- 车辆图片 -->
+          <view class="vehicle-image-container">
+            <image class="vehicle-image" src="{{item.image}}" mode="aspectFit"></image>
+            <view class="vehicle-year">{{item.year}}年</view>
           </view>
           
-          <!-- 查看详情按钮 -->
-          <view class="view-details-btn" 
-                bindtap="viewVehicleDetails" 
-                catchtap="viewVehicleDetails"
-                data-id="{{item.id}}">查看详情</view>
-        </view>
-        
-        <!-- 选择框 -->
-        <view class="selection-checkbox">
-          <view class="checkbox {{selectedVehicleId === item.id ? 'checked' : ''}}">
-            <text class="checkmark" wx:if="{{selectedVehicleId === item.id}}">✓</text>
+          <!-- 车辆信息 -->
+          <view class="vehicle-info">
+            <view class="vehicle-name">{{item.name}}</view>
+            <view class="vehicle-details">
+              <view class="detail-item">
+                <text class="detail-label">工作小时：</text>
+                <text class="detail-value">{{item.workHours}}h</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">油量：</text>
+                <text class="detail-value">{{item.fuelLevel}}%</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">状态：</text>
+                <text class="detail-value status-available">{{item.status}}</text>
+              </view>
+            </view>
+            
+            <!-- 查看详情按钮 -->
+            <view class="view-details-btn" 
+                  bindtap="viewVehicleDetails" 
+                  catchtap="viewVehicleDetails"
+                  data-id="{{item.id}}">查看详情</view>
+          </view>
+          
+          <!-- 选择框 -->
+          <view class="selection-checkbox">
+            <view class="checkbox {{selectedVehicleId === item.id ? 'checked' : ''}}">
+              <text class="checkmark" wx:if="{{selectedVehicleId === item.id}}">✓</text>
+            </view>
           </view>
         </view>
       </view>
-    </view>
-    
-    <!-- 加载更多按钮 -->
-    <view class="load-more-vehicles" wx:if="{{hasMoreVehicles}}" bindtap="loadMoreVehicles">
-      <text wx:if="{{isLoadingVehicles}}">加载中...</text>
-      <text wx:else>加载更多车辆</text>
-    </view>
-  </view>
-
-  <!-- 仪表盘数据输入 -->
-  <view class="dashboard-input">
-    <view class="section-title1">现场仪表盘数据</view>
-    <view class="input-container">
-      <text class="input-label">工作小时数：</text>
-      <input class="dashboard-input-field" 
-             type="digit" 
-             placeholder="请输入工作小时数" 
-             value="{{dashboardHours}}"
-             bindinput="onDashboardInput" />
-      <text class="input-unit">小时</text>
-    </view>
-    <view class="input-tip">*请精确到小数点后一位</view>
-  </view>
-
-  <!-- 车辆图片上传 -->
-  <view class="image-upload">
-    <view class="section-title1">车辆图片上传</view>
-    <view class="image-grid">
-      <block wx:for="{{uploadedImages}}" wx:key="index">
-        <view class="image-item">
-          <image class="uploaded-image" src="{{item}}" mode="aspectFill"></image>
-          <view class="delete-image" bindtap="deleteImage" data-index="{{index}}">×</view>
-        </view>
-      </block>
       
-      <!-- 上传按钮 -->
-      <view class="upload-placeholder" 
-            wx:if="{{uploadedImages.length < 6}}"
-            bindtap="chooseImage">
-        <text class="upload-icon">+</text>
-        <text class="upload-text">添加图片</text>
+      <!-- 加载更多按钮 -->
+      <view class="load-more-vehicles" wx:if="{{hasMoreVehicles}}" bindtap="loadMoreVehicles">
+        <text wx:if="{{isLoadingVehicles}}">加载中...</text>
+        <text wx:else>加载更多车辆</text>
       </view>
     </view>
-    <view class="upload-tip">最多可上传6张图片</view>
+
+    <!-- 仪表盘数据输入 - 只在选择车辆后显示 -->
+    <view class="dashboard-input" wx:if="{{selectedVehicleId}}">
+      <view class="info-header">
+        <view class="section-title1">现场仪表盘数据</view>
+      </view>
+      <view class="selected-vehicle-info">
+        <text class="vehicle-hint">已选择车辆：{{selectedVehicleName}}</text>
+        <text class="vehicle-hours">当前工作小时数：{{selectedVehicleHours}}h</text>
+      </view>
+      <view class="input-container">
+        <text class="input-label">工作小时数：</text>
+        <input class="dashboard-input-field" 
+               type="digit" 
+               placeholder="请输入工作小时数" 
+               value="{{dashboardHours}}"
+               bindinput="onDashboardInput" />
+        <text class="input-unit">小时</text>
+      </view>
+      <view class="input-tip">*请精确到小数点后一位，不能小于当前工作小时数</view>
+    </view>
+
+    <!-- 车辆图片上传 - 只在选择车辆后显示 -->
+    <view class="image-upload" wx:if="{{selectedVehicleId}}">
+      <view class="info-header">
+        <view class="section-title1">车辆图片上传</view>
+      </view>
+      <view class="image-grid">
+        <block wx:for="{{uploadedImages}}" wx:key="index">
+          <view class="image-item">
+            <image class="uploaded-image" src="{{item}}" mode="aspectFill"></image>
+            <view class="delete-image" bindtap="deleteImage" data-index="{{index}}">×</view>
+          </view>
+        </block>
+        
+        <!-- 上传按钮 -->
+        <view class="upload-placeholder" 
+              wx:if="{{uploadedImages.length < 6}}"
+              bindtap="chooseImage">
+          <text class="upload-icon">+</text>
+          <text class="upload-text">添加图片</text>
+        </view>
+      </view>
+      <view class="upload-tip">最多可上传6张图片，包含车辆外观、仪表盘等</view>
+    </view>
   </view>
 
   <!-- 固定底部按钮 -->
-  <view class="fixed-bottom">
+  <view class="fixed-bottom" wx:if="{{!isLoading}}">
     <view class="pickup-btn {{canSubmit ? 'active' : 'disabled'}}" 
           bindtap="submitPickup">
-      出车
+      确认出车
     </view>
   </view>
 </view>

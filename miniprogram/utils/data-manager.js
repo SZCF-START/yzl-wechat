@@ -140,14 +140,12 @@ class DataManager {
     if (!forceRefresh) {
       // 1. 优先使用全局数据（最新）
       const globalData = this.getGlobalOrderData();
-      console.log("globalData888:",globalData);
       if (globalData && globalData.orderId === orderId) {
         return globalData;
       }
 
       // 2. 其次使用本地缓存
       const cachedData = this.getCachedOrderData(orderId);
-      console.log("cachedData888:",cachedData);
       if (cachedData) {
         // 同时设置到全局数据中
         this.setGlobalOrderData(cachedData);
