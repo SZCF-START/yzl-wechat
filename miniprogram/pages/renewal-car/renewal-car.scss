@@ -1,4 +1,6 @@
-/* 续租容器 */
+/* renewal-car.wxss - 修改后支持订单关系展示的续租页面样式 */
+
+/* 基础样式保持不变 */
 .renew-container {
   display: flex;
   flex-direction: column;
@@ -7,11 +9,11 @@
   padding-bottom: 140rpx;
 }
 
-/* 信息区块通用样式 */
 .order-info,
 .renew-section,
 .payment-detail,
-.member-card {
+.member-card,
+.order-relationship {
   background-color: #fff;
   margin: 24rpx 20rpx;
   border-radius: 16rpx;
@@ -22,18 +24,10 @@
   transition: all 0.3s ease;
 }
 
-.order-info:hover,
-.renew-section:hover,
-.payment-detail:hover,
-.member-card:hover {
-  transform: translateY(-2rpx);
-  box-shadow: 0 6rpx 25rpx rgba(0,0,0,0.12);
-}
-
-/* 信息标题 */
 .info-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 24rpx;
   border-bottom: 2rpx solid #f8f9fa;
   padding-bottom: 16rpx;
@@ -58,7 +52,208 @@
   position: relative;
 }
 
-/* 信息行 */
+.info-subtitle {
+  font-size: 24rpx;
+  color: #95a5a6;
+  background-color: rgba(149, 165, 166, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+}
+
+/* 新增：订单关系样式 */
+.order-relationship {
+  background: linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%);
+  border: 2rpx solid #2c5aa0;
+}
+
+.relationship-content {
+  margin-top: 24rpx;
+}
+
+.current-order-info {
+  margin-bottom: 24rpx;
+}
+
+.order-chain-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  border-radius: 12rpx;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.order-chain-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 主订单样式 */
+.main-order {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 2rpx solid #28a745;
+  border-left: 6rpx solid #28a745;
+}
+
+/* 续租订单样式 */
+.renewal-order {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 2rpx solid #ffc107;
+  border-left: 6rpx solid #ffc107;
+}
+
+/* 新续租订单样式 */
+.new-renewal {
+  background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+  border: 2rpx solid #17a2b8;
+  border-left: 6rpx solid #17a2b8;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.order-tag {
+  position: absolute;
+  top: -8rpx;
+  right: 16rpx;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+  color: white;
+  z-index: 2;
+}
+
+.order-tag.main {
+  background-color: #28a745;
+}
+
+.order-tag.renewal {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.order-tag.new {
+  background-color: #17a2b8;
+}
+
+.order-basic {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.order-id {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.order-status {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  align-self: flex-start;
+}
+
+.order-status.completed {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.order-status.pending {
+  background-color: rgba(23, 162, 184, 0.1);
+  color: #17a2b8;
+}
+
+.order-period {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4rpx;
+}
+
+.period-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.period-days {
+  font-size: 22rpx;
+  color: #ff7200;
+  font-weight: 500;
+}
+
+/* 关系说明样式 */
+.relationship-note {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  border: 1rpx solid #e3f2fd;
+}
+
+.note-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.note-item:last-child {
+  margin-bottom: 0;
+}
+
+.note-icon {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+  width: 32rpx;
+  text-align: center;
+}
+
+.note-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* 新订单预览样式 */
+.new-order-preview {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid #dee2e6;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+}
+
+.preview-row:last-child {
+  margin-bottom: 0;
+}
+
+.preview-label {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.preview-value {
+  color: #495057;
+  font-weight: 400;
+}
+
+/* 原有样式保持不变 */
 .info-row {
   display: flex;
   align-items: center;
@@ -67,11 +262,6 @@
   padding: 8rpx 0;
   border-radius: 8rpx;
   transition: background-color 0.2s ease;
-}
-
-.info-row:hover {
-  background-color: #f8f9fa;
-  padding: 8rpx 12rpx;
 }
 
 .info-label {
@@ -219,6 +409,7 @@
   color: #999;
   padding-left: 20rpx;
   margin-bottom: 16rpx;
+  line-height: 1.4;
 }
 
 .error-tip {
@@ -235,23 +426,35 @@
 .new-period {
   margin-top: 24rpx;
   padding: 24rpx;
-  background: linear-gradient(135deg, #fff5f0, #fff8f5);
+  background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
   border-radius: 12rpx;
-  border: 2rpx solid #ff7200;
+  border: 2rpx solid #28a745;
 }
 
 .period-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 16rpx;
 }
 
 .period-title {
   font-size: 30rpx;
-  color: #ff7200;
+  color: #28a745;
   font-weight: 600;
+}
+
+.period-status {
+  font-size: 22rpx;
+  color: #17a2b8;
+  background-color: rgba(23, 162, 184, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
 }
 
 .period-display {
   text-align: center;
+  margin-bottom: 16rpx;
 }
 
 .period-text {
@@ -264,8 +467,20 @@
 
 .period-days {
   font-size: 26rpx;
-  color: #ff7200;
+  color: #28a745;
   font-weight: 500;
+}
+
+.period-note {
+  text-align: center;
+  padding-top: 16rpx;
+  border-top: 1rpx solid rgba(40, 167, 69, 0.2);
+}
+
+.period-note .note-text {
+  font-size: 22rpx;
+  color: #6c757d;
+  font-style: italic;
 }
 
 /* 支付明细 */
@@ -324,6 +539,37 @@
   font-size: 34rpx;
 }
 
+/* 支付说明 */
+.payment-note {
+  margin-top: 24rpx;
+  padding: 20rpx;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12rpx;
+  border: 1rpx solid #dee2e6;
+}
+
+.note-header {
+  font-size: 28rpx;
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+}
+
+.note-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.note-content .note-item {
+  font-size: 24rpx;
+  color: #6c757d;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
 /* 底部支付区域 */
 .payment-section {
   position: fixed;
@@ -353,7 +599,7 @@
 }
 
 .payment-amount {
-  font-size: 40rpx;
+  font-size: 36rpx;
   background: linear-gradient(135deg, #ff7200, #ff9500);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -362,13 +608,13 @@
 }
 
 .payment-btn {
-  width: 280rpx;
+  width: 320rpx;
   height: 88rpx;
   background: linear-gradient(135deg, #ff7200, #ff9500);
   color: #fff;
   border: none;
   border-radius: 44rpx;
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -397,26 +643,12 @@
   box-shadow: 0 6rpx 20rpx rgba(255, 114, 0, 0.4);
 }
 
-.payment-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2rpx 8rpx rgba(255, 114, 0, 0.3);
-}
-
 .payment-btn[disabled] {
   background: linear-gradient(135deg, #bdc3c7, #95a5a6);
   color: #ecf0f1;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
-}
-
-.payment-btn[disabled]:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.payment-btn[disabled]::before {
-  display: none;
 }
 
 /* 弹窗样式 */
@@ -435,11 +667,6 @@
   animation: fadeIn 0.3s ease;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 .modal-content {
   background-color: #fff;
   border-radius: 20rpx;
@@ -449,17 +676,6 @@
   width: calc(100% - 80rpx);
   box-shadow: 0 10rpx 40rpx rgba(0,0,0,0.2);
   animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(40rpx);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .modal-header {
@@ -500,19 +716,36 @@
   padding: 32rpx;
 }
 
-/* 确认详情 */
+/* 确认详情样式 */
 .confirm-detail {
   margin-bottom: 32rpx;
+}
+
+.confirm-section {
+  margin-bottom: 24rpx;
+  padding: 20rpx;
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
+}
+
+.confirm-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 30rpx;
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+  display: block;
 }
 
 .confirm-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20rpx;
-  padding: 16rpx;
-  background-color: #f8f9fa;
-  border-radius: 8rpx;
+  margin-bottom: 12rpx;
+  padding: 8rpx 0;
 }
 
 .confirm-row:last-child {
@@ -522,24 +755,26 @@
 .total-confirm {
   background: linear-gradient(135deg, #fff5f0, #fff8f5);
   border: 2rpx solid #ff7200;
+  border-radius: 8rpx;
+  padding: 12rpx;
 }
 
 .confirm-label {
-  font-size: 28rpx;
-  color: #7f8c8d;
+  font-size: 26rpx;
+  color: #6c757d;
   font-weight: 500;
 }
 
 .confirm-value {
-  font-size: 28rpx;
-  color: #2c3e50;
+  font-size: 26rpx;
+  color: #495057;
   font-weight: 400;
 }
 
 .confirm-value.highlight {
   color: #ff7200;
   font-weight: 700;
-  font-size: 32rpx;
+  font-size: 30rpx;
 }
 
 /* 弹窗按钮 */
@@ -562,13 +797,13 @@
 
 .cancel-btn {
   background-color: #f8f9fa;
-  color: #7f8c8d;
-  border: 2rpx solid #e9ecef;
+  color: #6c757d;
+  border: 2rpx solid #dee2e6;
 }
 
 .cancel-btn:hover {
   background-color: #e9ecef;
-  color: #6c757d;
+  color: #495057;
 }
 
 .confirm-btn {
@@ -580,6 +815,23 @@
 .confirm-btn:hover {
   transform: translateY(-2rpx);
   box-shadow: 0 6rpx 20rpx rgba(255, 114, 0, 0.4);
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 响应式优化 */
@@ -603,23 +855,14 @@
     flex-direction: column;
     gap: 16rpx;
   }
-}
-
-/* 滚动条优化 */
-::-webkit-scrollbar {
-  width: 6rpx;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 6rpx;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #ff7200, #ff9500);
-  border-radius: 6rpx;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #e65100, #ff7200);
+  
+  .order-chain-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12rpx;
+  }
+  
+  .order-period {
+    align-items: flex-start;
+  }
 }

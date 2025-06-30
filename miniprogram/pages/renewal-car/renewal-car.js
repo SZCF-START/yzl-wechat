@@ -1,36 +1,48 @@
+// renewal-car.js - 修改后支持生成新订单的续租页面
 Page({
   data: {
-    // 订单信息
-    orderInfo: {
+    // 原订单信息
+    originalOrderInfo: {
       orderId: '',
       storeName: '',
       managerName: '',
       managerPhone: '',
       carModel: '',
-      originalStartTime: 0, // 时间戳
-      originalEndTime: 0, // 时间戳
-      originalDays: 0
+      originalStartTime: 0,
+      originalEndTime: 0,
+      originalDays: 0,
+      orderStatus: '',
+      vehicleRecordId: '' // 出车记录ID
+    },
+    
+    // 新续租订单信息
+    renewalOrderInfo: {
+      orderId: '', // 新生成的续租订单ID
+      parentOrderId: '', // 指向原订单
+      isRenewalOrder: true,
+      renewalLevel: 1, // 续租层级
+      status: 'pending' // 待生效
     },
     
     // 续租相关
     renewDays: '',
-    renewPrice: 0, // 续租单价（非会员价格）
-    memberRenewPrice: 0, // 会员续租单价
+    renewPrice: 0,
+    memberRenewPrice: 0,
     daysErrorTip: '',
     
     // 系统服务费率
-    serviceRate: 0.006, // 默认0.6%，从后台获取
-    serviceRatePercent: '0.6', // 用于页面显示的百分比文本
+    serviceRate: 0.006,
+    serviceRatePercent: '0.6',
     
     // 会员相关
-    isMember: false, // 用户是否是会员
-    showMemberCard: false, // 是否显示购买会员卡片
+    isMember: false,
+    showMemberCard: false,
     membershipInfo: {
-      price: 299, // 会员价格
-      discount: 0.8, // 会员折扣（8折）
+      price: 299,
+      discount: 0.8,
       discountText: '8折'
     },
-    purchaseMembership: false, // 是否购买会员
+    purchaseMembership: false,
     
     // 格式化后的时间显示
     originalStartTimeText: '',
@@ -44,20 +56,27 @@ Page({
     totalDays: 0,
     
     // 价格明细
-    renewSubtotal: '0.00', // 续租小计
-    membershipFee: '0.00', // 会员费用
-    serviceSubtotal: '0.00', // 服务前小计
-    serviceFee: '0.00', // 系统服务费
-    totalAmount: '0.00', // 最终总价
+    renewSubtotal: '0.00',
+    membershipFee: '0.00',
+    serviceSubtotal: '0.00',
+    serviceFee: '0.00',
+    totalAmount: '0.00',
     
     // 支付相关
     canPay: false,
     paymentButtonText: '请先输入续租天数',
-    showPaymentModal: false
+    showPaymentModal: false,
+    
+    // 新增：订单关系展示
+    showOrderChain: false,
+    orderChainInfo: {
+      totalOrders: 1,
+      currentLevel: 0,
+      chainHistory: []
+    }
   },
 
   onLoad(options) {
-    // 页面加载时初始化
     console.log('续租页面加载', options);
     this.initPage(options);
   },
@@ -69,12 +88,22 @@ Page({
     });
 
     try {
+      // 设置原订单ID
+      this.setData({
+        'originalOrderInfo.orderId': options.orderId,
+        'renewalOrderInfo.parentOrderId': options.orderId
+      });
+
       // 并行获取基础数据
       await Promise.all([
-        this.getOrderInfo(options.orderId),
+        this.getOriginalOrderInfo(options.orderId),
         this.checkUserMembership(),
-        this.getServiceRate()
+        this.getServiceRate(),
+        this.getOrderChainInfo(options.orderId)
       ]);
+      
+      // 预生成续租订单信息
+      this.prepareRenewalOrder();
       
       wx.hideLoading();
     } catch (error) {
@@ -87,21 +116,19 @@ Page({
     }
   },
 
-  // 获取订单信息
-  async getOrderInfo(orderId) {
+  // 获取原订单信息
+  async getOriginalOrderInfo(orderId) {
     const DataManager = require('../../utils/data-manager.js');
     
     try {
-      // 使用智能数据获取（优先使用缓存）
       const orderData = await DataManager.getOrderDataSmart(
         orderId, 
         this.fetchOrderFromAPI.bind(this),
-        false // 不强制刷新
+        false
       );
 
-      // 设置页面数据
       this.setData({
-        orderInfo: {
+        originalOrderInfo: {
           orderId: orderData.orderId,
           storeName: orderData.storeName,
           managerName: orderData.managerName,
@@ -109,7 +136,9 @@ Page({
           carModel: orderData.carModel,
           originalStartTime: orderData.originalStartTime,
           originalEndTime: orderData.originalEndTime,
-          originalDays: orderData.originalDays
+          originalDays: orderData.originalDays,
+          orderStatus: orderData.status,
+          vehicleRecordId: orderData.vehicleRecordId || `VR_${orderId}`
         },
         originalStartTimeText: this.formatDateTime(new Date(orderData.originalStartTime)),
         originalEndTimeText: this.formatDateTime(new Date(orderData.originalEndTime)),
@@ -119,9 +148,60 @@ Page({
       
     } catch (error) {
       console.error('获取订单信息失败', error);
-      // 使用模拟数据作为备用
       this.useDefaultOrderData(orderId);
     }
+  },
+
+  // 获取订单链信息
+  async getOrderChainInfo(orderId) {
+    try {
+      // 查询订单链信息
+      const response = await this.requestAPI({
+        url: '/api/order/chain-info',
+        method: 'GET',
+        data: { orderId }
+      });
+
+      if (response.success) {
+        this.setData({
+          showOrderChain: true,
+          orderChainInfo: {
+            totalOrders: response.data.totalOrders || 1,
+            currentLevel: response.data.currentLevel || 0,
+            chainHistory: response.data.chainHistory || []
+          }
+        });
+      }
+    } catch (error) {
+      console.error('获取订单链信息失败', error);
+      // 使用模拟数据
+      this.setData({
+        showOrderChain: true,
+        orderChainInfo: {
+          totalOrders: Math.floor(Math.random() * 3) + 1,
+          currentLevel: Math.floor(Math.random() * 2),
+          chainHistory: [
+            { level: 0, orderId: orderId, status: '已完成', days: 2 }
+          ]
+        }
+      });
+    }
+  },
+
+  // 预生成续租订单
+  prepareRenewalOrder() {
+    const originalOrderId = this.data.originalOrderInfo.orderId;
+    const currentLevel = this.data.orderChainInfo.currentLevel;
+    
+    // 生成新的续租订单ID
+    const newRenewalOrderId = `${originalOrderId}_RENEWAL_${Date.now()}`;
+    
+    this.setData({
+      'renewalOrderInfo.orderId': newRenewalOrderId,
+      'renewalOrderInfo.renewalLevel': currentLevel + 1
+    });
+
+    console.log('预生成续租订单:', newRenewalOrderId);
   },
 
   // 从API获取订单数据
@@ -147,10 +227,11 @@ Page({
         originalEndTime: response.data.originalEndTime,
         originalDays: response.data.originalDays,
         renewPrice: response.data.renewPrice,
-        memberRenewPrice: response.data.memberRenewPrice
+        memberRenewPrice: response.data.memberRenewPrice,
+        status: response.data.status,
+        vehicleRecordId: response.data.vehicleRecordId
       };
     } catch (error) {
-      // API调用失败，抛出错误让上层处理
       throw error;
     }
   },
@@ -167,11 +248,13 @@ Page({
       originalEndTime: 1726660800000,
       originalDays: 2,
       renewPrice: 800,
-      memberRenewPrice: 640
+      memberRenewPrice: 640,
+      status: 'completed',
+      vehicleRecordId: `VR_${orderId}`
     };
     
     this.setData({
-      orderInfo: {
+      originalOrderInfo: {
         orderId: mockData.orderId,
         storeName: mockData.storeName,
         managerName: mockData.managerName,
@@ -179,7 +262,9 @@ Page({
         carModel: mockData.carModel,
         originalStartTime: mockData.originalStartTime,
         originalEndTime: mockData.originalEndTime,
-        originalDays: mockData.originalDays
+        originalDays: mockData.originalDays,
+        orderStatus: mockData.status,
+        vehicleRecordId: mockData.vehicleRecordId
       },
       originalStartTimeText: this.formatDateTime(new Date(mockData.originalStartTime)),
       originalEndTimeText: this.formatDateTime(new Date(mockData.originalEndTime)),
@@ -187,131 +272,6 @@ Page({
       memberRenewPrice: mockData.memberRenewPrice
     });
 
-    // 缓存模拟数据
-    const DataManager = require('../../utils/data-manager.js');
-    DataManager.cacheOrderData(mockData.orderId, mockData);
-  },
-  async initPage(options) {
-    wx.showLoading({
-      title: '加载中...'
-    });
-
-    try {
-      // 并行获取基础数据
-      await Promise.all([
-        this.getOrderInfo(options.orderId),
-        this.checkUserMembership(),
-        this.getServiceRate()
-      ]);
-      
-      wx.hideLoading();
-    } catch (error) {
-      wx.hideLoading();
-      console.error('页面初始化失败', error);
-      wx.showToast({
-        title: '加载失败，请重试',
-        icon: 'none'
-      });
-    }
-  },
-
-  // 获取订单信息
-  async getOrderInfo(orderId) {
-    // 引入数据管理工具
-    const DataManager = require('../../utils/data-manager.js');
-    
-    try {
-      // 使用智能数据获取（优先使用缓存）
-      const orderData = await DataManager.getOrderDataSmart(
-        orderId, 
-        this.fetchOrderFromAPI.bind(this),
-        false // 不强制刷新
-      );
-
-      // 设置页面数据
-      this.setData({
-        orderInfo: {
-          orderId: orderData.orderId,
-          storeName: orderData.storeName,
-          managerName: orderData.managerName,
-          managerPhone: orderData.managerPhone,
-          carModel: orderData.carModel,
-          originalStartTime: orderData.originalStartTime,
-          originalEndTime: orderData.originalEndTime,
-          originalDays: orderData.originalDays
-        },
-        originalStartTimeText: this.formatDateTime(new Date(orderData.originalStartTime)),
-        originalEndTimeText: this.formatDateTime(new Date(orderData.originalEndTime)),
-        renewPrice: orderData.renewPrice,
-        memberRenewPrice: orderData.memberRenewPrice
-      });
-      
-    } catch (error) {
-      console.error('获取订单信息失败', error);
-      // 使用模拟数据作为备用
-      this.useDefaultOrderData(orderId);
-    }
-  },
-
-  // 从API获取订单数据
-  async fetchOrderFromAPI(orderId) {
-    const response = await this.requestAPI({
-      url: '/api/order/detail',
-      method: 'GET',
-      data: { orderId }
-    });
-
-    if (!response.success) {
-      throw new Error(response.message || '获取订单信息失败');
-    }
-
-    return {
-      orderId: response.data.orderId,
-      storeName: response.data.storeName,
-      managerName: response.data.managerName,
-      managerPhone: response.data.managerPhone,
-      carModel: response.data.carModel,
-      originalStartTime: response.data.originalStartTime,
-      originalEndTime: response.data.originalEndTime,
-      originalDays: response.data.originalDays,
-      renewPrice: response.data.renewPrice,
-      memberRenewPrice: response.data.memberRenewPrice
-    };
-  },
-
-  // 使用默认订单数据
-  useDefaultOrderData(orderId) {
-    const mockData = {
-      orderId: orderId || 'mock_order_001',
-      storeName: '重庆渝北区分店',
-      managerName: '张经理',
-      managerPhone: '138****8888',
-      carModel: '现代挖掘机R225LC-9T',
-      originalStartTime: 1726488000000,
-      originalEndTime: 1726660800000,
-      originalDays: 2,
-      renewPrice: 800,
-      memberRenewPrice: 640
-    };
-    
-    this.setData({
-      orderInfo: {
-        orderId: mockData.orderId,
-        storeName: mockData.storeName,
-        managerName: mockData.managerName,
-        managerPhone: mockData.managerPhone,
-        carModel: mockData.carModel,
-        originalStartTime: mockData.originalStartTime,
-        originalEndTime: mockData.originalEndTime,
-        originalDays: mockData.originalDays
-      },
-      originalStartTimeText: this.formatDateTime(new Date(mockData.originalStartTime)),
-      originalEndTimeText: this.formatDateTime(new Date(mockData.originalEndTime)),
-      renewPrice: mockData.renewPrice,
-      memberRenewPrice: mockData.memberRenewPrice
-    });
-
-    // 缓存模拟数据
     const DataManager = require('../../utils/data-manager.js');
     DataManager.cacheOrderData(mockData.orderId, mockData);
   },
@@ -319,7 +279,6 @@ Page({
   // 检查用户会员状态
   async checkUserMembership() {
     try {
-      // 实际API调用
       const response = await this.requestAPI({
         url: '/api/user/membership',
         method: 'GET'
@@ -337,8 +296,7 @@ Page({
       }
     } catch (error) {
       console.error('检查会员状态失败', error);
-      // 使用模拟数据
-      const mockIsMember = Math.random() > 0.7; // 30%概率是会员
+      const mockIsMember = Math.random() > 0.7;
       this.setData({
         isMember: mockIsMember,
         showMemberCard: !mockIsMember,
@@ -354,7 +312,6 @@ Page({
   // 获取系统服务费率
   async getServiceRate() {
     try {
-      // 实际API调用
       const response = await this.requestAPI({
         url: '/api/system/service-rate',
         method: 'GET'
@@ -371,7 +328,6 @@ Page({
       }
     } catch (error) {
       console.error('获取服务费率失败', error);
-      // 使用默认值0.6%
       this.setData({
         serviceRate: 0.006,
         serviceRatePercent: '0.6'
@@ -458,13 +414,11 @@ Page({
 
   // 购买会员选择切换
   onPurchaseMembershipChange(e) {
-    // checkbox-group返回的是数组，如果选中则包含值，未选中则为空数组
     const selected = e.detail.value.length > 0;
     this.setData({
       purchaseMembership: selected
     });
     
-    // 重新计算价格
     if (this.data.renewDays) {
       this.calculateRenewal(parseInt(this.data.renewDays));
     }
@@ -477,13 +431,13 @@ Page({
       return;
     }
 
-    // 计算新的租期 - 从时间戳计算
-    const originalEndDate = new Date(this.data.orderInfo.originalEndTime);
+    // 计算新的租期 - 从原订单结束时间开始
+    const originalEndDate = new Date(this.data.originalOrderInfo.originalEndTime);
     const newEndDate = new Date(originalEndDate.getTime() + days * 24 * 60 * 60 * 1000);
     
-    const newStartTime = this.data.originalEndTimeText;
+    const newStartTime = this.data.originalEndTimeText; // 从原订单结束时间开始
     const newEndTime = this.formatDateTime(newEndDate);
-    const totalDays = this.data.orderInfo.originalDays + days;
+    const totalDays = this.data.originalOrderInfo.originalDays + days;
 
     // 计算价格
     this.calculatePricing(days);
@@ -495,7 +449,7 @@ Page({
       newEndTime,
       totalDays,
       canPay: true,
-      paymentButtonText: `立即支付 ¥${this.data.totalAmount}`
+      paymentButtonText: `创建续租订单并支付 ¥${this.data.totalAmount}`
     });
   },
 
@@ -503,32 +457,23 @@ Page({
   calculatePricing(days) {
     const { isMember, purchaseMembership, renewPrice, memberRenewPrice, serviceRate, membershipInfo } = this.data;
     
-    // 1. 计算续租费用
     let currentRenewPrice = renewPrice;
     let renewSubtotal = 0;
     
     if (isMember || purchaseMembership) {
-      // 会员价格
       currentRenewPrice = memberRenewPrice;
       renewSubtotal = days * memberRenewPrice;
     } else {
-      // 非会员价格
       renewSubtotal = days * renewPrice;
     }
 
-    // 2. 会员费用
     let membershipFee = 0;
     if (purchaseMembership && !isMember) {
       membershipFee = membershipInfo.price;
     }
 
-    // 3. 服务费前小计
     const serviceSubtotal = renewSubtotal + membershipFee;
-
-    // 4. 系统服务费
     const serviceFee = serviceSubtotal * serviceRate;
-
-    // 5. 最终总价
     const totalAmount = serviceSubtotal + serviceFee;
 
     this.setData({
@@ -559,7 +504,7 @@ Page({
     });
   },
 
-  // 格式化日期时间 - 处理时间戳
+  // 格式化日期时间
   formatDateTime(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -572,7 +517,7 @@ Page({
   makePhoneCall(e) {
     const phone = e.currentTarget.dataset.phone;
     wx.makePhoneCall({
-      phoneNumber: phone.replace(/\*/g, '1'), // 实际项目中应该用真实号码
+      phoneNumber: phone.replace(/\*/g, '1'),
       fail: (err) => {
         console.error('拨打电话失败', err);
         wx.showToast({
@@ -583,7 +528,7 @@ Page({
     });
   },
 
-  // 提交支付
+  // 提交支付 - 修改：先创建续租订单，再支付
   submitPayment() {
     if (!this.data.canPay) {
       wx.showToast({
@@ -610,167 +555,244 @@ Page({
     // 阻止事件冒泡
   },
 
-  // 确认支付
+  // 确认支付 - 修改：创建续租订单并支付
   confirmPayment() {
     wx.showLoading({
-      title: '支付中...'
+      title: '创建续租订单中...'
     });
 
-    // 模拟支付过程
+    // 模拟创建续租订单过程
     setTimeout(() => {
+      this.createRenewalOrderAndPay();
+    }, 1500);
+  },
+
+  // 创建续租订单并支付
+  async createRenewalOrderAndPay() {
+    try {
+      // 1. 先创建续租订单
+      const renewalOrderData = await this.createRenewalOrder();
+      
+      wx.showLoading({
+        title: '支付中...'
+      });
+
+      // 2. 再进行支付
+      const paymentResult = await this.processPayment(renewalOrderData);
+      
+      if (paymentResult.success) {
+        wx.hideLoading();
+        this.handlePaymentSuccess(renewalOrderData);
+      } else {
+        throw new Error(paymentResult.message || '支付失败');
+      }
+    } catch (error) {
       wx.hideLoading();
-      this.processPayment();
-    }, 2000);
+      console.error('创建续租订单或支付失败:', error);
+      wx.showToast({
+        title: error.message || '操作失败，请重试',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 创建续租订单
+  async createRenewalOrder() {
+    const originalOrderInfo = this.data.originalOrderInfo;
+    const renewalOrderInfo = this.data.renewalOrderInfo;
+    
+    // 构建续租订单数据
+    const renewalOrderData = {
+      id: renewalOrderInfo.orderId,
+      parentOrderId: originalOrderInfo.orderId,
+      isRenewalOrder: true,
+      renewalLevel: renewalOrderInfo.renewalLevel,
+      
+      // 基本信息
+      carModel: originalOrderInfo.carModel,
+      storeName: originalOrderInfo.storeName,
+      managerName: originalOrderInfo.managerName,
+      managerPhone: originalOrderInfo.managerPhone,
+      vehicleRecordId: originalOrderInfo.vehicleRecordId, // 共享同一个出车记录
+      
+      // 时间信息
+      startTime: originalOrderInfo.originalEndTime, // 从原订单结束时间开始
+      endTime: new Date(originalOrderInfo.originalEndTime + parseInt(this.data.renewDays) * 24 * 60 * 60 * 1000).getTime(),
+      rentalDays: parseInt(this.data.renewDays),
+      
+      // 状态信息
+      orderStatus: 6, // 待生效状态
+      statusText: '待生效',
+      
+      // 价格信息
+      renewPrice: this.data.renewPrice,
+      memberRenewPrice: this.data.memberRenewPrice,
+      price: parseFloat(this.data.totalAmount),
+      renewSubtotal: parseFloat(this.data.renewSubtotal),
+      membershipFee: parseFloat(this.data.membershipFee),
+      serviceFee: parseFloat(this.data.serviceFee),
+      
+      // 会员信息
+      purchaseMembership: this.data.purchaseMembership,
+      
+      // 创建时间
+      createTime: Date.now()
+    };
+
+    try {
+      // 调用API创建续租订单
+      const response = await this.requestAPI({
+        url: '/api/order/create-renewal',
+        method: 'POST',
+        data: renewalOrderData
+      });
+
+      if (response.success) {
+        // 缓存新订单数据
+        const DataManager = require('../../utils/data-manager.js');
+        DataManager.cacheOrderData(renewalOrderData.id, renewalOrderData);
+        
+        console.log('续租订单创建成功:', renewalOrderData.id);
+        return renewalOrderData;
+      } else {
+        throw new Error(response.message || '创建续租订单失败');
+      }
+    } catch (error) {
+      // 使用模拟逻辑
+      console.log('使用模拟创建续租订单');
+      
+      // 缓存模拟数据
+      const DataManager = require('../../utils/data-manager.js');
+      DataManager.cacheOrderData(renewalOrderData.id, renewalOrderData);
+      
+      return renewalOrderData;
+    }
   },
 
   // 处理支付
-  async processPayment() {
+  async processPayment(renewalOrderData) {
     try {
-      // 构建支付参数
       const paymentData = {
-        orderId: this.data.orderInfo.orderId,
-        renewDays: parseInt(this.data.renewDays),
-        renewSubtotal: parseFloat(this.data.renewSubtotal),
-        membershipFee: parseFloat(this.data.membershipFee),
-        serviceFee: parseFloat(this.data.serviceFee),
-        totalAmount: parseFloat(this.data.totalAmount),
-        purchaseMembership: this.data.purchaseMembership,
-        newEndTime: this.data.newEndTime
+        orderId: renewalOrderData.id,
+        parentOrderId: renewalOrderData.parentOrderId,
+        amount: renewalOrderData.price,
+        renewDays: renewalOrderData.rentalDays,
+        renewSubtotal: renewalOrderData.renewSubtotal,
+        membershipFee: renewalOrderData.membershipFee,
+        serviceFee: renewalOrderData.serviceFee,
+        purchaseMembership: renewalOrderData.purchaseMembership
       };
 
-      // 实际API调用
       const response = await this.requestAPI({
-        url: '/api/payment/process',
+        url: '/api/payment/process-renewal',
         method: 'POST',
         data: paymentData
       });
 
       if (response.success) {
-        // 更新订单数据到缓存
-        const DataManager = require('../../utils/data-manager.js');
-        const updatedOrderData = {
-          ...this.data.orderInfo,
-          status: 'renewed',
-          newEndTime: this.data.newEndTime,
-          totalDays: this.data.totalDays,
-          lastRenewalTime: Date.now()
-        };
-        
-        DataManager.updateOrderData(this.data.orderInfo.orderId, updatedOrderData);
-
-        wx.showToast({
-          title: '支付成功',
-          icon: 'success',
-          duration: 1500
-        });
-        
-        // 跳转到续租成功页面，传递完整数据
-        setTimeout(() => {
-          const NavigationUtils = require('../../utils/navigation-utils.js');
-          
-          // 准备传递给成功页面的完整数据
-          const successData = {
-            orderId: this.data.orderInfo.orderId,
-            renewDays: this.data.renewDays,
-            totalAmount: this.data.totalAmount,
-            newEndTime: this.data.newEndTime,
-            purchaseMembership: this.data.purchaseMembership,
-            // 传递详细的支付信息
-            paymentDetails: {
-              renewAmount: this.data.renewSubtotal,
-              membershipAmount: this.data.membershipFee,
-              serviceFee: this.data.serviceFee,
-              totalAmount: this.data.totalAmount,
-              payTime: Date.now()
-            },
-            // 传递完整的订单信息
-            orderInfo: {
-              orderId: this.data.orderInfo.orderId,
-              carModel: this.data.orderInfo.carModel,
-              managerName: this.data.orderInfo.managerName,
-              managerPhone: this.data.orderInfo.managerPhone,
-              storeName: this.data.orderInfo.storeName,
-              originalStartTime: this.data.orderInfo.originalStartTime,
-              originalEndTime: this.data.orderInfo.originalEndTime,
-              originalDays: this.data.orderInfo.originalDays
-            }
-          };
-
-          // 将完整数据设置到全局，避免成功页面重新查询
-          DataManager.setGlobalOrderData(successData);
-          
-          NavigationUtils.toRenewalSuccessPage(successData);
-        }, 1500);
+        return { success: true, data: response.data };
       } else {
         throw new Error(response.message || '支付失败');
       }
     } catch (error) {
-      console.error('支付处理失败', error);
-      
       // 模拟支付结果
       const paymentSuccess = Math.random() > 0.1; // 90%成功率
       
       if (paymentSuccess) {
-        // 更新订单数据到缓存
-        const DataManager = require('../../utils/data-manager.js');
-        const updatedOrderData = {
-          ...this.data.orderInfo,
-          status: 'renewed',
-          newEndTime: this.data.newEndTime,
-          totalDays: this.data.totalDays,
-          lastRenewalTime: Date.now()
+        return { 
+          success: true, 
+          data: { 
+            paymentId: `PAY_${Date.now()}`,
+            payTime: Date.now()
+          } 
         };
-        
-        DataManager.updateOrderData(this.data.orderInfo.orderId, updatedOrderData);
-
-        wx.showToast({
-          title: '支付成功',
-          icon: 'success',
-          duration: 1500
-        });
-        
-        setTimeout(() => {
-          const NavigationUtils = require('../../utils/navigation-utils.js');
-          
-          // 准备传递给成功页面的完整数据
-          const successData = {
-            orderId: this.data.orderInfo.orderId,
-            renewDays: this.data.renewDays,
-            totalAmount: this.data.totalAmount,
-            newEndTime: this.data.newEndTime,
-            purchaseMembership: this.data.purchaseMembership,
-            // 传递详细的支付信息
-            paymentDetails: {
-              renewAmount: this.data.renewSubtotal,
-              membershipAmount: this.data.membershipFee,
-              serviceFee: this.data.serviceFee,
-              totalAmount: this.data.totalAmount,
-              payTime: Date.now()
-            },
-            // 传递完整的订单信息
-            orderInfo: {
-              orderId: this.data.orderInfo.orderId,
-              carModel: this.data.orderInfo.carModel,
-              managerName: this.data.orderInfo.managerName,
-              managerPhone: this.data.orderInfo.managerPhone,
-              storeName: this.data.orderInfo.storeName,
-              originalStartTime: this.data.orderInfo.originalStartTime,
-              originalEndTime: this.data.orderInfo.originalEndTime,
-              originalDays: this.data.orderInfo.originalDays
-            }
-          };
-
-          // 将完整数据设置到全局，避免成功页面重新查询
-          DataManager.setGlobalOrderData(successData);
-          
-          NavigationUtils.toRenewalSuccessPage(successData);
-        }, 1500);
       } else {
-        wx.showToast({
-          title: '支付失败，请重试',
-          icon: 'none'
-        });
+        return { 
+          success: false, 
+          message: '支付失败，请重试' 
+        };
       }
     }
+  },
+
+  // 处理支付成功
+  handlePaymentSuccess(renewalOrderData) {
+    // 更新订单数据
+    const DataManager = require('../../utils/data-manager.js');
+    
+    // 更新续租订单状态为待生效
+    const updatedRenewalOrder = {
+      ...renewalOrderData,
+      orderStatus: 6, // 待生效
+      statusText: '待生效',
+      paymentTime: Date.now(),
+      paymentStatus: 'paid'
+    };
+    
+    DataManager.updateOrderData(renewalOrderData.id, updatedRenewalOrder);
+
+    // 更新原订单的关联信息
+    const updatedOriginalOrder = {
+      ...this.data.originalOrderInfo,
+      hasRenewal: true,
+      latestRenewalOrderId: renewalOrderData.id,
+      renewalCount: (this.data.orderChainInfo.currentLevel + 1)
+    };
+    
+    DataManager.updateOrderData(this.data.originalOrderInfo.orderId, updatedOriginalOrder);
+
+    wx.showToast({
+      title: '续租订单创建成功',
+      icon: 'success',
+      duration: 2000
+    });
+
+    setTimeout(() => {
+      const NavigationUtils = require('../../utils/navigation-utils.js');
+      
+      // 准备传递给成功页面的数据
+      const successData = {
+        originalOrderId: this.data.originalOrderInfo.orderId,
+        renewalOrderId: renewalOrderData.id,
+        renewDays: this.data.renewDays,
+        totalAmount: this.data.totalAmount,
+        newStartTime: this.data.newStartTime,
+        newEndTime: this.data.newEndTime,
+        purchaseMembership: this.data.purchaseMembership,
+        orderType: 'renewal', // 标识为续租订单
+        
+        // 续租订单特有信息
+        renewalInfo: {
+          parentOrderId: this.data.originalOrderInfo.orderId,
+          renewalLevel: renewalOrderData.renewalLevel,
+          vehicleRecordId: renewalOrderData.vehicleRecordId,
+          status: '待生效',
+          effectiveCondition: '原订单结束后自动生效'
+        },
+        
+        // 详细的支付信息
+        paymentDetails: {
+          renewAmount: this.data.renewSubtotal,
+          membershipAmount: this.data.membershipFee,
+          serviceFee: this.data.serviceFee,
+          totalAmount: this.data.totalAmount,
+          payTime: Date.now()
+        },
+        
+        // 完整的订单信息
+        orderInfo: {
+          carModel: this.data.originalOrderInfo.carModel,
+          managerName: this.data.originalOrderInfo.managerName,
+          managerPhone: this.data.originalOrderInfo.managerPhone,
+          storeName: this.data.originalOrderInfo.storeName
+        }
+      };
+
+      // 设置全局数据
+      DataManager.setGlobalOrderData(successData);
+      
+      // 跳转到续租成功页面
+      NavigationUtils.toRenewalSuccessPage(successData);
+    }, 2000);
   }
-})
+});

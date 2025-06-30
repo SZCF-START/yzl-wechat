@@ -1,4 +1,6 @@
-/* 订单容器 */
+/* order.wxss - 优化后的样式文件，简化类名判断 */
+
+/* Basic layout */
 .order-container {
   display: flex;
   flex-direction: column;
@@ -7,7 +9,7 @@
   position: relative;
 }
 
-/* 订单类型切换 */
+/* Top navigation */
 .order-type {
   display: flex;
   justify-content: space-around;
@@ -26,6 +28,7 @@
   font-size: 28rpx;
   color: #666;
   border-radius: 30rpx;
+  transition: all 0.3s ease;
 }
 
 .active-type {
@@ -34,7 +37,6 @@
   font-weight: 500;
 }
 
-/* 订单状态切换 */
 .order-status-bar {
   display: flex;
   justify-content: space-around;
@@ -54,6 +56,7 @@
   font-size: 28rpx;
   color: #666;
   padding: 10rpx 0;
+  transition: color 0.3s ease;
 }
 
 .active-status {
@@ -72,43 +75,85 @@
   border-radius: 2rpx;
 }
 
-/* 订单列表 - 修改这里的样式 */
+/* Order list */
 .order-list {
   flex: 1;
   overflow-y: auto;
-  margin-top: 180rpx; /* 给固定导航留出空间 */
-  padding: 20rpx 20rpx 120rpx;  /* 减少上方padding，因为已经用margin-top留出空间 */
-  height: calc(100vh - 180rpx - 120rpx); /* 明确设置高度，确保滚动区域正确 */
-  box-sizing: border-box;
+  padding: 200rpx 20rpx 120rpx;
 }
 
 .order-item {
   background-color: #fff;
-  border-radius: 12rpx;
-  margin-bottom: 20rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
-  overflow: visible; /* 允许子元素溢出 */
-  position: relative; /* 为了定位弹窗 */
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.08);
+  position: relative;
+  transition: all 0.3s ease;
 }
 
+.order-item:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 20rpx rgba(0,0,0,0.12);
+}
+
+/* Order header */
 .order-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20rpx;
+  align-items: center;
+  margin-bottom: 24rpx;
+  padding-bottom: 16rpx;
   border-bottom: 1rpx solid #f0f0f0;
 }
 
 .success-status {
-  color: #FF8C00;
   font-size: 28rpx;
+  font-weight: 600;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  background-color: rgba(255, 114, 0, 0.1);
+  color: #ff7200;
 }
 
 .order-price {
   font-size: 32rpx;
-  font-weight: bold;
+  font-weight: 700;
+  color: #333;
 }
 
+/* 简化的状态样式 - 基于预计算的类名 */
+.order-item.status-pending .success-status {
+  background-color: rgba(52, 152, 219, 0.1);
+  color: #3498db;
+}
+
+.order-item.status-renting .success-status {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.order-item.status-completed .success-status {
+  background-color: rgba(149, 165, 166, 0.1);
+  color: #95a5a6;
+}
+
+.order-item.status-cancelled .success-status {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
+
+.order-item.status-waiting .success-status {
+  background-color: rgba(241, 196, 15, 0.1);
+  color: #f1c40f;
+}
+
+.order-item.status-payment .success-status {
+  background-color: rgba(255, 114, 0, 0.1);
+  color: #ff7200;
+}
+
+/* Car and store info */
 .car-info {
   display: flex;
   justify-content: space-between;
@@ -117,30 +162,34 @@
 }
 
 .car-name {
-  font-size: 34rpx;
-  font-weight: bold;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
 }
 
 .car-image {
-  width: 180rpx;
-  height: 100rpx;
+  width: 160rpx;
+  height: 90rpx;
+  border-radius: 8rpx;
 }
 
 .store-info {
   display: flex;
   align-items: center;
-  margin-bottom: 10rpx;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  color: #666;
 }
 
 .store-point {
   width: 12rpx;
   height: 12rpx;
   border-radius: 50%;
-  margin-right: 10rpx;
+  margin-right: 12rpx;
 }
 
 .orange {
-  background-color: #FF8C00;
+  background-color: #ff7200;
 }
 
 .green {
@@ -152,12 +201,15 @@
   color: #666;
 }
 
+/* Rental time */
 .rental-time {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 20rpx 0;
-  padding: 15rpx 0;
+  margin: 24rpx 0;
+  padding: 16rpx 20rpx;
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
 }
 
 .time-info {
@@ -165,103 +217,373 @@
   color: #666;
 }
 
-.time-info1 {
-  font-size: 24rpx;
-  color: #eee;
-}
-
 .day-count {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #ff7200;
-  font-weight: 500;
+  font-weight: 600;
+  background-color: rgba(255, 114, 0, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
 }
 
-.order-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+/* Order chain collapse section */
+.order-chain-section {
   margin-top: 20rpx;
   border-top: 1rpx solid #f0f0f0;
   padding-top: 20rpx;
 }
 
+.chain-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12rpx;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.chain-header:active {
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  transform: scale(0.98);
+}
+
+.chain-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+/* Renewal and payment badges */
+.renewal-badge {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12rpx;
+  border: 1rpx solid #bbdefb;
+  font-weight: 500;
+}
+
+.payment-badge {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  background-color: #fff3e0;
+  color: #f57c00;
+  border-radius: 12rpx;
+  border: 1rpx solid #ffcc02;
+  font-weight: 500;
+  animation: pulse-orange 2s infinite;
+}
+
+@keyframes pulse-orange {
+  0% { 
+    background-color: #fff3e0;
+    transform: scale(1); 
+  }
+  50% { 
+    background-color: #ffe0b2;
+    transform: scale(1.05); 
+  }
+  100% { 
+    background-color: #fff3e0;
+    transform: scale(1); 
+  }
+}
+
+/* Payment notice styles */
+.payment-notice {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 12rpx;
+  padding: 12rpx 16rpx;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-radius: 8rpx;
+  border: 1rpx solid #ffb74d;
+}
+
+.notice-icon {
+  font-size: 24rpx;
+}
+
+.notice-text {
+  font-size: 22rpx;
+  color: #ef6c00;
+  font-weight: 500;
+}
+
+/* Payment status in vehicle record */
+.payment-status {
+  color: #f57c00;
+  font-weight: 600;
+}
+
+.chain-icon {
+  font-size: 28rpx;
+}
+
+.chain-title {
+  font-size: 26rpx;
+  color: #495057;
+  font-weight: 500;
+}
+
+.chain-arrow {
+  font-size: 20rpx;
+  color: #6c757d;
+  transform: rotate(-90deg);
+  transition: transform 0.3s ease;
+}
+
+.chain-arrow.expanded {
+  transform: rotate(0deg);
+}
+
+/* Chain content */
+.chain-content {
+  padding: 20rpx;
+  background-color: #fafbfc;
+  border-radius: 0 0 12rpx 12rpx;
+  border: 1rpx solid #e9ecef;
+  border-top: none;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10rpx);
+  }
+  to {
+    opacity: 1;
+    max-height: 2000rpx;
+    transform: translateY(0);
+  }
+}
+
+.chain-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid #e9ecef;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+}
+
+.chain-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Chain item header */
+.chain-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.order-type-tag {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+}
+
+.order-type-tag.original {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1rpx solid #c3e6cb;
+}
+
+.order-type-tag.renewal {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1rpx solid #ffeaa7;
+}
+
+.order-status-tag {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 10rpx;
+  font-weight: 500;
+}
+
+/* 简化的状态样式 - 基于预计算的类名 */
+.order-status-tag.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.order-status-tag.status-renting {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.order-status-tag.status-pending {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.order-status-tag.status-payment {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.order-status-tag.status-unknown {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+/* Chain detail rows */
+.chain-item-body {
+  margin-top: 12rpx;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+  font-size: 24rpx;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-label {
+  color: #6c757d;
+  font-weight: 500;
+  min-width: 140rpx;
+}
+
+.detail-value {
+  color: #495057;
+  font-weight: 400;
+  text-align: right;
+  flex: 1;
+}
+
+.price-value {
+  color: #ff7200;
+  font-weight: 600;
+}
+
+/* Overtime styles */
+.overtime-row {
+  background-color: #fff3cd;
+  padding: 8rpx 12rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid #ffeaa7;
+  margin: 8rpx 0;
+}
+
+.overtime-text {
+  color: #856404;
+  font-weight: 600;
+}
+
+.overtime-fee {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* Vehicle record info */
+.vehicle-record {
+  margin-top: 20rpx;
+  padding: 16rpx;
+  background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+  border-radius: 12rpx;
+  border: 1rpx solid #c3e6cb;
+}
+
+.record-header {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.record-icon {
+  font-size: 24rpx;
+}
+
+.record-title {
+  font-size: 26rpx;
+  color: #155724;
+  font-weight: 600;
+}
+
+.record-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.record-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 22rpx;
+}
+
+.record-label {
+  color: #155724;
+  font-weight: 500;
+}
+
+.record-value {
+  color: #155724;
+  font-weight: 400;
+}
+
+/* Action buttons area */
+.order-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 24rpx;
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 20rpx;
+  gap: 12rpx;
+}
+
 .more-action {
   font-size: 26rpx;
   color: #999;
-  padding: 10rpx 0 20rpx;
+  padding: 10rpx 0;
   margin-right: auto;
   position: relative;
   z-index: 50;
 }
 
-/* 更多选项弹出层 - 修改后的样式 */
+/* More actions dropdown */
 .more-dropdown {
   position: absolute;
-  top: 60rpx;
-  left: 0; /* 改为从左侧开始 */
+  top: 50rpx;
+  left: 0;
   min-width: 200rpx;
-  max-width: 300rpx; /* 限制最大宽度 */
   background-color: #fff;
-  border-radius: 12rpx; /* 增加圆角 */
-  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.12); /* 优化阴影 */
+  border-radius: 12rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.15);
   z-index: 999;
-  overflow: hidden; /* 防止内容溢出 */
+  overflow: hidden;
   display: none;
-  transform-origin: top left; /* 改为左上角为原点 */
-  white-space: nowrap;
-  /* 确保不会超出屏幕右边界 */
-  right: auto;
-}
-
-/* 当弹窗可能超出右边界时，调整到右对齐 */
-.more-dropdown.left-aligned {
-  left: auto;
-  right: 0;
-  transform-origin: top right;
-}
-
-/* 添加三角形箭头 */
-.more-dropdown::before {
-  content: '';
-  position: absolute;
-  top: -16rpx;
-  left: 30rpx; /* 默认箭头在左侧 */
-  width: 0;
-  height: 0;
-  border-left: 16rpx solid transparent;
-  border-right: 16rpx solid transparent;
-  border-bottom: 16rpx solid #fff;
-  z-index: 1000;
-}
-
-/* 右对齐时箭头位置调整 */
-.more-dropdown.left-aligned::before {
-  left: auto;
-  right: 30rpx;
+  transform-origin: top left;
 }
 
 .more-dropdown.show {
   display: block;
   animation: fadeIn 0.2s ease-out forwards;
-}
-
-.dropdown-item {
-  white-space: nowrap;
-  padding: 24rpx 30rpx; /* 增加垂直内边距 */
-  font-size: 28rpx;
-  color: #333;
-  border-bottom: 1rpx solid #f0f0f0;
-  transition: background-color 0.2s ease;
-  line-height: 1.4; /* 增加行高 */
-}
-
-.dropdown-item:last-child {
-  border-bottom: none;
-}
-
-.dropdown-item:active,
-.dropdown-item:hover {
-  background-color: #f8f8f8;
 }
 
 @keyframes fadeIn {
@@ -275,49 +597,61 @@
   }
 }
 
-.action-button {
+.dropdown-item {
+  padding: 20rpx 24rpx;
   font-size: 26rpx;
+  color: #333;
+  border-bottom: 1rpx solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:active {
+  background-color: #f8f8f8;
+}
+
+/* Action buttons */
+.action-button {
+  font-size: 24rpx;
   color: #666;
-  border: 1px solid #ddd;
-  border-radius: 30rpx;
-  padding: 8rpx 20rpx;
-  margin-left: 15rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 20rpx;
+  padding: 8rpx 16rpx;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .action-button:active {
   background-color: #f5f5f5;
+  transform: scale(0.98);
 }
 
-.highlight {
-  color: #FF8C00;
-  border-color: #FF8C00;
+.action-button.highlight {
+  color: #ff7200;
+  border-color: #ff7200;
 }
 
-.car-details-btn {
-  position: absolute;
-  left: 30rpx;
-  bottom: 30rpx;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8rpx;
-  font-size: 24rpx;
-  color: #666;
-  padding: 8rpx 15rpx;
+.action-button.highlight:active {
+  background-color: rgba(255, 114, 0, 0.1);
 }
 
+/* No orders state */
 .no-order {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100rpx 0;
+  padding: 120rpx 0;
 }
 
 .no-order image {
   width: 200rpx;
   height: 200rpx;
   margin-bottom: 20rpx;
+  opacity: 0.6;
 }
 
 .no-order text {
@@ -325,14 +659,15 @@
   font-size: 28rpx;
 }
 
+/* Load more */
 .load-more {
   text-align: center;
-  padding: 20rpx 0;
+  padding: 30rpx 0;
   color: #999;
   font-size: 26rpx;
 }
 
-/* 搜索按钮 */
+/* Search button */
 .search-btn {
   position: fixed;
   right: 30rpx;
@@ -342,5 +677,52 @@
   background-color: #fff;
   border-radius: 30rpx;
   padding: 15rpx 25rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.1);
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+
+.search-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.15);
+}
+
+.search-btn image {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
+}
+
+.search-btn text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* Responsive design */
+@media screen and (max-width: 750rpx) {
+  .order-actions {
+    flex-wrap: wrap;
+    gap: 8rpx;
+  }
+  
+  .action-button {
+    font-size: 22rpx;
+    padding: 6rpx 12rpx;
+  }
+  
+  .chain-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8rpx;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4rpx;
+  }
+  
+  .detail-value {
+    text-align: left;
+  }
 }

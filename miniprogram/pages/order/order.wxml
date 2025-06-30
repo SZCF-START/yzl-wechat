@@ -1,4 +1,6 @@
-<view class="order-container">
+<!-- order.wxml - 优化后的订单页面模板，移除复杂表达式 -->
+<view class="order-container" bindtap="onPageTap">
+  
   <!-- 订单类型切换 -->
   <view class="order-type">
     <view 
@@ -27,15 +29,26 @@
   <!-- 订单列表 -->
   <view class="order-list">
     <block wx:if="{{orderList.length > 0}}">
-      <view class="order-item" wx:for="{{orderList}}" wx:key="id">
+      
+      <!-- 订单项 -->
+      <view wx:for="{{orderList}}" wx:key="id" class="order-item {{item.statusClassName}}" data-status="{{item.orderStatus}}">
+        
+        <!-- 订单头部：状态和价格 -->
         <view class="order-header">
           <view class="success-status">{{item.statusText}}</view>
-          <view class="order-price">¥{{item.price}}</view>
+          <!-- 使用预计算的价格显示逻辑 -->
+          <view class="order-price" wx:if="{{item.shouldShowPrice}}">
+            <text>{{item.priceDisplayText}}</text>
+          </view>
         </view>
+        
+        <!-- 车辆信息 -->
         <view class="car-info">
           <view class="car-name">{{item.carModel}}</view>
           <image class="car-image" src="{{item.carImage}}" mode="aspectFit"></image>
         </view>
+        
+        <!-- 门店信息 -->
         <view class="store-info">
           <view class="store-point orange"></view>
           <view class="store-name">{{item.pickupStore}}</view>
@@ -44,6 +57,8 @@
           <view class="store-point green"></view>
           <view class="store-name">{{item.returnStore}}</view>
         </view>
+        
+        <!-- 租赁时间（按出车记录显示） -->
         <view class="rental-time">
           <view class="time-info">{{item.pickupTime}}</view>
           <view class="time-info">—</view>
@@ -51,60 +66,146 @@
           <view class="time-info">—</view>
           <view class="time-info">{{item.returnTime}}</view>
         </view>
-        <view class="order-actions">
-          <!-- 更多下拉菜单 -->
-          <view class="more-action" 
-                wx:if="{{item.orderStatus == 0 || item.orderStatus == 1 || item.orderStatus == 2 || item.orderStatus == 3 || item.orderStatus == 4 || item.orderStatus == 5}}"
-                bindtap="showMoreActions" 
-                catchtap="showMoreActions"
-                data-id="{{item.id}}">更多
-            <!-- 更多下拉菜单 -->
-            <view class="more-dropdown {{item.id === activeMoreId ? 'show' : ''}} {{item.isLeftAligned ? 'left-aligned' : ''}}" catchtap="stopPropagation">
-              <!-- 车辆详情 - 所有状态都有 -->
-              <view class="dropdown-item" bindtap="viewCarDetails" data-id="{{item.id}}">车辆详情</view>
-              
-              <!-- 修改订单 - 预约中和正常租赁中状态有 -->
-              <view class="dropdown-item" 
-                    wx:if="{{item.orderStatus == 0 || item.orderStatus == 1}}" 
-                    bindtap="modifyOrder" 
-                    data-id="{{item.id}}">修改订单</view>
-              
-              <!-- 取消订单 - 只有预约中状态有 -->
-              <view class="dropdown-item" 
-                    wx:if="{{item.orderStatus == 0}}" 
-                    bindtap="cancelOrder" 
-                    data-id="{{item.id}}">取消订单</view>
+        
+        <!-- 订单链折叠区域 -->
+        <view class="order-chain-section" wx:if="{{item.hasOrderChain}}">
+          <!-- 折叠头部 -->
+          <view class="chain-header" bindtap="toggleOrderChain" data-order-id="{{item.id}}" catchtap="toggleOrderChain">
+            <view class="chain-info">
+              <text class="chain-icon">🔗</text>
+              <text class="chain-title">订单链详情 ({{item.chainSummary.totalOrders}}个订单)</text>
+              <!-- 使用预计算的标签 -->
+              <view wx:for="{{item.chainSummary.badges}}" wx:key="type" class="{{item.type}}-badge">
+                {{item.text}}
+              </view>
+            </view>
+            <view class="chain-arrow {{item.isChainExpanded ? 'expanded' : ''}}">
+              ▼
             </view>
           </view>
           
-          <!-- 预约中状态的按钮：咨询、取车门店指引、取车 -->
-          <block wx:if="{{item.orderStatus == 0}}">
-            <view class="action-button highlight" bindtap="handleConsult" data-id="{{item.id}}">咨询</view>
-            <view class="action-button highlight" bindtap="handlePickupGuide" data-id="{{item.id}}">取车门店指引</view>
-            <view class="action-button highlight" bindtap="handlePickup" data-id="{{item.id}}">取车</view>
-          </block>
+          <!-- 折叠内容 -->
+          <view class="chain-content" wx:if="{{item.isChainExpanded}}">
+            
+            <!-- 订单链条列表 -->
+            <view wx:for="{{item.processedChainDetails}}" wx:key="orderId" wx:for-item="chainItem" class="chain-item">
+              
+              <!-- 订单类型和状态 -->
+              <view class="chain-item-header">
+                <view class="order-type-tag {{chainItem.typeClassName}}">
+                  {{chainItem.orderType}}
+                </view>
+                <view class="order-status-tag {{chainItem.statusClassName}}">
+                  {{chainItem.orderStatus}}
+                </view>
+              </view>
+              
+              <!-- 订单详细信息 -->
+              <view class="chain-item-body">
+                <view class="detail-row">
+                  <text class="detail-label">订单编号:</text>
+                  <text class="detail-value">{{chainItem.orderId}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">订单价格:</text>
+                  <text class="detail-value price-value">{{chainItem.formattedPrice}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">租期天数:</text>
+                  <text class="detail-value">{{chainItem.rentalDays}}天</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">订单时间:</text>
+                  <text class="detail-value">{{chainItem.startTime}} - {{chainItem.endTime}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">创建时间:</text>
+                  <text class="detail-value">{{chainItem.createTime}}</text>
+                </view>
+                
+                <!-- 超时信息 -->
+                <block wx:if="{{chainItem.showOvertimeInfo}}">
+                  <view class="detail-row overtime-row">
+                    <text class="detail-label">超时情况:</text>
+                    <text class="detail-value overtime-text">超时{{chainItem.overtimeHours}}小时</text>
+                  </view>
+                  <view class="detail-row" wx:if="{{chainItem.actualEndTime}}">
+                    <text class="detail-label">实际还车:</text>
+                    <text class="detail-value">{{chainItem.actualEndTime}}</text>
+                  </view>
+                  <view class="detail-row" wx:if="{{chainItem.formattedOvertimeFee}}">
+                    <text class="detail-label">超时费用:</text>
+                    <text class="detail-value overtime-fee">{{chainItem.formattedOvertimeFee}}</text>
+                  </view>
+                  <!-- 补缴订单标识 -->
+                  <view class="payment-notice" wx:if="{{chainItem.showPaymentNotice}}">
+                    <text class="notice-icon">💰</text>
+                    <text class="notice-text">此订单需要补缴超时费用</text>
+                  </view>
+                </block>
+              </view>
+            </view>
+            
+            <!-- 出车记录信息 -->
+            <view class="vehicle-record">
+              <view class="record-header">
+                <text class="record-icon">🚗</text>
+                <text class="record-title">出车记录信息</text>
+              </view>
+              <view class="record-content">
+                <view class="record-row">
+                  <text class="record-label">记录编号:</text>
+                  <text class="record-value">{{item.vehicleRecordId}}</text>
+                </view>
+                <view class="record-row">
+                  <text class="record-label">总租期:</text>
+                  <text class="record-value">{{item.totalRentalDays}}天</text>
+                </view>
+                <view class="record-row">
+                  <text class="record-label">续租次数:</text>
+                  <text class="record-value">{{item.renewalCount}}次</text>
+                </view>
+                <view class="record-row">
+                  <text class="record-label">取车时间:</text>
+                  <text class="record-value">{{item.pickupTime}}</text>
+                </view>
+                <view class="record-row">
+                  <text class="record-label">还车时间:</text>
+                  <text class="record-value">{{item.returnTime}}</text>
+                </view>
+                <view class="record-row" wx:if="{{item.hasPayment}}">
+                  <text class="record-label">补缴状态:</text>
+                  <text class="record-value payment-status">存在超时补缴费用</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 操作按钮区域 -->
+        <view class="order-actions">
           
-          <!-- 租赁中状态(1)的按钮：取车门店指引、续租、还车 -->
-          <block wx:elif="{{item.orderStatus == 1}}">
-            <view class="action-button highlight" bindtap="handlePickupGuide" data-id="{{item.id}}">取车门店指引</view>
-            <view class="action-button highlight" bindtap="handleRenewal" data-id="{{item.id}}">续租</view>
-            <view class="action-button highlight" bindtap="handleReturn" data-id="{{item.id}}">还车</view>
-          </block>
+          <!-- 更多操作下拉菜单 -->
+          <view class="more-action" bindtap="showMoreActions" catchtap="showMoreActions" data-id="{{item.id}}">
+            更多
+            <view class="more-dropdown {{item.isMoreMenuOpen ? 'show' : ''}}" catchtap="stopPropagation">
+              <view wx:for="{{item.moreMenuItems}}" wx:key="action" class="dropdown-item" bindtap="handleAction" data-action="{{item.action}}" data-id="{{item.id}}">
+                {{item.text}}
+              </view>
+            </view>
+          </view>
           
-          <!-- 还车审核中状态(4)的按钮：还车审核中 -->
-          <block wx:elif="{{item.orderStatus == 4}}">
-            <view class="action-button highlight" bindtap="handleReturnAudit" data-id="{{item.id}}">还车审核中</view>
-          </block>
+          <!-- 使用预计算的操作按钮配置 -->
+          <view wx:for="{{item.actionButtons}}" wx:key="action" class="action-button {{item.highlight ? 'highlight' : ''}}" bindtap="handleAction" data-action="{{item.action}}" data-id="{{item.id}}">
+            {{item.text}}
+          </view>
           
-          <!-- 待支付状态(5)的按钮：去支付 -->
-          <block wx:elif="{{item.orderStatus == 5}}">
-            <view class="action-button highlight" bindtap="handlePayment" data-id="{{item.id}}">去支付</view>
-          </block>
-          
-          <!-- 已完成和已取消状态：没有操作按钮 -->
         </view>
       </view>
+      
     </block>
+    
+    <!-- 无订单状态 -->
     <view class="no-order" wx:else>
       <image src="/images/no-order.png" mode="aspectFit"></image>
       <text>暂无订单</text>
@@ -117,4 +218,11 @@
       <text wx:else>没有更多数据了</text>
     </view>
   </view>
+  
+  <!-- 搜索按钮 -->
+  <view class="search-btn" bindtap="searchOrder">
+    <image src="/images/search.png"></image>
+    <text>搜索</text>
+  </view>
+  
 </view>

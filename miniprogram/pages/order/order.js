@@ -1,36 +1,44 @@
+// order.js - 优化后的订单页面逻辑，避免模板中的复杂表达式
 Page({
   data: {
-    orderTypeList: [],     // 订单类型列表数据
-    activeOrderType: 0,    // 当前选中的订单类型索引
-    statusList: [],        // 订单状态列表数据
-    activeStatus: 0,       // 当前选中的订单状态索引
-    orderList: [],         // 订单列表数据
-    pageNum: 1,            // 当前页码
-    pageSize: 10,          // 每页条数
-    totalCount: 0,         // 订单总条数
-    totalPage: 0,          // 总页数
-    isLoading: false,      // 是否正在加载中
-    hasMoreOrders: true,    // 是否还有更多订单
-    activeMoreId: null, // 当前展开的"更多"菜单的订单ID
+    // 订单类型和状态
+    orderTypeList: [
+      { id: 0, name: "挖机订单" },
+      { id: 1, name: "属具订单" }
+    ],
+    activeOrderType: 0,
+    statusList: [
+      { id: 0, name: "预约中" },
+      { id: 1, name: "租赁中" },
+      { id: 2, name: "已完成" },
+      { id: 3, name: "已取消" }
+    ],
+    activeStatus: 0,
+    
+    // 订单列表
+    orderList: [],
+    pageNum: 1,
+    pageSize: 10,
+    totalCount: 0,
+    totalPage: 0,
+    isLoading: false,
+    hasMoreOrders: true,
+    
+    // 交互状态
+    activeMoreId: null, // 当前展开的"更多"菜单
+    expandedChainIds: [], // 展开的订单链折叠区域
   },
 
   onLoad: function(options) {
-    // 引入数据管理工具，应用启动时清理过期缓存
-    const DataManager = require('../../utils/data-manager.js');
-    DataManager.cleanExpiredCache();
-
-    // 获取订单类型数据
-    this.getOrderTypeList();
-    // 获取订单状态数据
-    this.getOrderStatusList();
-    // 获取订单列表数据
     this.getOrderList(true);
   },
 
   onPullDownRefresh: function() {
     this.setData({
       pageNum: 1,
-      hasMoreOrders: true
+      hasMoreOrders: true,
+      expandedChainIds: [],
+      activeMoreId: null
     });
     this.getOrderList(true);
     wx.stopPullDownRefresh();
@@ -41,42 +49,238 @@ Page({
       this.loadMoreOrders();
     }
   },
+
+  // ==================== 数据获取 ====================
   
-  // 获取订单类型列表
-  getOrderTypeList: function() {
-    // 模拟接口请求获取订单类型列表
+  getOrderList: function(isRefresh) {
+    if (this.data.isLoading) return;
+    
+    this.setData({ isLoading: true });
+    
+    // 模拟API调用
     setTimeout(() => {
-      // 模拟后台返回的订单类型数据
-      const orderTypeList = [
-        { id: 0, name: "挖机订单" },
-        { id: 1, name: "属具订单" }
-      ];
-      
-      this.setData({
-        orderTypeList: orderTypeList
-      });
-    }, 200);
+      const mockData = this.generateMockOrderData();
+      this.handleOrderListResponse(mockData, isRefresh);
+    }, 800);
   },
-  
-  // 获取订单状态列表
-  getOrderStatusList: function() {
-    // 模拟接口请求获取订单状态列表
-    setTimeout(() => {
-      // 模拟后台返回的订单状态数据
-      const statusList = [
-        { id: 0, name: "预约中" },
-        { id: 1, name: "租赁中" },
-        { id: 2, name: "已完成" },
-        { id: 3, name: "已取消" }
-      ];
-      
+
+  handleOrderListResponse: function(responseData, isRefresh) {
+    // 过滤显示主订单（包含订单链信息）
+    const displayOrders = responseData.list.filter(order => 
+      !order.isRenewalOrder || order.isMainDisplay
+    );
+    
+    // 对每个订单进行数据预处理
+    const processedOrders = displayOrders.map(order => this.processOrderData(order));
+    
+    if (isRefresh) {
       this.setData({
-        statusList: statusList
+        orderList: processedOrders,
+        isLoading: false,
+        totalCount: responseData.totalCount,
+        totalPage: responseData.totalPage,
+        pageNum: 2,
+        hasMoreOrders: responseData.pageNum < responseData.totalPage
       });
-    }, 200);
+    } else {
+      this.setData({
+        orderList: [...this.data.orderList, ...processedOrders],
+        isLoading: false,
+        pageNum: this.data.pageNum + 1,
+        hasMoreOrders: responseData.pageNum < responseData.totalPage
+      });
+    }
   },
-  
-  // 切换订单类型
+
+  // 预处理订单数据，计算所有需要在模板中使用的属性
+  processOrderData: function(order) {
+    const processedOrder = { ...order };
+    
+    // 预计算价格显示逻辑
+    processedOrder.shouldShowPrice = this.shouldShowOrderPrice(order);
+    processedOrder.priceDisplayText = this.getPriceDisplayText(order);
+    
+    // 预计算状态样式类名
+    processedOrder.statusClassName = this.getStatusClassName(order.orderStatus);
+    
+    // 预计算操作按钮显示逻辑
+    processedOrder.actionButtons = this.getActionButtons(order);
+    
+    // 预计算更多菜单项
+    processedOrder.moreMenuItems = this.getMoreMenuItems(order);
+    
+    // 预计算订单链相关属性
+    if (order.hasOrderChain && order.orderChainDetails) {
+      processedOrder.chainSummary = this.getChainSummary(order);
+      processedOrder.processedChainDetails = order.orderChainDetails.map(chainItem => 
+        this.processChainItemData(chainItem)
+      );
+    }
+    
+    // 预计算展开状态
+    processedOrder.isChainExpanded = this.data.expandedChainIds.includes(order.id);
+    processedOrder.isMoreMenuOpen = this.data.activeMoreId === order.id;
+    
+    return processedOrder;
+  },
+
+  // 判断是否显示价格
+  shouldShowOrderPrice: function(order) {
+    // 租赁中状态且有订单链时不显示价格
+    return !(order.orderStatus === 1 && order.hasOrderChain);
+  },
+
+  // 获取价格显示文本
+  getPriceDisplayText: function(order) {
+    if (!this.shouldShowOrderPrice(order)) {
+      return '';
+    }
+    return order.price ? `¥${order.price}` : '详见明细';
+  },
+
+  // 获取状态样式类名
+  getStatusClassName: function(status) {
+    const statusClassMap = {
+      0: 'status-pending',    // 预约中
+      1: 'status-renting',    // 租赁中
+      2: 'status-completed',  // 已完成
+      3: 'status-cancelled',  // 已取消
+      4: 'status-waiting',    // 还车审核中
+      5: 'status-payment'     // 待支付
+    };
+    return statusClassMap[status] || 'status-unknown';
+  },
+
+  // 获取操作按钮配置
+  getActionButtons: function(order) {
+    const buttons = [];
+    
+    switch (order.orderStatus) {
+      case 0: // 预约中
+        buttons.push(
+          { text: '咨询', action: 'handleConsult', highlight: true },
+          { text: '取车门店指引', action: 'handlePickupGuide', highlight: true },
+          { text: '取车', action: 'handlePickup', highlight: true }
+        );
+        break;
+        
+      case 1: // 租赁中
+        buttons.push(
+          { text: '取车门店指引', action: 'handlePickupGuide', highlight: true },
+          { text: '续租', action: 'handleRenewal', highlight: true },
+          { text: '还车', action: 'handleReturn', highlight: true }
+        );
+        break;
+        
+      case 4: // 还车审核中
+        buttons.push(
+          { text: '还车审核中', action: 'handleReturnAudit', highlight: true }
+        );
+        break;
+        
+      case 5: // 待支付
+        buttons.push(
+          { text: '去支付', action: 'handlePayment', highlight: true }
+        );
+        break;
+    }
+    
+    return buttons;
+  },
+
+  // 获取更多菜单项
+  getMoreMenuItems: function(order) {
+    const items = [
+      { text: '车辆详情', action: 'viewCarDetails', showAlways: true }
+    ];
+    
+    // 预约中或租赁中可以修改订单
+    if (order.orderStatus === 0 || order.orderStatus === 1) {
+      items.push({ text: '修改订单', action: 'modifyOrder', showAlways: false });
+    }
+    
+    // 预约中可以取消订单
+    if (order.orderStatus === 0) {
+      items.push({ text: '取消订单', action: 'cancelOrder', showAlways: false });
+    }
+    
+    return items;
+  },
+
+  // 获取订单链摘要信息
+  getChainSummary: function(order) {
+    return {
+      totalOrders: order.orderChainDetails ? order.orderChainDetails.length : 0,
+      renewalCount: order.renewalCount || 0,
+      hasPayment: order.hasPayment || false,
+      badges: this.getChainBadges(order)
+    };
+  },
+
+  // 获取订单链标签
+  getChainBadges: function(order) {
+    const badges = [];
+    
+    if (order.renewalCount > 0) {
+      badges.push({
+        text: `续租${order.renewalCount}次`,
+        type: 'renewal'
+      });
+    }
+    
+    if (order.hasPayment) {
+      badges.push({
+        text: '有补缴',
+        type: 'payment'
+      });
+    }
+    
+    return badges;
+  },
+
+  // 处理订单链子项数据
+  processChainItemData: function(chainItem) {
+    const processed = { ...chainItem };
+    
+    // 预计算订单类型样式
+    processed.typeClassName = chainItem.orderType === '原订单' ? 'original' : 'renewal';
+    
+    // 预计算状态样式
+    processed.statusClassName = this.getChainItemStatusClass(chainItem.orderStatus);
+    
+    // 预计算是否显示超时信息
+    processed.showOvertimeInfo = chainItem.isOvertime || false;
+    
+    // 预计算是否显示补缴提示
+    processed.showPaymentNotice = chainItem.orderStatus && 
+      chainItem.orderStatus.indexOf('补缴') > -1;
+    
+    // 格式化数据
+    processed.formattedPrice = `¥${chainItem.price}`;
+    processed.formattedOvertimeFee = chainItem.overtimeFee ? `¥${chainItem.overtimeFee}` : '';
+    
+    return processed;
+  },
+
+  // 获取订单链子项状态样式
+  getChainItemStatusClass: function(status) {
+    if (!status) return 'status-unknown';
+    
+    if (status.includes('已完成')) return 'status-completed';
+    if (status.includes('租赁中')) return 'status-renting';
+    if (status.includes('待生效')) return 'status-pending';
+    if (status.includes('待支付')) return 'status-payment';
+    if (status.includes('补缴')) return 'status-payment';
+    
+    return 'status-unknown';
+  },
+
+  loadMoreOrders: function() {
+    this.getOrderList(false);
+  },
+
+  // ==================== 交互事件 ====================
+
   switchOrderType: function(e) {
     const type = parseInt(e.currentTarget.dataset.type);
     if (type !== this.data.activeOrderType) {
@@ -85,13 +289,13 @@ Page({
         pageNum: 1,
         hasMoreOrders: true,
         orderList: [],
-        activeMoreId: null // 关闭所有展开的菜单
+        expandedChainIds: [],
+        activeMoreId: null
       });
       this.getOrderList(true);
     }
   },
-  
-  // 切换订单状态
+
   switchStatus: function(e) {
     const status = parseInt(e.currentTarget.dataset.status);
     if (status !== this.data.activeStatus) {
@@ -100,543 +304,111 @@ Page({
         pageNum: 1,
         hasMoreOrders: true,
         orderList: [],
-        activeMoreId: null // 关闭所有展开的菜单
+        expandedChainIds: [],
+        activeMoreId: null
       });
       this.getOrderList(true);
     }
   },
-  
-  // 获取订单列表
-  getOrderList: function(isRefresh) {
-    if (this.data.isLoading) return;
-    
-    this.setData({ isLoading: true });
-    
-    // 准备请求参数
-    const params = {
-      orderType: this.data.activeOrderType,
-      orderStatus: this.data.activeStatus,
-      pageNum: this.data.pageNum,
-      pageSize: this.data.pageSize
-    };
-    
-    // 调用数据管理工具获取订单列表
-    this.getOrderListWithCache(params, isRefresh);
-  },
 
-  // 使用缓存和API获取订单列表
-  async getOrderListWithCache(params, isRefresh) {
-    const DataManager = require('../../utils/data-manager.js');
+  // 切换订单链折叠状态
+  toggleOrderChain: function(e) {
+    const orderId = e.currentTarget.dataset.orderId;
+    const expandedIds = this.data.expandedChainIds;
     
-    try {
-      // 为列表数据生成缓存key
-      const cacheKey = `order_list_${params.orderType}_${params.orderStatus}_${params.pageNum}`;
-      
-      // 列表数据缓存时间较短，1分钟
-      let cachedData = null;
-      if (!isRefresh) {
-        cachedData = DataManager.getCachedOrderData(cacheKey);
-      }
-
-      if (cachedData && !isRefresh) {
-        // 使用缓存数据
-        this.handleOrderListResponse(cachedData, isRefresh);
-      } else {
-        // 获取新数据
-        const responseData = await this.fetchOrderListFromAPI(params);
-        
-        // 缓存列表数据（1分钟过期）
-        // DataManager.cacheOrderData(cacheKey, responseData, 60 * 1000);
-        
-        // 同时缓存每个订单的详细信息（5分钟过期）
-        // responseData.list.forEach(order => {
-        //   const orderDetail = this.buildOrderDetailFromListItem(order);
-        //   DataManager.cacheOrderData(order.id, orderDetail, 5 * 60 * 1000);
-        // });
-        
-        this.handleOrderListResponse(responseData, isRefresh);
-      }
-    } catch (error) {
-      console.error('获取订单列表失败:', error);
-      this.setData({ isLoading: false });
-      wx.showToast({
-        title: '获取订单列表失败',
-        icon: 'none'
-      });
+    let newExpandedIds;
+    if (expandedIds.includes(orderId)) {
+      newExpandedIds = expandedIds.filter(id => id !== orderId);
+    } else {
+      newExpandedIds = [...expandedIds, orderId];
     }
-  },
-
-  // 从列表项构建订单详情数据
-  buildOrderDetailFromListItem(order) {
-    return {
-      orderId: order.id,
-      storeName: order.pickupStore,
-      managerName: '张经理', // 模拟数据
-      managerPhone: '138****8888', // 模拟数据
-      carModel: order.carModel,
-      originalStartTime: this.parseTimeToTimestamp(order.pickupTime),
-      originalEndTime: this.parseTimeToTimestamp(order.returnTime),
-      originalDays: order.rentalDays,
-      renewPrice: 800, // 模拟续租单价
-      memberRenewPrice: 640, // 模拟会员续租单价
-      status: order.orderStatus,
-      price: order.price,
-      carImage: order.carImage
-    };
-  },
-
-  // 解析时间字符串为时间戳（简化版本）
-  parseTimeToTimestamp(timeStr) {
-    // 将 "09月16日 21:00" 格式转换为时间戳
-    const currentYear = new Date().getFullYear();
-    const match = timeStr.match(/(\d{2})月(\d{2})日\s+(\d{1,2}):(\d{2})/);
-    if (match) {
-      const [, month, day, hour, minute] = match;
-      return new Date(currentYear, parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute)).getTime();
-    }
-    return Date.now();
-  },
-
-  // 从API获取订单列表
-  fetchOrderListFromAPI(params) {
-    return new Promise((resolve) => {
-      // 模拟API请求延迟
-      setTimeout(() => {
-        const responseData = this.getMockResponseData(params);
-        resolve(responseData);
-      }, 500);
+    
+    this.setData({
+      expandedChainIds: newExpandedIds
+    }, () => {
+      // 重新处理订单数据以更新展开状态
+      this.updateOrderListState();
     });
   },
 
-  // 处理订单列表响应
-  handleOrderListResponse(responseData, isRefresh) {
-    if (isRefresh) {
-      this.setData({
-        orderList: responseData.list,
-        isLoading: false,
-        totalCount: responseData.totalCount,
-        totalPage: responseData.totalPage,
-        pageNum: responseData.pageNum + 1,
-        hasMoreOrders: responseData.pageNum < responseData.totalPage
-      });
-    } else {
-      // 加载更多数据
-      if (responseData.list.length > 0) {
-        this.setData({
-          orderList: [...this.data.orderList, ...responseData.list],
-          isLoading: false,
-          totalCount: responseData.totalCount,
-          totalPage: responseData.totalPage,
-          pageNum: responseData.pageNum + 1,
-          hasMoreOrders: responseData.pageNum < responseData.totalPage
-        });
-      } else {
-        this.setData({
-          isLoading: false,
-          hasMoreOrders: false
-        });
-      }
-    }
-  },
-  
-  // 加载更多订单
-  loadMoreOrders: function() {
-    this.getOrderList(false);
-  },
-  
-  // 模拟API响应数据（增加仪表盘数据和设备信息）
-  getMockResponseData: function(params) {
-    const { orderType, orderStatus, pageNum, pageSize } = params;
-    
-    // 模拟不同状态的订单数据
-    const equipmentModels = [
-      {
-        model: "现代挖掘机R225LC-9T",
-        equipmentId: "EQ001",
-        brand: "现代",
-        category: "挖掘机"
-      },
-      {
-        model: "三一SY16C",
-        equipmentId: "EQ002", 
-        brand: "三一",
-        category: "挖掘机"
-      },
-      {
-        model: "徐工XE27E",
-        equipmentId: "EQ003",
-        brand: "徐工", 
-        category: "挖掘机"
-      },
-      {
-        model: "柳工915E",
-        equipmentId: "EQ004",
-        brand: "柳工",
-        category: "挖掘机"
-      },
-      {
-        model: "临工LG6150",
-        equipmentId: "EQ005",
-        brand: "临工",
-        category: "装载机"
-      }
-    ];
-    
-    const stores = [
-      {
-        name: "重庆渝北区分店",
-        storeId: "ST001",
-        address: "重庆市渝北区龙溪街道",
-        phone: "023-67788999"
-      },
-      {
-        name: "长沙岳麓区店", 
-        storeId: "ST002",
-        address: "长沙市岳麓区桐梓坡路",
-        phone: "0731-88889999"
-      },
-      {
-        name: "长沙火车南站店",
-        storeId: "ST003", 
-        address: "长沙市雨花区劳动东路",
-        phone: "0731-85556666"
-      },
-      {
-        name: "长沙五一广场店",
-        storeId: "ST004",
-        address: "长沙市芙蓉区五一大道",
-        phone: "0731-82223333"
-      },
-      {
-        name: "长沙黄花机场店",
-        storeId: "ST005", 
-        address: "长沙市长沙县黄花镇",
-        phone: "0731-96777888"
-      }
-    ];
-    
-    const managers = [
-      { name: "张经理", phone: "138****8888", managerId: "MG001" },
-      { name: "李经理", phone: "139****6666", managerId: "MG002" },
-      { name: "王经理", phone: "187****1234", managerId: "MG003" },
-      { name: "刘经理", phone: "150****9999", managerId: "MG004" },
-      { name: "陈经理", phone: "186****5555", managerId: "MG005" }
-    ];
-    
-    const carImages = [
-      "../../assets/rsg.png", 
-      "../../assets/rsg.png", 
-      "../../assets/rsg.png", 
-      "../../assets/rsg.png", 
-      "../../assets/rsg.png"
-    ];
-    
-    // 模拟分页数据
-    let totalCount;
-    if (orderType === 0) { // 挖机订单
-      if (orderStatus === 0) totalCount = 35; // 预约中
-      else if (orderStatus === 1) totalCount = 45; // 租赁中
-      else if (orderStatus === 2) totalCount = 42; // 已完成
-      else totalCount = 15; // 已取消
-    } else { // 属具订单
-      if (orderStatus === 0) totalCount = 20; // 预约中
-      else if (orderStatus === 1) totalCount = 25; // 租赁中
-      else if (orderStatus === 2) totalCount = 25; // 已完成
-      else totalCount = 5; // 已取消
-    }
-    
-    const totalPage = Math.ceil(totalCount / pageSize);
-    
-    let currentPageItemCount;
-    if (pageNum >= totalPage) {
-      currentPageItemCount = totalCount % pageSize === 0 ? pageSize : totalCount % pageSize;
-    } else {
-      currentPageItemCount = pageSize;
-    }
-    
-    if (pageNum > totalPage) {
-      return {
-        list: [],
-        pageNum: pageNum,
-        pageSize: pageSize,
-        totalCount: totalCount,
-        totalPage: totalPage
-      };
-    }
-    
-    const startDate = new Date();
-    const mockOrders = [];
-    
-    // 随机生成订单数据
-    for (let i = 0; i < currentPageItemCount; i++) {
-      const randomEquipmentIndex = Math.floor(Math.random() * equipmentModels.length);
-      const randomStoreIndex = Math.floor(Math.random() * stores.length);
-      const randomManagerIndex = Math.floor(Math.random() * managers.length);
-      const rentalDays = Math.floor(Math.random() * 7) + 1;
-      
-      const selectedEquipment = equipmentModels[randomEquipmentIndex];
-      const selectedStore = stores[randomStoreIndex];
-      const selectedManager = managers[randomManagerIndex];
-      
-      const pickupDate = new Date(startDate);
-      pickupDate.setDate(startDate.getDate() + Math.floor(Math.random() * 10));
-      
-      const returnDate = new Date(pickupDate);
-      returnDate.setDate(pickupDate.getDate() + rentalDays);
-      
-      const price = Math.floor(Math.random() * 300) + 100;
-      
-      const formatDate = (date) => {
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        const hour = date.getHours();
-        return `${month < 10 ? '0' + month : month}月${day < 10 ? '0' + day : day}日 ${hour}:00`;
-      };
-      
-      // 根据大状态确定实际的订单状态
-      let actualOrderStatus = orderStatus;
-      let statusText = "";
-      
-      if (orderStatus === 1) { // 租赁中大状态
-        const rentalStatuses = [1, 4, 5];
-        actualOrderStatus = rentalStatuses[Math.floor(Math.random() * rentalStatuses.length)];
-        
-        switch (actualOrderStatus) {
-          case 1:
-            statusText = "租赁中";
-            break;
-          case 4:
-            statusText = "还车审核中";
-            break;
-          case 5:
-            statusText = "待支付";
-            break;
-        }
-      } else {
-        const statusMap = {
-          0: "预约中",
-          2: "已完成", 
-          3: "已取消"
-        };
-        statusText = statusMap[orderStatus];
-      }
-      
-      const orderId = `ORDER_${Date.now()}_${i}_${pageNum}_${orderType}_${orderStatus}`;
-      
-      // 模拟仪表盘数据（根据订单状态）
-      let dashboardData = null;
-      if (actualOrderStatus >= 1) { // 已出车的订单有仪表盘数据
-        dashboardData = {
-          pickupReading: Math.floor(Math.random() * 10000) + 5000, // 取车时读数
-          currentReading: actualOrderStatus === 1 ? Math.floor(Math.random() * 12000) + 7000 : null, // 当前读数（仅租赁中有）
-          returnReading: actualOrderStatus >= 2 ? Math.floor(Math.random() * 15000) + 8000 : null, // 还车读数（已完成有）
-          fuelLevel: Math.floor(Math.random() * 100), // 燃油量百分比
-          lastUpdateTime: Date.now() - Math.floor(Math.random() * 3600000) // 最后更新时间
-        };
-      }
-      
-      // 模拟照片数据
-      const photoData = {
-        pickupPhotos: actualOrderStatus >= 1 ? [
-          { url: '../../assets/pickup1.jpg', type: 'front', timestamp: pickupDate.getTime() },
-          { url: '../../assets/pickup2.jpg', type: 'side', timestamp: pickupDate.getTime() },
-          { url: '../../assets/pickup3.jpg', type: 'dashboard', timestamp: pickupDate.getTime() }
-        ] : [],
-        returnPhotos: actualOrderStatus >= 2 ? [
-          { url: '../../assets/return1.jpg', type: 'front', timestamp: returnDate.getTime() },
-          { url: '../../assets/return2.jpg', type: 'side', timestamp: returnDate.getTime() },
-          { url: '../../assets/return3.jpg', type: 'dashboard', timestamp: returnDate.getTime() }
-        ] : []
-      };
-      
-      mockOrders.push({
-        id: orderId,
-        statusText: statusText,
-        orderStatus: actualOrderStatus,
-        displayStatus: orderStatus,
-        price: price,
-        
-        // 设备信息
-        equipmentId: selectedEquipment.equipmentId,
-        equipmentModel: selectedEquipment.model,
-        carModel: selectedEquipment.model, // 保持兼容性
-        equipmentBrand: selectedEquipment.brand,
-        equipmentCategory: selectedEquipment.category,
-        carImage: carImages[randomEquipmentIndex % carImages.length],
-        
-        // 门店信息
-        storeId: selectedStore.storeId,
-        pickupStore: selectedStore.name,
-        returnStore: selectedStore.name,
-        storeAddress: selectedStore.address,
-        storePhone: selectedStore.phone,
-        
-        // 管理员信息
-        managerId: selectedManager.managerId,
-        managerName: selectedManager.name,
-        managerPhone: selectedManager.phone,
-        
-        // 时间信息
-        pickupTime: formatDate(pickupDate),
-        returnTime: formatDate(returnDate),
-        rentalDays: rentalDays,
-        pickupTimestamp: pickupDate.getTime(),
-        returnTimestamp: returnDate.getTime(),
-        
-        // 业务数据
-        orderType: orderType,
-        isLeftAligned: false,
-        
-        // 仪表盘数据
-        dashboardData: dashboardData,
-        
-        // 照片数据
-        pickupPhotos: photoData.pickupPhotos,
-        returnPhotos: photoData.returnPhotos,
-        
-        // 续租相关
-        renewPrice: 800, // 标准续租价格
-        memberRenewPrice: 640, // 会员续租价格
-        
-        // 额外业务字段
-        operatorInfo: actualOrderStatus >= 1 ? {
-          name: "操作员" + (i + 1),
-          phone: "159****" + String(1000 + i).substr(1),
-          certNo: "操作证" + String(10000 + i).substr(1)
-        } : null,
-        
-        // 版本控制
-        dataVersion: this.generateDataVersion(),
-        lastUpdateTime: Date.now()
-      });
-    }
-    
-    return {
-      list: mockOrders,
-      pageNum: pageNum,
-      pageSize: pageSize,
-      totalCount: totalCount,
-      totalPage: totalPage
-    };
-  },
-
-  // 生成数据版本号
-  generateDataVersion() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-  },
-  
-  /**
-   * 显示更多操作菜单
-   */
-  showMoreActions(e) {
+  // 显示更多操作菜单
+  showMoreActions: function(e) {
     const orderId = e.currentTarget.dataset.id;
     const currentActiveId = this.data.activeMoreId;
     
-    if (currentActiveId === orderId) {
-      this.setData({
-        activeMoreId: null
-      });
-      return;
-    }
-
-    this.setData({
-      activeMoreId: orderId
-    });
-
-    setTimeout(() => {
-      this.calculateDropdownPosition(orderId);
-    }, 50);
-  },
-
-  /**
-   * 计算弹窗位置，防止超出屏幕
-   */
-  calculateDropdownPosition(orderId) {
-    const query = wx.createSelectorQuery();
-    const windowInfo = wx.getWindowInfo();
-    const screenWidth = windowInfo.windowWidth;
+    const newActiveId = currentActiveId === orderId ? null : orderId;
     
-    query.selectAll('.more-action').boundingClientRect((rects) => {
-      if (rects && rects.length > 0) {
-        const targetIndex = this.data.orderList.findIndex(item => item.id === orderId);
-        
-        if (targetIndex >= 0 && rects[targetIndex]) {
-          const buttonRect = rects[targetIndex];
-          const dropdownWidth = 200;
-          const dropdownWidthPx = dropdownWidth * (screenWidth / 750);
-          
-          const willOverflow = (buttonRect.right + dropdownWidthPx) > screenWidth;
-          
-          const updatedOrderList = this.data.orderList.map((item, index) => {
-            if (item.id === orderId) {
-              return {
-                ...item,
-                isLeftAligned: willOverflow
-              };
-            }
-            return item;
-          });
-          
-          this.setData({
-            orderList: updatedOrderList
-          });
-        }
-      }
-    }).exec();
-  },
-
-  /**
-   * 关闭所有弹窗
-   */
-  closeAllDropdowns() {
-    this.setData({
-      activeMoreId: null
+    this.setData({ 
+      activeMoreId: newActiveId 
+    }, () => {
+      this.updateOrderListState();
     });
   },
 
-  /**
-   * 处理页面点击事件
-   */
-  onPageTap() {
+  // 更新订单列表状态（重新计算展开状态等）
+  updateOrderListState: function() {
+    const updatedOrderList = this.data.orderList.map(order => {
+      const updated = { ...order };
+      updated.isChainExpanded = this.data.expandedChainIds.includes(order.id);
+      updated.isMoreMenuOpen = this.data.activeMoreId === order.id;
+      return updated;
+    });
+    
+    this.setData({ orderList: updatedOrderList });
+  },
+
+  // 关闭所有弹窗
+  closeAllDropdowns: function() {
+    this.setData({ activeMoreId: null }, () => {
+      this.updateOrderListState();
+    });
+  },
+
+  onPageTap: function() {
     if (this.data.activeMoreId) {
       this.closeAllDropdowns();
     }
   },
 
-  /**
-   * 查看车辆详情
-   */
-  viewCarDetails(e) {
+  // 阻止事件冒泡
+  stopPropagation: function() {
+    // 空函数，用于阻止事件冒泡
+  },
+
+  // ==================== 订单操作 ====================
+
+  // 通用操作处理函数
+  handleAction: function(e) {
+    const action = e.currentTarget.dataset.action;
     const orderId = e.currentTarget.dataset.id;
+    
     this.closeAllDropdowns();
     
-    console.log('查看车辆详情:', orderId);
+    // 根据action调用对应的处理函数
+    if (this[action]) {
+      this[action]({ currentTarget: { dataset: { id: orderId } } });
+    }
+  },
+
+  viewCarDetails: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    this.closeAllDropdowns();
     wx.showToast({
-      title: '功能开发中,敬请期待!',
-      icon: 'none',
-      duration: 2000
+      title: '查看车辆详情: ' + orderId,
+      icon: 'none'
     });
   },
 
-  /**
-   * 修改订单
-   */
-  modifyOrder(e) {
+  modifyOrder: function(e) {
     const orderId = e.currentTarget.dataset.id;
     this.closeAllDropdowns();
-    
-    console.log('修改订单:', orderId);
     wx.showToast({
-      title: '功能开发中,敬请期待!',
-      icon: 'none',
-      duration: 2000
+      title: '修改订单: ' + orderId,
+      icon: 'none'
     });
   },
 
-  /**
-   * 取消订单
-   */
-  cancelOrder(e) {
+  cancelOrder: function(e) {
     const orderId = e.currentTarget.dataset.id;
     this.closeAllDropdowns();
     
@@ -645,18 +417,15 @@ Page({
       content: '确定要取消此订单吗？',
       success: (res) => {
         if (res.confirm) {
-          console.log('取消订单:', orderId);
           wx.showToast({
-            title: '功能开发中,敬请期待!',
-            icon: 'none',
-            duration: 2000
+            title: '订单已取消',
+            icon: 'success'
           });
         }
       }
     });
   },
-  
-  // 咨询
+
   handleConsult: function(e) {
     const orderId = e.currentTarget.dataset.id;
     wx.showToast({
@@ -664,82 +433,604 @@ Page({
       icon: 'none'
     });
   },
-  
-  // 取车门店指引
+
   handlePickupGuide: function(e) {
     const orderId = e.currentTarget.dataset.id;
     wx.showToast({
-      title: '取车门店指引功能开发中',
+      title: '取车门店指引',
       icon: 'none'
     });
   },
-  
-  // 取车 - 预约中状态
+
   handlePickup: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    const NavigationUtils = require('../../utils/navigation-utils.js');
-    NavigationUtils.toPickupPage(orderId);
+    wx.navigateTo({
+      url: `/pages/pickup/pickup?orderId=${orderId}`
+    });
   },
-  
-  // 续租 - 租赁中状态
+
   handleRenewal: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    
-    // 检查导航工具类是否可用
-    try {
-      const NavigationUtils = require('../../utils/navigation-utils.js');
-      NavigationUtils.toRenewalPage(orderId);
-    } catch (error) {
-      console.error('导航工具类加载失败:', error);
-      // 降级处理：直接使用wx.navigateTo
-      wx.navigateTo({
-        url: `/pages/rental-car/rental-car?orderId=${orderId}`,
-        fail: (err) => {
-          console.error('跳转续租页面失败', err);
-          wx.showToast({
-            title: '跳转失败，请重试',
-            icon: 'none'
-          });
-        }
-      });
-    }
+    wx.navigateTo({
+      url: `/pages/renewal/renewal?orderId=${orderId}`
+    });
   },
-  
-  // 还车 - 租赁中状态
+
   handleReturn: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    const NavigationUtils = require('../../utils/navigation-utils.js');
-    NavigationUtils.toReturnPage(orderId);
+    wx.navigateTo({
+      url: `/pages/return/return?orderId=${orderId}`
+    });
   },
 
-  // 还车审核中状态的按钮
   handleReturnAudit: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    const NavigationUtils = require('../../utils/navigation-utils.js');
-    NavigationUtils.toReturnReviewPage(orderId);
+    wx.navigateTo({
+      url: `/pages/return-audit/return-audit?orderId=${orderId}`
+    });
   },
 
-  // 去支付 - 待支付状态
   handlePayment: function(e) {
     const orderId = e.currentTarget.dataset.id;
-    const NavigationUtils = require('../../utils/navigation-utils.js');
-    NavigationUtils.toPaymentPage(orderId);
+    wx.navigateTo({
+      url: `/pages/payment/payment?orderId=${orderId}`
+    });
   },
-  
-  // 搜索订单
+
   searchOrder: function() {
     wx.showToast({
-      title: '搜索订单',
+      title: '搜索订单功能',
       icon: 'none'
     });
   },
-  
-  // 页面触摸开始时关闭所有下拉菜单
-  onPageTouch: function() {
-    if (this.data.activeMoreId) {
-      this.setData({
-        activeMoreId: null
+
+  // ==================== 数据生成 ====================
+
+  generateMockOrderData: function() {
+    const { activeOrderType, activeStatus, pageNum } = this.data;
+    
+    // 基础数据
+    const carModels = ["现代挖掘机R225LC-9T", "三一SY16C", "徐工XE27E", "柳工915E", "临工LG6150"];
+    const stores = ["重庆渝北区分店", "长沙岳麓区店", "长沙火车南站店"];
+    const managers = ["张经理", "李经理", "王经理"];
+    const phones = ["138****8888", "139****6666", "187****1234"];
+    
+    const mockOrders = [];
+    const baseTime = Date.now();
+    
+    // 格式化日期
+    const formatDate = (date) => {
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const hour = date.getHours();
+      return `${month.toString().padStart(2, '0')}月${day.toString().padStart(2, '0')}日 ${hour}:00`;
+    };
+
+    // 示例1: 单个订单（无续租）
+    const singleOrderId = `SINGLE_${baseTime}_001`;
+    const singlePickupDate = new Date();
+    singlePickupDate.setDate(singlePickupDate.getDate() - 3);
+    const singleReturnDate = new Date(singlePickupDate);
+    singleReturnDate.setDate(singlePickupDate.getDate() + 2);
+    
+    mockOrders.push({
+      id: singleOrderId,
+      statusText: this.getStatusText(activeStatus),
+      orderStatus: activeStatus,
+      price: activeStatus === 1 ? null : 480, // 租赁中状态不显示价格（如果有订单链）
+      carModel: carModels[0],
+      carImage: "../../assets/rsg.png",
+      pickupStore: stores[0],
+      returnStore: stores[0],
+      managerName: managers[0],
+      managerPhone: phones[0],
+      pickupTime: formatDate(singlePickupDate),
+      returnTime: formatDate(singleReturnDate),
+      rentalDays: 2,
+      orderType: activeOrderType,
+      vehicleRecordId: `VR_${singleOrderId}`,
+      hasOrderChain: false,
+      totalRentalDays: 2,
+      isRenewalOrder: false,
+      renewalCount: 0,
+      hasPayment: false
+    });
+
+    // 示例2: 有续租的订单链 - 根据不同状态显示不同示例
+    if (activeStatus === 1) { // 租赁中状态 - 有2次续租的复杂订单链
+      const rentingChainId = `RENTING_${baseTime}_001`;
+      const rentingPickupDate = new Date();
+      rentingPickupDate.setDate(rentingPickupDate.getDate() - 5);
+      const originalReturnDate = new Date(rentingPickupDate);
+      originalReturnDate.setDate(rentingPickupDate.getDate() + 7);
+      const renewal1EndDate = new Date(originalReturnDate);
+      renewal1EndDate.setDate(originalReturnDate.getDate() + 3);
+      const renewal2EndDate = new Date(renewal1EndDate);
+      renewal2EndDate.setDate(renewal1EndDate.getDate() + 4);
+      
+      mockOrders.push({
+        id: rentingChainId,
+        statusText: "租赁中",
+        orderStatus: 1,
+        price: null, // 租赁中且有订单链时不显示价格
+        carModel: carModels[1],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[1],
+        returnStore: stores[1],
+        managerName: managers[1],
+        managerPhone: phones[1],
+        pickupTime: formatDate(rentingPickupDate),
+        returnTime: formatDate(renewal2EndDate), // 预计最终还车时间
+        rentalDays: 14, // 7+3+4=14天
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${rentingChainId}`,
+        hasOrderChain: true,
+        totalRentalDays: 14,
+        isRenewalOrder: false,
+        renewalCount: 2, // 续租2次
+        hasPayment: false,
+        orderChainDetails: [
+          {
+            orderId: rentingChainId,
+            orderType: "原订单",
+            orderStatus: "已完成",
+            price: 1680,
+            rentalDays: 7,
+            startTime: formatDate(rentingPickupDate),
+            endTime: formatDate(originalReturnDate),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(rentingPickupDate.getTime() - 24*60*60*1000))
+          },
+          {
+            orderId: `${rentingChainId}_RENEWAL_1`,
+            orderType: "第1次续租",
+            orderStatus: "租赁中",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDate(originalReturnDate),
+            endTime: formatDate(renewal1EndDate),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(originalReturnDate.getTime() - 3*60*60*1000))
+          },
+          {
+            orderId: `${rentingChainId}_RENEWAL_2`,
+            orderType: "第2次续租",
+            orderStatus: "待生效",
+            price: 960,
+            rentalDays: 4,
+            startTime: formatDate(renewal1EndDate),
+            endTime: formatDate(renewal2EndDate),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(renewal1EndDate.getTime() - 1*60*60*1000))
+          }
+        ]
+      });
+
+      // 示例2: 原订单已完成 + 第1次续租租赁中
+      const simpleRentingId = `SIMPLE_RENTING_${baseTime}_002`;
+      const simplePickupDate = new Date();
+      simplePickupDate.setDate(simplePickupDate.getDate() - 2);
+      const simpleOriginalEnd = new Date(simplePickupDate);
+      simpleOriginalEnd.setDate(simplePickupDate.getDate() + 5);
+      const simpleRenewalEnd = new Date(simpleOriginalEnd);
+      simpleRenewalEnd.setDate(simpleOriginalEnd.getDate() + 3);
+      
+      mockOrders.push({
+        id: simpleRentingId,
+        statusText: "租赁中",
+        orderStatus: 1,
+        price: null,
+        carModel: carModels[2],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[2],
+        returnStore: stores[2],
+        managerName: managers[2],
+        managerPhone: phones[2],
+        pickupTime: formatDate(simplePickupDate),
+        returnTime: formatDate(simpleRenewalEnd),
+        rentalDays: 8, // 5+3=8天
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${simpleRentingId}`,
+        hasOrderChain: true,
+        totalRentalDays: 8,
+        isRenewalOrder: false,
+        renewalCount: 1,
+        hasPayment: false,
+        orderChainDetails: [
+          {
+            orderId: simpleRentingId,
+            orderType: "原订单",
+            orderStatus: "已完成",
+            price: 1200,
+            rentalDays: 5,
+            startTime: formatDate(simplePickupDate),
+            endTime: formatDate(simpleOriginalEnd),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(simplePickupDate.getTime() - 24*60*60*1000))
+          },
+          {
+            orderId: `${simpleRentingId}_RENEWAL_1`,
+            orderType: "第1次续租",
+            orderStatus: "租赁中",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDate(simpleOriginalEnd),
+            endTime: formatDate(simpleRenewalEnd),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(simpleOriginalEnd.getTime() - 2*60*60*1000))
+          }
+        ]
+      });
+
+      // 示例3: 原订单租赁中 + 第1次续租待生效
+      const originalRentingId = `ORIGINAL_RENTING_${baseTime}_003`;
+      const originalStartDate = new Date();
+      originalStartDate.setDate(originalStartDate.getDate() - 1); // 1天前开始
+      const originalEndDate = new Date(originalStartDate);
+      originalEndDate.setDate(originalStartDate.getDate() + 6); // 还有5天结束
+      const firstRenewalEnd = new Date(originalEndDate);
+      firstRenewalEnd.setDate(originalEndDate.getDate() + 4); // 续租4天
+      
+      mockOrders.push({
+        id: originalRentingId,
+        statusText: "租赁中",
+        orderStatus: 1,
+        price: null,
+        carModel: carModels[3],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[0],
+        returnStore: stores[0],
+        managerName: managers[0],
+        managerPhone: phones[0],
+        pickupTime: formatDate(originalStartDate),
+        returnTime: formatDate(firstRenewalEnd), // 预计最终还车时间
+        rentalDays: 10, // 6+4=10天
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${originalRentingId}`,
+        hasOrderChain: true,
+        totalRentalDays: 10,
+        isRenewalOrder: false,
+        renewalCount: 1,
+        hasPayment: false,
+        orderChainDetails: [
+          {
+            orderId: originalRentingId,
+            orderType: "原订单",
+            orderStatus: "租赁中", // 原订单还在租赁中
+            price: 1440,
+            rentalDays: 6,
+            startTime: formatDate(originalStartDate),
+            endTime: formatDate(originalEndDate),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(originalStartDate.getTime() - 24*60*60*1000))
+          },
+          {
+            orderId: `${originalRentingId}_RENEWAL_1`,
+            orderType: "第1次续租",
+            orderStatus: "待生效", // 续租订单待生效
+            price: 960,
+            rentalDays: 4,
+            startTime: formatDate(originalEndDate),
+            endTime: formatDate(firstRenewalEnd),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date()) // 刚创建的续租订单
+          }
+        ]
+      });
+
+      // 示例4: 原订单租赁中，提前预约了2次续租
+      const advancedRenewalId = `ADVANCED_${baseTime}_004`;
+      const advancedStartDate = new Date();
+      advancedStartDate.setHours(advancedStartDate.getHours() - 12); // 12小时前开始
+      const advancedOriginalEnd = new Date(advancedStartDate);
+      advancedOriginalEnd.setDate(advancedStartDate.getDate() + 3); // 3天后结束
+      const advancedRenewal1End = new Date(advancedOriginalEnd);
+      advancedRenewal1End.setDate(advancedOriginalEnd.getDate() + 2); // 第1次续租2天
+      const advancedRenewal2End = new Date(advancedRenewal1End);
+      advancedRenewal2End.setDate(advancedRenewal1End.getDate() + 5); // 第2次续租5天
+      
+      mockOrders.push({
+        id: advancedRenewalId,
+        statusText: "租赁中",
+        orderStatus: 1,
+        price: null,
+        carModel: carModels[4],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[1],
+        returnStore: stores[1],
+        managerName: managers[1],
+        managerPhone: phones[1],
+        pickupTime: formatDate(advancedStartDate),
+        returnTime: formatDate(advancedRenewal2End),
+        rentalDays: 10, // 3+2+5=10天
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${advancedRenewalId}`,
+        hasOrderChain: true,
+        totalRentalDays: 10,
+        isRenewalOrder: false,
+        renewalCount: 2, // 预约了2次续租
+        hasPayment: false,
+        orderChainDetails: [
+          {
+            orderId: advancedRenewalId,
+            orderType: "原订单",
+            orderStatus: "租赁中", // 原订单正在进行中
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDate(advancedStartDate),
+            endTime: formatDate(advancedOriginalEnd),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(advancedStartDate.getTime() - 24*60*60*1000))
+          },
+          {
+            orderId: `${advancedRenewalId}_RENEWAL_1`,
+            orderType: "第1次续租",
+            orderStatus: "待生效", // 第1次续租等待生效
+            price: 480,
+            rentalDays: 2,
+            startTime: formatDate(advancedOriginalEnd),
+            endTime: formatDate(advancedRenewal1End),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(advancedOriginalEnd.getTime() - 6*60*60*1000)) // 6小时前创建
+          },
+          {
+            orderId: `${advancedRenewalId}_RENEWAL_2`,
+            orderType: "第2次续租",
+            orderStatus: "待生效", // 第2次续租也是待生效
+            price: 1200,
+            rentalDays: 5,
+            startTime: formatDate(advancedRenewal1End),
+            endTime: formatDate(advancedRenewal2End),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(advancedRenewal1End.getTime() - 1*60*60*1000)) // 1小时前创建
+          }
+        ]
       });
     }
+
+    if (activeStatus === 2) { // 已完成状态 - 有续租的订单链
+      const chainOrderId = `CHAIN_${baseTime}_001`;
+      const chainPickupDate = new Date();
+      chainPickupDate.setDate(chainPickupDate.getDate() - 8);
+      const originalReturnDate = new Date(chainPickupDate);
+      originalReturnDate.setDate(chainPickupDate.getDate() + 3);
+      const finalReturnDate = new Date(originalReturnDate);
+      finalReturnDate.setDate(originalReturnDate.getDate() + 2);
+      
+      mockOrders.push({
+        id: chainOrderId,
+        statusText: "已完成",
+        orderStatus: 2,
+        price: null, // 不显示价格，在折叠区域显示
+        carModel: carModels[1],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[1],
+        returnStore: stores[1],
+        managerName: managers[1],
+        managerPhone: phones[1],
+        pickupTime: formatDate(chainPickupDate),
+        returnTime: formatDate(finalReturnDate),
+        rentalDays: 5, // 合并显示：3+2=5天
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${chainOrderId}`,
+        hasOrderChain: true,
+        totalRentalDays: 5,
+        isRenewalOrder: false,
+        renewalCount: 1, // 续租1次
+        hasPayment: false,
+        orderChainDetails: [
+          {
+            orderId: chainOrderId,
+            orderType: "原订单",
+            orderStatus: "已完成",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDate(chainPickupDate),
+            endTime: formatDate(originalReturnDate),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(chainPickupDate.getTime() - 24*60*60*1000))
+          },
+          {
+            orderId: `${chainOrderId}_RENEWAL_1`,
+            orderType: "第1次续租",
+            orderStatus: "已完成",
+            price: 480,
+            rentalDays: 2,
+            startTime: formatDate(originalReturnDate),
+            endTime: formatDate(finalReturnDate),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(originalReturnDate.getTime() - 2*60*60*1000))
+          }
+        ]
+      });
+
+      // 示例3: 有超时的待补缴订单（3次续租，最后一次超时）
+      const overtimeOrderId = `OVERTIME_${baseTime}_001`;
+      const overtimePickupDate = new Date();
+      overtimePickupDate.setDate(overtimePickupDate.getDate() - 15);
+      const originalEndDate = new Date(overtimePickupDate);
+      originalEndDate.setDate(overtimePickupDate.getDate() + 4);
+      const renewal1EndDate = new Date(originalEndDate);
+      renewal1EndDate.setDate(originalEndDate.getDate() + 3);
+      const renewal2EndDate = new Date(renewal1EndDate);
+      renewal2EndDate.setDate(renewal1EndDate.getDate() + 2);
+      const actualReturnDate = new Date(renewal2EndDate);
+      actualReturnDate.setHours(renewal2EndDate.getHours() + 6); // 超时6小时
+      
+      mockOrders.push({
+        id: overtimeOrderId,
+        statusText: "已完成(补缴)",
+        orderStatus: 2,
+        price: null,
+        carModel: carModels[3],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[0],
+        returnStore: stores[0],
+        managerName: managers[0],
+        managerPhone: phones[0],
+        pickupTime: formatDate(overtimePickupDate),
+        returnTime: formatDate(actualReturnDate), // 实际还车时间（含超时）
+        rentalDays: 9, // 4+3+2=9天
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${overtimeOrderId}`,
+        hasOrderChain: true,
+        totalRentalDays: 9,
+        isRenewalOrder: false,
+        renewalCount: 2, // 续租2次
+        hasPayment: true, // 有补缴
+        orderChainDetails: [
+          {
+            orderId: overtimeOrderId,
+            orderType: "原订单",
+            orderStatus: "已完成",
+            price: 960,
+            rentalDays: 4,
+            startTime: formatDate(overtimePickupDate),
+            endTime: formatDate(originalEndDate),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(overtimePickupDate.getTime() - 24*60*60*1000))
+          },
+          {
+            orderId: `${overtimeOrderId}_RENEWAL_1`,
+            orderType: "第1次续租",
+            orderStatus: "已完成",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDate(originalEndDate),
+            endTime: formatDate(renewal1EndDate),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatDate(new Date(originalEndDate.getTime() - 2*60*60*1000))
+          },
+          {
+            orderId: `${overtimeOrderId}_RENEWAL_2`,
+            orderType: "第2次续租",
+            orderStatus: "已完成(补缴)",
+            price: 480,
+            rentalDays: 2,
+            startTime: formatDate(renewal1EndDate),
+            endTime: formatDate(renewal2EndDate), // 计划结束时间
+            isOvertime: true,
+            overtimeHours: 6,
+            actualEndTime: formatDate(actualReturnDate), // 实际还车时间
+            overtimeFee: 360, // 超时费用
+            createTime: formatDate(new Date(renewal1EndDate.getTime() - 1*60*60*1000))
+          }
+        ]
+      });
+    }
+
+    // 示例4: 预约中状态的订单（即将开始）
+    if (activeStatus === 0) {
+      const futureOrderId = `FUTURE_${baseTime}_001`;
+      const futurePickupDate = new Date();
+      futurePickupDate.setDate(futurePickupDate.getDate() + 1);
+      const futureReturnDate = new Date(futurePickupDate);
+      futureReturnDate.setDate(futurePickupDate.getDate() + 5);
+      
+      mockOrders.push({
+        id: futureOrderId,
+        statusText: "预约中",
+        orderStatus: 0,
+        price: 1200,
+        carModel: carModels[4],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[1],
+        returnStore: stores[1],
+        managerName: managers[1],
+        managerPhone: phones[1],
+        pickupTime: formatDate(futurePickupDate),
+        returnTime: formatDate(futureReturnDate),
+        rentalDays: 5,
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${futureOrderId}`,
+        hasOrderChain: false,
+        totalRentalDays: 5,
+        isRenewalOrder: false,
+        renewalCount: 0,
+        hasPayment: false
+      });
+    }
+
+    // 示例5: 待支付状态（有超时费用）
+    if (activeStatus === 5) {
+      const paymentOrderId = `PAYMENT_${baseTime}_001`;
+      const paymentPickupDate = new Date();
+      paymentPickupDate.setDate(paymentPickupDate.getDate() - 10);
+      const paymentOriginalEnd = new Date(paymentPickupDate);
+      paymentOriginalEnd.setDate(paymentPickupDate.getDate() + 3);
+      const paymentActualEnd = new Date(paymentOriginalEnd);
+      paymentActualEnd.setHours(paymentOriginalEnd.getHours() + 4); // 超时4小时
+      
+      mockOrders.push({
+        id: paymentOrderId,
+        statusText: "待支付",
+        orderStatus: 5,
+        price: null,
+        carModel: carModels[2],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[2],
+        returnStore: stores[2],
+        managerName: managers[2],
+        managerPhone: phones[2],
+        pickupTime: formatDate(paymentPickupDate),
+        returnTime: formatDate(paymentActualEnd),
+        rentalDays: 3,
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${paymentOrderId}`,
+        hasOrderChain: true,
+        totalRentalDays: 3,
+        isRenewalOrder: false,
+        renewalCount: 0,
+        hasPayment: true,
+        orderChainDetails: [
+          {
+            orderId: paymentOrderId,
+            orderType: "原订单",
+            orderStatus: "待支付",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDate(paymentPickupDate),
+            endTime: formatDate(paymentOriginalEnd),
+            isOvertime: true,
+            overtimeHours: 4,
+            actualEndTime: formatDate(paymentActualEnd),
+            overtimeFee: 240,
+            createTime: formatDate(new Date(paymentPickupDate.getTime() - 24*60*60*1000))
+          }
+        ]
+      });
+    }
+
+    return {
+      list: mockOrders,
+      pageNum: pageNum,
+      pageSize: 10,
+      totalCount: 20,
+      totalPage: 2
+    };
+  },
+
+  getStatusText: function(status) {
+    const statusMap = {
+      0: "预约中",
+      1: "租赁中", 
+      2: "已完成",
+      3: "已取消"
+    };
+    return statusMap[status] || "未知状态";
   }
-})
+});
