@@ -1,4 +1,4 @@
-<!-- order.wxml - 优化后的订单页面模板，移除复杂表达式 -->
+<!-- order.wxml - 修复更多按钮点击事件和布局 -->
 <view class="order-container" bindtap="onPageTap">
   
   <!-- 订单类型切换 -->
@@ -22,6 +22,7 @@
       bindtap="switchStatus" 
       data-status="{{item.id}}">
       <text>{{item.name}}</text>
+      <!-- 活跃状态下划线移到状态文字下方 -->
       <view class="active-line" wx:if="{{activeStatus == item.id}}"></view>
     </view>
   </view>
@@ -30,13 +31,13 @@
   <view class="order-list">
     <block wx:if="{{orderList.length > 0}}">
       
-      <!-- 订单项 -->
-      <view wx:for="{{orderList}}" wx:key="id" class="order-item {{item.statusClassName}}" data-status="{{item.orderStatus}}">
+      <!-- 订单项 - 添加动态CSS类控制层级 -->
+      <view wx:for="{{orderList}}" wx:key="id" class="order-item {{item.statusClassName}} {{item.cssClasses}}" data-status="{{item.orderStatus}}">
         
         <!-- 订单头部：状态和价格 -->
         <view class="order-header">
           <view class="success-status">{{item.statusText}}</view>
-          <!-- 使用预计算的价格显示逻辑 -->
+          <!-- 有续租或补缴时不显示价格 -->
           <view class="order-price" wx:if="{{item.shouldShowPrice}}">
             <text>{{item.priceDisplayText}}</text>
           </view>
@@ -70,7 +71,7 @@
         <!-- 订单链折叠区域 -->
         <view class="order-chain-section" wx:if="{{item.hasOrderChain}}">
           <!-- 折叠头部 -->
-          <view class="chain-header" bindtap="toggleOrderChain" data-order-id="{{item.id}}" catchtap="toggleOrderChain">
+          <view class="chain-header" catchtap="toggleOrderChain" data-order-id="{{item.id}}">
             <view class="chain-info">
               <text class="chain-icon">🔗</text>
               <text class="chain-title">订单链详情 ({{item.chainSummary.totalOrders}}个订单)</text>
@@ -111,16 +112,16 @@
                   <text class="detail-value price-value">{{chainItem.formattedPrice}}</text>
                 </view>
                 <view class="detail-row">
+                  <text class="detail-label">生效时间:</text>
+                  <text class="detail-value">{{chainItem.formattedEffectiveTime}}</text>
+                </view>
+                <view class="detail-row">
                   <text class="detail-label">租期天数:</text>
                   <text class="detail-value">{{chainItem.rentalDays}}天</text>
                 </view>
                 <view class="detail-row">
-                  <text class="detail-label">订单时间:</text>
-                  <text class="detail-value">{{chainItem.startTime}} - {{chainItem.endTime}}</text>
-                </view>
-                <view class="detail-row">
                   <text class="detail-label">创建时间:</text>
-                  <text class="detail-value">{{chainItem.createTime}}</text>
+                  <text class="detail-value">{{chainItem.formattedCreateTime}}</text>
                 </view>
                 
                 <!-- 超时信息 -->
@@ -158,6 +159,10 @@
                   <text class="record-value">{{item.vehicleRecordId}}</text>
                 </view>
                 <view class="record-row">
+                  <text class="record-label">车辆编号:</text>
+                  <text class="record-value">{{item.carNumber}}</text>
+                </view>
+                <view class="record-row">
                   <text class="record-label">总租期:</text>
                   <text class="record-value">{{item.totalRentalDays}}天</text>
                 </view>
@@ -185,19 +190,20 @@
         <!-- 操作按钮区域 -->
         <view class="order-actions">
           
-          <!-- 更多操作下拉菜单 -->
-          <view class="more-action" bindtap="showMoreActions" catchtap="showMoreActions" data-id="{{item.id}}">
+          <!-- 更多操作下拉菜单 - 修复事件绑定 -->
+          <view class="more-action" catchtap="showMoreActions" data-id="{{item.id}}">
             更多
+            <!-- 下拉菜单内容 - 修复显示逻辑 -->
             <view class="more-dropdown {{item.isMoreMenuOpen ? 'show' : ''}}" catchtap="stopPropagation">
-              <view wx:for="{{item.moreMenuItems}}" wx:key="action" class="dropdown-item" bindtap="handleAction" data-action="{{item.action}}" data-id="{{item.id}}">
-                {{item.text}}
+              <view wx:for="{{item.moreMenuItems}}" wx:key="action" wx:for-item="menuItem" class="dropdown-item" catchtap="handleAction" data-action="{{menuItem.action}}" data-id="{{item.id}}">
+                {{menuItem.text}}
               </view>
             </view>
           </view>
           
           <!-- 使用预计算的操作按钮配置 -->
-          <view wx:for="{{item.actionButtons}}" wx:key="action" class="action-button {{item.highlight ? 'highlight' : ''}}" bindtap="handleAction" data-action="{{item.action}}" data-id="{{item.id}}">
-            {{item.text}}
+          <view wx:for="{{item.actionButtons}}" wx:key="action" wx:for-item="button" class="action-button {{button.highlight ? 'highlight' : ''}}" bindtap="handleAction" data-action="{{button.action}}" data-id="{{item.id}}">
+            {{button.text}}
           </view>
           
         </view>
