@@ -528,17 +528,49 @@
   z-index: 100;
 }
 
+/* 支付操作行 - 价格和按钮并排 */
+.payment-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+/* 左侧价格信息 */
+.payment-info-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.payment-info-left .payment-label {
+  font-size: 26rpx;
+  color: #7f8c8d;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+}
+
+.payment-info-left .payment-amount {
+  font-size: 40rpx;
+  background: linear-gradient(135deg, #ff7200, #ff9500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .action-btn {
-  width: 100%;
-  height: 96rpx;
+  height: 88rpx;
   border: none;
-  border-radius: 48rpx;
-  font-size: 32rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-width: 200rpx;
 
   &::before {
     content: '';
@@ -557,6 +589,14 @@
 
   &:active {
     transform: translateY(-2rpx);
+  }
+
+  /* 全宽按钮样式 */
+  &.full-width {
+    width: 100%;
+    height: 96rpx;
+    border-radius: 48rpx;
+    font-size: 32rpx;
   }
 
   &.primary {
@@ -759,6 +799,23 @@
     align-items: flex-start;
     gap: 8rpx;
     justify-content: flex-start;
+  }
+
+  /* 移动端底部操作区域调整 */
+  .payment-action-row {
+    flex-direction: column;
+    gap: 16rpx;
+    align-items: stretch;
+  }
+
+  .payment-info-left {
+    align-items: center;
+    text-align: center;
+  }
+
+  .action-btn {
+    width: 100%;
+    min-width: auto;
   }
 }
 

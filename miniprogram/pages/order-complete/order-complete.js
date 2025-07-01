@@ -1,6 +1,7 @@
+// order-complete.js - 优化代码结构，参考order页面风格
 Page({
   data: {
-    // 订单信息
+    // 订单基本信息
     orderInfo: {
       id: '',
       storeName: '',
@@ -14,220 +15,316 @@ Page({
     
     // 费用明细
     costDetail: {
-      rentalCost: 0,      // 租赁费用
-      overtimeCost: 0,    // 超时费用
-      depositRefund: 0,   // 押金退还
-      totalCost: 0        // 总费用
+      rentalCost: 0,
+      overtimeCost: 0,
+      totalCost: 0
     },
     
     // 工作统计
     workStats: {
-      totalHours: '0.0',    // 总工作小时
-      averageDaily: '0.0',  // 日均工作小时
-      efficiency: '标准'     // 工作效率评级
+      totalHours: '0.0',
+      averageDaily: '0.0',
+      efficiency: '标准',
+      efficiencyClass: 'standard'
     },
     
-    // 评价相关
-    rating: 0,           // 评分（1-5星）
-    feedback: '',        // 反馈内容
-    showSuccessModal: false,  // 成功提示弹窗
+    // 评价系统
+    feedback: {
+      rating: 0,
+      content: '',
+      submitted: false
+    },
     
-    // 星星数组，用于循环显示
+    // UI状态
+    uiState: {
+      isLoading: false,
+      showSuccessModal: false
+    },
+    
+    // 星星数组
     starArray: [1, 2, 3, 4, 5]
   },
 
   onLoad: function(options) {
-    console.log('订单完成页面加载，参数：', options);
-    
-    // 从options中获取订单ID
+    this.logTestScenarios();
+    this.initializePage(options);
+  },
+
+  // ==================== 初始化 ====================
+  
+  initializePage: function(options) {
     const orderId = options.orderId;
+    
+    console.log('订单完成页面初始化，订单ID:', orderId);
+    
     if (orderId) {
       this.loadOrderCompleteInfo(orderId);
     } else {
-      // 订单ID不存在，直接使用模拟数据进行测试
-      console.log('未传入订单ID，使用模拟数据');
-      this.loadMockData();
+      // 无订单ID时，生成一个测试订单ID
+      const testOrderId = `COMPLETE_ORDER_${Date.now()}`;
+      console.log('无订单ID，生成测试订单:', testOrderId);
+      this.loadOrderCompleteInfo(testOrderId);
     }
   },
 
-  onShow: function() {
-    // 页面显示时执行
-    console.log('订单完成页面显示');
-  },
-
-  // 加载模拟数据
-  loadMockData: function() {
-    console.log('开始加载模拟数据');
+  // ==================== 数据加载 ====================
+  
+  loadOrderCompleteInfo: function(orderId) {
+    // 优先使用模拟数据进行开发测试
+    console.log(`加载订单完成信息: ${orderId}`);
     
     wx.showToast({
-      title: '加载模拟数据',
+      title: '使用模拟数据',
       icon: 'none',
       duration: 1500
     });
+    
+    setTimeout(() => {
+      const mockData = this.generateMockDataById(orderId);
+      this.processOrderCompleteData(mockData);
+    }, 800);
+    
+    // 保留真实API调用代码，生产环境时启用
+    // this.loadOrderFromAPI(orderId);
+  },
 
-    // 模拟数据
+  // 真实API调用方法（生产环境使用）
+  loadOrderFromAPI: function(orderId) {
+    this.setData({ 'uiState.isLoading': true });
+    
+    wx.showLoading({ title: '加载中...' });
+    
+    wx.request({
+      url: 'YOUR_API_BASE_URL/order/complete-detail',
+      method: 'GET',
+      data: { orderId },
+      success: (res) => this.handleOrderResponse(res),
+      fail: () => this.handleLoadError(),
+      complete: () => {
+        wx.hideLoading();
+        this.setData({ 'uiState.isLoading': false });
+      }
+    });
+  },
+
+  handleOrderResponse: function(res) {
+    if (res.data.code === 200) {
+      this.processOrderCompleteData(res.data.data);
+    } else {
+      this.showLoadErrorDialog(res.data.message || '获取订单信息失败');
+    }
+  },
+
+  handleLoadError: function() {
+    this.showLoadErrorDialog('网络请求失败');
+  },
+
+  showLoadErrorDialog: function(message) {
+    wx.showModal({
+      title: '加载失败',
+      content: `${message}，是否使用模拟数据？`,
+      confirmText: '使用模拟数据',
+      cancelText: '返回',
+      success: (modalRes) => {
+        if (modalRes.confirm) {
+          const testOrderId = `ERROR_FALLBACK_${Date.now()}`;
+          const mockData = this.generateMockDataById(testOrderId);
+          this.processOrderCompleteData(mockData);
+        } else {
+          wx.navigateBack();
+        }
+      }
+    });
+  },
+
+  // ==================== 数据处理 ====================
+  
+  processOrderCompleteData: function(data) {
+    // 处理时间格式
+    const timeData = this.processTimeData(data);
+    
+    // 计算工作统计
+    const workStats = this.calculateWorkStats(data, timeData.rentalDays);
+    
+    // 更新页面数据
+    this.setData({
+      orderInfo: {
+        id: data.id,
+        storeName: data.storeName,
+        managerName: data.managerName,
+        managerPhone: data.managerPhone,
+        carModel: data.carModel,
+        startTime: timeData.startTime,
+        endTime: timeData.endTime,
+        rentalDays: timeData.rentalDays
+      },
+      costDetail: {
+        rentalCost: data.rentalCost,
+        overtimeCost: data.overtimeCost || 0,
+        totalCost: data.totalCost || (data.rentalCost + (data.overtimeCost || 0))
+      },
+      workStats: workStats
+    });
+
+    console.log('订单完成数据处理完成', {
+      订单ID: data.id,
+      总费用: this.data.costDetail.totalCost,
+      工作统计: workStats
+    });
+  },
+
+  processTimeData: function(data) {
+    return {
+      startTime: this.formatTimestamp(data.startTimestamp),
+      endTime: this.formatTimestamp(data.endTimestamp),
+      rentalDays: this.calculateRentalDays(data.startTimestamp, data.endTimestamp)
+    };
+  },
+
+  calculateWorkStats: function(data, rentalDays) {
+    const totalHours = data.totalWorkHours || 0;
+    const averageDaily = rentalDays > 0 ? (totalHours / rentalDays).toFixed(1) : '0.0';
+    const efficiencyData = this.calculateEfficiency(parseFloat(averageDaily));
+    
+    return {
+      totalHours: totalHours.toFixed(1),
+      averageDaily: averageDaily,
+      efficiency: efficiencyData.text,
+      efficiencyClass: efficiencyData.class
+    };
+  },
+
+  // ==================== 模拟数据生成 ====================
+  
+  generateMockDataById: function(orderId) {
+    console.log(`为订单 ${orderId} 生成模拟数据`);
+    
+    const baseData = this.generateBaseMockData();
+    
+    // 根据不同的订单ID生成不同的场景数据
+    if (orderId.includes('HIGH_COST')) {
+      return this.generateHighCostScenario(baseData, orderId);
+    } else if (orderId.includes('OVERTIME')) {
+      return this.generateOvertimeScenario(baseData, orderId);
+    } else if (orderId.includes('PERFECT')) {
+      return this.generatePerfectScenario(baseData, orderId);
+    } else if (orderId.includes('LONG_TERM')) {
+      return this.generateLongTermScenario(baseData, orderId);
+    } else {
+      // 默认场景：标准完成
+      return this.generateDefaultCompleteScenario(baseData, orderId);
+    }
+  },
+
+  generateBaseMockData: function() {
     const now = Date.now();
-    const threeDaysAgo = now - 3 * 24 * 60 * 60 * 1000; // 3天前
-    const endTime = now - 2 * 60 * 60 * 1000; // 2小时前
-
-    const mockData = {
-      id: 'MOCK_ORDER_001',
+    const threeDaysAgo = now - 3 * 24 * 60 * 60 * 1000;
+    const endTime = now - 2 * 60 * 60 * 1000;
+    
+    return {
       storeName: '北京朝阳门店',
       managerName: '张经理',
       managerPhone: '138-0000-1234',
       carModel: '卡特彼勒320D挖掘机',
       startTimestamp: threeDaysAgo,
       endTimestamp: endTime,
-      rentalCost: 1800,      // 租赁费用：600元/天 * 3天
-      overtimeCost: 200,     // 超时费用：200元
-      depositRefund: 500,    // 押金退还：500元
-      totalWorkHours: 25.5,  // 总工作小时
-      initialHours: 1250.5,  // 出车时仪表盘小时数
-      finalHours: 1276.0     // 还车时仪表盘小时数
+      rentalCost: 1800,
+      totalWorkHours: 24.5
     };
-
-    // 计算总费用
-    const totalCost = mockData.rentalCost + mockData.overtimeCost - mockData.depositRefund;
-    
-    // 计算工作统计
-    const rentalDays = this.calculateRentalDays(mockData.startTimestamp, mockData.endTimestamp);
-    const averageDaily = (mockData.totalWorkHours / rentalDays).toFixed(1);
-    const efficiency = this.calculateEfficiency(parseFloat(averageDaily));
-
-    // 处理时间戳转换
-    const startTime = this.formatTimestamp(mockData.startTimestamp);
-    const endTimeFormatted = this.formatTimestamp(mockData.endTimestamp);
-    
-    // 设置数据到页面
-    this.setData({
-      orderInfo: {
-        id: mockData.id,
-        storeName: mockData.storeName,
-        managerName: mockData.managerName,
-        managerPhone: mockData.managerPhone,
-        carModel: mockData.carModel,
-        startTime: startTime,
-        endTime: endTimeFormatted,
-        rentalDays: rentalDays
-      },
-      costDetail: {
-        rentalCost: mockData.rentalCost,
-        overtimeCost: mockData.overtimeCost,
-        depositRefund: mockData.depositRefund,
-        totalCost: totalCost
-      },
-      workStats: {
-        totalHours: mockData.totalWorkHours.toFixed(1),
-        averageDaily: averageDaily,
-        efficiency: efficiency
-      }
-    }, () => {
-      console.log('模拟数据设置完成，当前数据：', this.data);
-    });
-
-    console.log('订单完成页面模拟数据加载完成：', {
-      订单编号: mockData.id,
-      租赁天数: rentalDays,
-      总费用: totalCost,
-      总工作小时: mockData.totalWorkHours,
-      日均工作小时: averageDaily,
-      工作效率: efficiency
-    });
   },
 
-  // 加载订单完成信息
-  loadOrderCompleteInfo: function(orderId) {
-    const that = this;
-    wx.showLoading({
-      title: '加载中...'
-    });
-    
-    // 调用后端接口获取订单完成详情
-    wx.request({
-      url: 'YOUR_API_BASE_URL/order/complete-detail',
-      method: 'GET',
-      data: {
-        orderId: orderId
-      },
-      success: function(res) {
-        console.log('订单详情接口返回：', res);
-        
-        if (res.data.code === 200) {
-          const data = res.data.data;
-          
-          // 处理时间戳转换
-          const startTime = that.formatTimestamp(data.startTimestamp);
-          const endTime = that.formatTimestamp(data.endTimestamp);
-          
-          // 计算租赁天数
-          const rentalDays = that.calculateRentalDays(data.startTimestamp, data.endTimestamp);
-          
-          // 计算工作统计
-          const averageDaily = (data.totalWorkHours / rentalDays).toFixed(1);
-          const efficiency = that.calculateEfficiency(parseFloat(averageDaily));
-          
-          that.setData({
-            orderInfo: {
-              id: data.id,
-              storeName: data.storeName,
-              managerName: data.managerName,
-              managerPhone: data.managerPhone,
-              carModel: data.carModel,
-              startTime: startTime,
-              endTime: endTime,
-              rentalDays: rentalDays
-            },
-            costDetail: {
-              rentalCost: data.rentalCost,
-              overtimeCost: data.overtimeCost,
-              depositRefund: data.depositRefund,
-              totalCost: data.totalCost
-            },
-            workStats: {
-              totalHours: data.totalWorkHours.toFixed(1),
-              averageDaily: averageDaily,
-              efficiency: efficiency
-            }
-          });
-        } else {
-          wx.showModal({
-            title: '获取订单失败',
-            content: res.data.message || '获取订单信息失败，是否使用模拟数据？',
-            confirmText: '使用模拟数据',
-            cancelText: '返回',
-            success: function(modalRes) {
-              if (modalRes.confirm) {
-                that.loadMockData();
-              } else {
-                wx.navigateBack();
-              }
-            }
-          });
-        }
-      },
-      fail: function(error) {
-        console.log('订单详情接口请求失败：', error);
-        wx.showModal({
-          title: '网络错误',
-          content: '网络请求失败，是否使用模拟数据？',
-          confirmText: '使用模拟数据',
-          cancelText: '返回',
-          success: function(modalRes) {
-            if (modalRes.confirm) {
-              that.loadMockData();
-            } else {
-              wx.navigateBack();
-            }
-          }
-        });
-      },
-      complete: function() {
-        wx.hideLoading();
-      }
-    });
+  // 默认完成场景
+  generateDefaultCompleteScenario: function(baseData, orderId) {
+    return {
+      ...baseData,
+      id: orderId,
+      overtimeCost: 200,
+      totalWorkHours: 24.5
+    };
   },
 
-  // 时间戳转换为指定格式
+  // 高费用场景
+  generateHighCostScenario: function(baseData, orderId) {
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const twoDaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000;
+    
+    return {
+      ...baseData,
+      id: orderId,
+      storeName: '上海浦东新区分店',
+      managerName: '李经理',
+      managerPhone: '139-8888-6666',
+      carModel: '三一重工SY365H挖掘机',
+      startTimestamp: sevenDaysAgo,
+      endTimestamp: twoDaysAgo,
+      rentalCost: 5600, // 800元/天 * 7天
+      overtimeCost: 800, // 超时费用
+      totalWorkHours: 68.3
+    };
+  },
+
+  // 超时场景
+  generateOvertimeScenario: function(baseData, orderId) {
+    const fiveDaysAgo = Date.now() - 5 * 24 * 60 * 60 * 1000;
+    const oneDayAgo = Date.now() - 1 * 24 * 60 * 60 * 1000;
+    
+    return {
+      ...baseData,
+      id: orderId,
+      storeName: '深圳南山区分店',
+      managerName: '王经理',
+      managerPhone: '187-9999-1234',
+      carModel: '徐工XE270DK挖掘机',
+      startTimestamp: fiveDaysAgo,
+      endTimestamp: oneDayAgo,
+      rentalCost: 3000,
+      overtimeCost: 1200, // 严重超时
+      totalWorkHours: 52.8
+    };
+  },
+
+  // 完美场景
+  generatePerfectScenario: function(baseData, orderId) {
+    const twoDaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000;
+    const oneHourAgo = Date.now() - 1 * 60 * 60 * 1000;
+    
+    return {
+      ...baseData,
+      id: orderId,
+      storeName: '广州天河区分店',
+      managerName: '陈经理',
+      managerPhone: '158-7777-8888',
+      carModel: '柳工CLG922E挖掘机',
+      startTimestamp: twoDaysAgo,
+      endTimestamp: oneHourAgo,
+      rentalCost: 1200,
+      overtimeCost: 0, // 无超时
+      totalWorkHours: 16.0 // 正好2天*8小时
+    };
+  },
+
+  // 长期租赁场景
+  generateLongTermScenario: function(baseData, orderId) {
+    const fifteenDaysAgo = Date.now() - 15 * 24 * 60 * 60 * 1000;
+    const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
+    
+    return {
+      ...baseData,
+      id: orderId,
+      storeName: '成都高新区分店',
+      managerName: '刘经理',
+      managerPhone: '177-5555-9999',
+      carModel: '斗山DX225LC-9C挖掘机',
+      startTimestamp: fifteenDaysAgo,
+      endTimestamp: threeDaysAgo,
+      rentalCost: 9000, // 600元/天 * 15天
+      overtimeCost: 400,
+      totalWorkHours: 126.5
+    };
+  },
+
+  // ==================== 工具函数 ====================
+  
   formatTimestamp: function(timestamp) {
     const date = new Date(timestamp);
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -238,30 +335,22 @@ Page({
     return `${month}月${day}日 ${hour}:${minute}`;
   },
 
-  // 计算租赁天数
   calculateRentalDays: function(startTimestamp, endTimestamp) {
     const diffMs = endTimestamp - startTimestamp;
-    const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
-    return Math.max(1, diffDays); // 最少1天
+    return Math.max(1, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
   },
 
-  // 计算工作效率评级
   calculateEfficiency: function(averageDaily) {
-    if (averageDaily >= 10) {
-      return '高效';
-    } else if (averageDaily >= 8) {
-      return '标准';
-    } else if (averageDaily >= 6) {
-      return '一般';
-    } else {
-      return '偏低';
-    }
+    if (averageDaily >= 10) return { text: '高效', class: 'high' };
+    if (averageDaily >= 8) return { text: '标准', class: 'standard' };
+    if (averageDaily >= 6) return { text: '一般', class: 'normal' };
+    return { text: '偏低', class: 'low' };
   },
 
-  // 拨打电话
+  // ==================== 用户交互 ====================
+  
   makePhoneCall: function(e) {
     const phone = e.currentTarget.dataset.phone;
-    console.log('拨打电话：', phone);
     
     if (!phone) {
       wx.showToast({
@@ -273,11 +362,7 @@ Page({
     
     wx.makePhoneCall({
       phoneNumber: phone,
-      success: function() {
-        console.log('拨打电话成功');
-      },
-      fail: function(error) {
-        console.error('拨打电话失败：', error);
+      fail: () => {
         wx.showToast({
           title: '拨打电话失败',
           icon: 'none'
@@ -286,33 +371,28 @@ Page({
     });
   },
 
-  // 设置评分
   setRating: function(e) {
     const rating = parseInt(e.currentTarget.dataset.rating);
-    console.log('设置评分：', rating);
     
     this.setData({
-      rating: rating
-    }, () => {
-      console.log('当前评分：', this.data.rating);
+      'feedback.rating': rating
     });
+    
+    console.log('设置评分:', rating);
   },
 
-  // 输入反馈内容
   onFeedbackInput: function(e) {
-    const feedback = e.detail.value;
-    console.log('输入反馈内容：', feedback);
-    
     this.setData({
-      feedback: feedback
+      'feedback.content': e.detail.value
     });
   },
 
-  // 提交评价
+  // ==================== 评价提交 ====================
+  
   submitFeedback: function() {
-    console.log('提交评价，当前评分：', this.data.rating, '反馈内容：', this.data.feedback);
+    const { rating, content } = this.data.feedback;
     
-    if (this.data.rating === 0 && !this.data.feedback.trim()) {
+    if (rating === 0 && !content.trim()) {
       wx.showToast({
         title: '请先评分或输入建议',
         icon: 'none'
@@ -322,34 +402,55 @@ Page({
 
     const feedbackData = {
       orderId: this.data.orderInfo.id,
-      rating: this.data.rating,
-      feedback: this.data.feedback.trim()
+      rating: rating,
+      feedback: content.trim()
     };
 
-    console.log('提交评价数据：', feedbackData);
+    console.log('提交评价数据:', feedbackData);
     
-    // 模拟提交评价
-    if (this.data.orderInfo.id.includes('MOCK')) {
-      this.mockSubmitFeedback(feedbackData);
-      return;
+    // 根据订单ID判断使用模拟还是真实API
+    if (this.data.orderInfo.id.includes('MOCK_') || 
+        this.data.orderInfo.id.includes('COMPLETE_') || 
+        this.data.orderInfo.id.includes('TEST_')) {
+      this.processMockFeedback(feedbackData);
+    } else {
+      this.processApiFeedback(feedbackData);
     }
+  },
 
-    wx.showLoading({
-      title: '提交中...'
-    });
+  // 模拟评价提交
+  processMockFeedback: function(feedbackData) {
+    console.log('使用模拟评价提交:', feedbackData);
     
-    // 调用后端接口提交评价
-    const that = this;
+    wx.showLoading({ title: '提交中...' });
+    
+    setTimeout(() => {
+      wx.hideLoading();
+      
+      this.setData({
+        'feedback.submitted': true,
+        'uiState.showSuccessModal': true
+      });
+      
+      console.log('模拟评价提交成功');
+    }, 1000);
+  },
+
+  // 真实API评价提交（生产环境使用）
+  processApiFeedback: function(feedbackData) {
+    console.log('使用真实API评价提交:', feedbackData);
+    
+    wx.showLoading({ title: '提交中...' });
+    
     wx.request({
       url: 'YOUR_API_BASE_URL/order/feedback',
       method: 'POST',
       data: feedbackData,
-      success: function(res) {
-        console.log('评价提交接口返回：', res);
-        
+      success: (res) => {
         if (res.data.code === 200) {
-          that.setData({
-            showSuccessModal: true
+          this.setData({
+            'feedback.submitted': true,
+            'uiState.showSuccessModal': true
           });
         } else {
           wx.showToast({
@@ -358,52 +459,32 @@ Page({
           });
         }
       },
-      fail: function(error) {
-        console.log('评价提交接口请求失败：', error);
+      fail: () => {
         wx.showToast({
           title: '网络请求失败',
           icon: 'none'
         });
       },
-      complete: function() {
+      complete: () => {
         wx.hideLoading();
       }
     });
   },
 
-  // 模拟提交评价
-  mockSubmitFeedback: function(feedbackData) {
-    console.log('模拟提交评价：', feedbackData);
-    
-    wx.showLoading({
-      title: '提交中...'
-    });
-    
-    // 模拟网络延迟
-    setTimeout(() => {
-      wx.hideLoading();
-      console.log('模拟提交评价成功');
-      this.setData({
-        showSuccessModal: true
-      });
-    }, 1000);
-  },
-
-  // 隐藏成功弹窗
+  // ==================== 弹窗控制 ====================
+  
   hideSuccessModal: function() {
-    console.log('隐藏成功弹窗');
     this.setData({
-      showSuccessModal: false
+      'uiState.showSuccessModal': false
     });
   },
 
-  // 阻止冒泡
-  stopPropagation: function(e) {
-    console.log('阻止事件冒泡');
-    // 空函数，用于阻止事件冒泡
+  stopPropagation: function() {
+    // 阻止事件冒泡
   },
 
-  // 返回首页
+  // ==================== 页面导航 ====================
+  
   backToHome: function() {
     console.log('返回首页');
     wx.reLaunch({
@@ -411,17 +492,42 @@ Page({
     });
   },
 
-  // 页面分享
-  onShareAppMessage: function() {
+  // ==================== 测试场景管理 ====================
+  
+  generateTestScenarios: function() {
     return {
-      title: '租赁设备服务完成',
-      path: '/pages/index/index',
-      imageUrl: '' // 可以设置分享图片
+      'HIGH_COST_001': '高费用场景 - 长期租赁高总价',
+      'OVERTIME_001': '超时场景 - 严重超时有罚金',
+      'PERFECT_001': '完美场景 - 无超时按时还车',
+      'LONG_TERM_001': '长期租赁场景 - 15天租期',
+      'COMPLETE_ORDER_001': '默认完成场景 - 标准订单'
     };
   },
 
-  // 页面卸载
+  logTestScenarios: function() {
+    const scenarios = this.generateTestScenarios();
+    console.log('=== 订单完成页面可用测试场景 ===');
+    Object.keys(scenarios).forEach(orderId => {
+      console.log(`${orderId}: ${scenarios[orderId]}`);
+    });
+    console.log('=== 使用方法 ===');
+    console.log('在页面URL中添加 ?orderId=HIGH_COST_001 来测试不同场景');
+  },
+
+  // ==================== 页面生命周期 ====================
+  
+  onShow: function() {
+    console.log('订单完成页面显示');
+  },
+
   onUnload: function() {
     console.log('订单完成页面卸载');
+  },
+
+  onShareAppMessage: function() {
+    return {
+      title: '租赁设备服务完成',
+      path: '/pages/index/index'
+    };
   }
 });

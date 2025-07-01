@@ -1,3 +1,6 @@
 {
-  "usingComponents": {}
+  "usingComponents": {},
+  "navigationBarTitleText": "补缴支付",
+  "navigationBarTextStyle": "black",
+  "navigationBarBackgroundColor": "#fff"
 }
