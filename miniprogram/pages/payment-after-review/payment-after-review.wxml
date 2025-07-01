@@ -1,168 +1,206 @@
+<!-- payment-after-review.wxml - 优化UI结构和交互体验 -->
 <view class="payment-container">
-  <!-- 订单信息 -->
-  <view class="order-info">
-    <view class="info-header">
-      <text class="info-title">订单信息</text>
+  
+  <!-- 订单信息卡片 -->
+  <view class="info-card order-info-card">
+    <view class="card-header">
+      <text class="card-title">订单信息</text>
     </view>
-    <view class="info-row">
-      <text class="info-label">门店名称：</text>
-      <text class="info-value">{{orderInfo.storeName}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">管理员：</text>
-      <text class="info-value">{{orderInfo.managerName}}</text>
-      <text class="phone-link" bindtap="makePhoneCall" data-phone="{{orderInfo.managerPhone}}">{{orderInfo.managerPhone}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">车型名称：</text>
-      <text class="info-value">{{orderInfo.carModel}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">租赁时间：</text>
-      <text class="info-value">{{orderInfo.startTime}} —— {{orderInfo.endTime}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">租赁天数：</text>
-      <text class="info-value highlight">{{orderInfo.rentalDays}}天</text>
-    </view>
-  </view>
-
-  <!-- 出车时仪表盘数据 -->
-  <view class="dashboard-info">
-    <view class="info-header">
-      <text class="info-title">出车时仪表盘数据</text>
-    </view>
-    <view class="dashboard-display">
-      <text class="dashboard-value">{{orderInfo.initialHours}}小时</text>
+    <view class="card-content">
+      <view class="info-row">
+        <text class="info-label">门店名称</text>
+        <text class="info-value">{{orderInfo.storeName}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">管理员</text>
+        <view class="manager-info">
+          <text class="info-value">{{orderInfo.managerName}}</text>
+          <text class="phone-link" bindtap="makePhoneCall" data-phone="{{orderInfo.managerPhone}}">
+            {{orderInfo.managerPhone}}
+          </text>
+        </view>
+      </view>
+      <view class="info-row">
+        <text class="info-label">车型名称</text>
+        <text class="info-value">{{orderInfo.carModel}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">租赁时间</text>
+        <text class="info-value">{{orderInfo.startTime}} —— {{orderInfo.endTime}}</text>
+      </view>
+      <view class="info-row highlight-row">
+        <text class="info-label">租赁天数</text>
+        <text class="info-value highlight">{{orderInfo.rentalDays}}天</text>
+      </view>
     </view>
   </view>
 
-  <!-- 用户还车时仪表盘数据 -->
-  <view class="dashboard-info">
-    <view class="info-header">
-      <text class="info-title">用户还车时仪表盘数据</text>
+  <!-- 仪表盘数据对比 -->
+  <view class="dashboard-comparison">
+    <!-- 出车时数据 -->
+    <view class="info-card dashboard-card">
+      <view class="card-header">
+        <text class="card-title">出车时仪表盘数据</text>
+      </view>
+      <view class="dashboard-display initial">
+        <text class="dashboard-value">{{orderInfo.initialHours}}</text>
+        <text class="dashboard-unit">小时</text>
+      </view>
     </view>
-    <view class="dashboard-display">
-      <text class="dashboard-value">{{returnData.userReturnHours}}小时</text>
+
+    <!-- 用户还车数据 -->
+    <view class="info-card dashboard-card">
+      <view class="card-header">
+        <text class="card-title">用户还车时数据</text>
+      </view>
+      <view class="dashboard-display user">
+        <text class="dashboard-value">{{returnData.userReturnHours}}</text>
+        <text class="dashboard-unit">小时</text>
+      </view>
     </view>
   </view>
 
-  <!-- 管理员审核后修改的数据 -->
-  <view class="review-section">
-    <view class="info-header">
-      <text class="info-title">管理员审核后修改的数据</text>
+  <!-- 管理员审核数据 -->
+  <view class="info-card review-card">
+    <view class="card-header">
+      <text class="card-title">管理员审核后修改的数据</text>
     </view>
-    <view class="review-item">
-      <text class="review-label">修改后仪表盘数据：</text>
-      <text class="review-value highlight">{{returnData.adminReturnHours}}小时</text>
-    </view>
-    <view class="review-item">
-      <text class="review-label">实际还车时间：</text>
-      <text class="review-value">{{returnData.actualReturnTime}}</text>
-    </view>
-    <view class="review-item">
-      <text class="review-label">仪表盘照片：</text>
-    </view>
-    <view class="dashboard-image">
-      <image class="review-image" src="{{returnData.dashboardImage}}" mode="aspectFill"></image>
+    <view class="card-content">
+      <view class="review-item">
+        <text class="review-label">修改后仪表盘数据</text>
+        <text class="review-value highlight">{{returnData.adminReturnHours}}小时</text>
+      </view>
+      <view class="review-item">
+        <text class="review-label">实际还车时间</text>
+        <text class="review-value">{{returnData.actualReturnTime}}</text>
+      </view>
+      <view class="review-item">
+        <text class="review-label">仪表盘照片</text>
+      </view>
+      <view class="dashboard-image-container">
+        <image class="dashboard-image" src="{{returnData.dashboardImage}}" mode="aspectFill" />
+      </view>
     </view>
   </view>
 
   <!-- 超时计算结果 -->
-  <view class="overtime-result">
-    <view class="info-header">
-      <text class="info-title">超时计算结果</text>
-      <text class="question-icon" bindtap="showOvertimeDetail">?</text>
+  <view class="info-card overtime-card">
+    <view class="card-header">
+      <text class="card-title">超时计算结果</text>
+      <view class="question-btn" bindtap="showOvertimeDetail">
+        <text class="question-icon">?</text>
+      </view>
     </view>
-    <view class="overtime-info">
+    <view class="overtime-result">
       <text class="overtime-text">
-        最终超时了 <text class="highlight">{{finalOvertimeDays}}天</text>
+        最终超时了 <text class="overtime-days">{{overtimeCalculation.finalOvertimeDays}}天</text>
       </text>
     </view>
   </view>
 
-  <!-- 已支付和剩余支付 -->
-  <view class="payment-status">
-    <view class="info-header">
-      <text class="info-title">支付状态</text>
+  <!-- 支付状态 -->
+  <view class="info-card payment-status-card">
+    <view class="card-header">
+      <text class="card-title">支付状态</text>
     </view>
-    <view class="payment-item">
-      <text class="payment-label">已支付超时天数：</text>
-      <text class="payment-value">{{paidOvertimeDays}}天</text>
-    </view>
-    <view class="payment-item">
-      <text class="payment-label">剩余需支付天数：</text>
-      <text class="payment-value highlight">{{remainingOvertimeDays}}天</text>
+    <view class="card-content">
+      <view class="payment-status-row">
+        <text class="status-label">已支付超时天数</text>
+        <text class="status-value">{{overtimeCalculation.paidOvertimeDays}}天</text>
+      </view>
+      <view class="payment-status-row highlight-row">
+        <text class="status-label">剩余需支付天数</text>
+        <text class="status-value highlight">{{overtimeCalculation.remainingOvertimeDays}}天</text>
+      </view>
     </view>
   </view>
 
-  <!-- 价格选择 -->
-  <view class="price-selection" wx:if="{{remainingOvertimeDays > 0}}">
-    <view class="info-header">
-      <text class="info-title">选择计费方式</text>
+  <!-- 计费方式选择 -->
+  <view class="info-card price-selection-card" wx:if="{{overtimeCalculation.remainingOvertimeDays > 0}}">
+    <view class="card-header">
+      <text class="card-title">选择计费方式</text>
     </view>
     <view class="price-options">
-      <view class="price-card {{selectedPriceType === 'overtime' ? 'selected' : ''}}" 
+      <view class="price-option {{priceOptions.selectedType === 'overtime' ? 'selected' : ''}}" 
             bindtap="selectPriceType" data-type="overtime">
-        <view class="price-type">超时单价</view>
-        <view class="price-value">¥{{overtimePrice}}/天</view>
-        <view class="total-price">总计：¥{{overtimeTotalPrice}}</view>
+        <view class="option-header">
+          <text class="option-title">超时单价</text>
+          <view class="option-radio {{priceOptions.selectedType === 'overtime' ? 'checked' : ''}}"></view>
+        </view>
+        <view class="option-price">¥{{priceOptions.overtimePrice}}/天</view>
+        <view class="option-total">总计：¥{{priceOptions.overtimeTotalPrice}}</view>
       </view>
-      <view class="price-card {{selectedPriceType === 'renewal' ? 'selected' : ''}}" 
+      
+      <view class="price-option {{priceOptions.selectedType === 'renewal' ? 'selected' : ''}}" 
             bindtap="selectPriceType" data-type="renewal">
-        <view class="price-type">续租单价</view>
-        <view class="price-value">¥{{renewalPrice}}/天</view>
-        <view class="total-price">总计：¥{{renewalTotalPrice}}</view>
+        <view class="option-header">
+          <text class="option-title">续租单价</text>
+          <view class="option-radio {{priceOptions.selectedType === 'renewal' ? 'checked' : ''}}"></view>
+        </view>
+        <view class="option-price">¥{{priceOptions.renewalPrice}}/天</view>
+        <view class="option-total">总计：¥{{priceOptions.renewalTotalPrice}}</view>
       </view>
     </view>
   </view>
 
   <!-- 最终支付金额 -->
-  <view class="final-payment" wx:if="{{remainingOvertimeDays > 0}}">
-    <view class="payment-info">
-      <text class="payment-label">需要支付：</text>
-      <text class="payment-amount">¥{{finalPaymentAmount}}</text>
+  <view class="info-card final-payment-card" wx:if="{{overtimeCalculation.remainingOvertimeDays > 0}}">
+    <view class="payment-summary">
+      <text class="payment-label">需要支付</text>
+      <text class="payment-amount">¥{{priceOptions.finalPaymentAmount}}</text>
     </view>
   </view>
 
   <!-- 无需支付提示 -->
-  <view class="no-payment" wx:if="{{remainingOvertimeDays <= 0}}">
-    <view class="no-payment-info">
-      <text class="no-payment-text">无需额外支付</text>
+  <view class="info-card no-payment-card" wx:if="{{overtimeCalculation.remainingOvertimeDays <= 0}}">
+    <view class="no-payment-content">
+      <view class="no-payment-icon">✓</view>
+      <text class="no-payment-title">无需额外支付</text>
       <text class="no-payment-desc">已支付金额已覆盖所有超时费用</text>
     </view>
   </view>
 
-  <!-- 支付按钮 -->
-  <view class="submit-section">
-    <button class="submit-btn" bindtap="submitPayment" disabled="{{!canPayment}}" wx:if="{{remainingOvertimeDays > 0}}">
-      支付
-    </button>
-    <button class="submit-btn completed" bindtap="goToComplete" wx:else>
-      订单已完成
-    </button>
-  </view>
+</view>
+
+<!-- 底部操作区域 -->
+<view class="bottom-actions">
+  <button class="action-btn primary" 
+          bindtap="submitPayment" 
+          disabled="{{!uiState.canPayment || uiState.paymentProcessing}}" 
+          wx:if="{{overtimeCalculation.remainingOvertimeDays > 0}}">
+    <text wx:if="{{uiState.paymentProcessing}}">支付中...</text>
+    <text wx:else>立即支付</text>
+  </button>
+  
+  <button class="action-btn completed" bindtap="goToComplete" wx:else>
+    订单已完成
+  </button>
 </view>
 
 <!-- 超时详情弹窗 -->
-<view class="modal-mask" wx:if="{{showOvertimeModal}}" bindtap="hideOvertimeDetail">
-  <view class="modal-content" catchtap="stopPropagation">
+<view class="modal-overlay" wx:if="{{uiState.showOvertimeModal}}" bindtap="hideOvertimeDetail">
+  <view class="modal-container" catchtap="stopPropagation">
     <view class="modal-header">
       <text class="modal-title">超时计算详情</text>
-      <text class="modal-close" bindtap="hideOvertimeDetail">×</text>
+      <view class="modal-close" bindtap="hideOvertimeDetail">
+        <text class="close-icon">×</text>
+      </view>
     </view>
-    <view class="modal-body">
-      <view class="detail-item">
-        <text class="detail-title">租期时间计算：</text>
-        <text class="detail-content">{{timeOvertimeDetail}}</text>
+    
+    <view class="modal-content">
+      <view class="detail-section">
+        <view class="detail-title">租期时间计算</view>
+        <text class="detail-text">{{overtimeCalculation.timeOvertimeDetail}}</text>
       </view>
-      <view class="detail-item">
-        <text class="detail-title">工作小时数计算：</text>
-        <text class="detail-content">{{hoursOvertimeDetail}}</text>
+      
+      <view class="detail-section">
+        <view class="detail-title">工作小时数计算</view>
+        <text class="detail-text">{{overtimeCalculation.hoursOvertimeDetail}}</text>
       </view>
-      <view class="detail-item">
-        <text class="detail-title">最终超时原因：</text>
-        <text class="detail-content">{{finalOvertimeReason}}</text>
+      
+      <view class="detail-section">
+        <view class="detail-title">最终超时原因</view>
+        <text class="detail-text highlight">{{overtimeCalculation.finalOvertimeReason}}</text>
       </view>
     </view>
   </view>

@@ -1,4 +1,4 @@
-// order.js - 修复租赁中三个小状态的逻辑和数据生成
+// order.js - 修改订单链展示逻辑，租赁中和已完成状态都展示订单链
 Page({
   data: {
     // 订单类型和状态
@@ -521,7 +521,7 @@ Page({
   handlePayment: function(e) {
     const orderId = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/payment/payment?orderId=${orderId}`
+      url: `/pages/payment-after-review/payment-after-review?orderId=${orderId}`
     });
   },
 
@@ -531,7 +531,7 @@ Page({
     });
   },
 
-  // ==================== 数据生成（新增租赁中三个小状态的模拟数据）====================
+  // ==================== 数据生成 - 修改为在租赁中和已完成状态都生成订单链数据 ====================
 
   generateMockOrderData: function() {
     const { activeOrderType, activeStatus, pageNum } = this.data;
@@ -566,20 +566,20 @@ Page({
       return `${year}年${month.toString().padStart(2, '0')}月${day.toString().padStart(2, '0')}日 ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
     };
 
-    // 生成非租赁中状态的订单
-    if (activeStatus !== 1) {
-      const singleOrderId = `SINGLE_${baseTime}_001`;
+    // 预约中状态 - 简单订单
+    if (activeStatus === 0) {
+      const singleOrderId = `PENDING_${baseTime}_001`;
       const singlePickupDate = new Date();
-      singlePickupDate.setDate(singlePickupDate.getDate() - 3);
+      singlePickupDate.setDate(singlePickupDate.getDate() + 1);
       const singleReturnDate = new Date(singlePickupDate);
-      singleReturnDate.setDate(singlePickupDate.getDate() + 2);
+      singleReturnDate.setDate(singlePickupDate.getDate() + 3);
       
       mockOrders.push({
         id: singleOrderId,
-        statusText: this.getStatusText(activeStatus),
-        orderStatus: activeStatus,
-        subStatus: activeStatus, // 单状态订单小状态等于大状态
-        price: 480,
+        statusText: "预约中",
+        orderStatus: 0,
+        subStatus: 0,
+        price: 720,
         carModel: carModels[0],
         carNumber: carNumbers[0],
         carImage: "../../assets/rsg.png",
@@ -589,18 +589,18 @@ Page({
         managerPhone: phones[0],
         pickupTime: formatDateTime(singlePickupDate),
         returnTime: formatDateTime(singleReturnDate),
-        rentalDays: 2,
+        rentalDays: 3,
         orderType: activeOrderType,
         vehicleRecordId: `VR_${singleOrderId}`,
         hasOrderChain: false,
-        totalRentalDays: 2,
+        totalRentalDays: 3,
         isRenewalOrder: false,
         renewalCount: 0,
         hasPayment: false
       });
     }
 
-    // 生成租赁中状态的订单（包含三个小状态）
+    // 租赁中状态 - 生成复杂订单链数据
     if (activeStatus === 1) {
       // 小状态1：租赁中（正常租赁中）
       const renting1Id = `RENTING_1_${baseTime}_001`;
@@ -614,9 +614,9 @@ Page({
       mockOrders.push({
         id: renting1Id,
         statusText: "租赁中",
-        orderStatus: 1, // 大状态：租赁中
-        subStatus: 1,   // 小状态：租赁中
-        price: 720,
+        orderStatus: 1,
+        subStatus: 1,
+        price: null, // 单订单也不显示价格，通过订单链查看详情
         carModel: carModels[0],
         carNumber: carNumbers[0],
         carImage: "../../assets/rsg.png",
@@ -629,14 +629,28 @@ Page({
         rentalDays: 3,
         orderType: activeOrderType,
         vehicleRecordId: `VR_${renting1Id}`,
-        hasOrderChain: false,
+        hasOrderChain: true, // 所有租赁中的订单都显示订单链
         totalRentalDays: 3,
         isRenewalOrder: false,
         renewalCount: 0,
-        hasPayment: false
+        hasPayment: false,
+        orderChainDetails: [
+          {
+            orderId: renting1Id,
+            orderType: "原订单",
+            orderStatus: "租赁中",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDateTime(renting1Start),
+            endTime: formatDateTime(renting1End),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatCreateTime(new Date(renting1Start.getTime() - 24*60*60*1000))
+          }
+        ]
       });
 
-      // 小状态4：还车审核中（业务流程1 - 单个订单超时还车审核中）
+      // 小状态4：还车审核中
       const audit1Id = `AUDIT_1_${baseTime}_002`;
       const audit1Start = new Date();
       audit1Start.setDate(audit1Start.getDate() - 5);
@@ -645,14 +659,14 @@ Page({
       audit1PlanEnd.setDate(audit1Start.getDate() + 3);
       audit1PlanEnd.setHours(18, 0, 0, 0);
       const audit1ActualEnd = new Date(audit1PlanEnd);
-      audit1ActualEnd.setHours(22, 0, 0, 0); // 超时4小时还车
+      audit1ActualEnd.setHours(22, 0, 0, 0);
       
       mockOrders.push({
         id: audit1Id,
         statusText: "还车审核中",
-        orderStatus: 1, // 大状态：租赁中
-        subStatus: 4,   // 小状态：还车审核中
-        price: null, // 审核中不显示价格
+        orderStatus: 1,
+        subStatus: 4,
+        price: null,
         carModel: carModels[1],
         carNumber: carNumbers[1],
         carImage: "../../assets/rsg.png",
@@ -665,30 +679,30 @@ Page({
         rentalDays: 3,
         orderType: activeOrderType,
         vehicleRecordId: `VR_${audit1Id}`,
-        hasOrderChain: true, // 需要显示超时信息
+        hasOrderChain: true,
         totalRentalDays: 3,
         isRenewalOrder: false,
         renewalCount: 0,
-        hasPayment: false, // 还在审核中，暂无补缴
+        hasPayment: false,
         orderChainDetails: [
           {
             orderId: audit1Id,
             orderType: "原订单",
-            orderStatus: "还车审核中", // 正在审核
+            orderStatus: "还车审核中",
             price: 720,
             rentalDays: 3,
             startTime: formatDateTime(audit1Start),
-            endTime: formatDateTime(audit1PlanEnd), // 计划结束时间
-            actualEndTime: formatDateTime(audit1ActualEnd), // 实际还车时间
+            endTime: formatDateTime(audit1PlanEnd),
+            actualEndTime: formatDateTime(audit1ActualEnd),
             isOvertime: true,
             overtimeHours: 4,
-            overtimeFee: 240, // 基础超时费，审核可能调整
+            overtimeFee: 240,
             createTime: formatCreateTime(new Date(audit1Start.getTime() - 24*60*60*1000))
           }
         ]
       });
 
-      // 小状态5：待补缴（业务流程1完成审核 - 单个订单审核后需要补缴）
+      // 小状态5：待补缴
       const payment1Id = `PAYMENT_1_${baseTime}_003`;
       const payment1Start = new Date();
       payment1Start.setDate(payment1Start.getDate() - 8);
@@ -697,14 +711,14 @@ Page({
       payment1PlanEnd.setDate(payment1Start.getDate() + 3);
       payment1PlanEnd.setHours(18, 0, 0, 0);
       const payment1ActualEnd = new Date(payment1PlanEnd);
-      payment1ActualEnd.setHours(23, 0, 0, 0); // 超时5小时还车
+      payment1ActualEnd.setHours(23, 0, 0, 0);
       
       mockOrders.push({
         id: payment1Id,
         statusText: "待补缴",
-        orderStatus: 1, // 大状态：租赁中
-        subStatus: 5,   // 小状态：待补缴
-        price: null, // 待补缴不显示价格
+        orderStatus: 1,
+        subStatus: 5,
+        price: null,
         carModel: carModels[2],
         carNumber: carNumbers[2],
         carImage: "../../assets/rsg.png",
@@ -717,30 +731,30 @@ Page({
         rentalDays: 3,
         orderType: activeOrderType,
         vehicleRecordId: `VR_${payment1Id}`,
-        hasOrderChain: true, // 需要显示补缴信息
+        hasOrderChain: true,
         totalRentalDays: 3,
         isRenewalOrder: false,
         renewalCount: 0,
-        hasPayment: true, // 有补缴
+        hasPayment: true,
         orderChainDetails: [
           {
             orderId: payment1Id,
             orderType: "原订单",
-            orderStatus: "待补缴", // 审核完成，等待补缴
+            orderStatus: "待补缴",
             price: 720,
             rentalDays: 3,
             startTime: formatDateTime(payment1Start),
-            endTime: formatDateTime(payment1PlanEnd), // 计划结束时间
-            actualEndTime: formatDateTime(payment1ActualEnd), // 实际还车时间
+            endTime: formatDateTime(payment1PlanEnd),
+            actualEndTime: formatDateTime(payment1ActualEnd),
             isOvertime: true,
             overtimeHours: 5,
-            overtimeFee: 350, // 管理员审核后确定的超时费（包含差异费用）
+            overtimeFee: 350,
             createTime: formatCreateTime(new Date(payment1Start.getTime() - 24*60*60*1000))
           }
         ]
       });
 
-      // 小状态1：租赁中 - 有续租的复杂场景
+      // 租赁中 - 有续租的复杂场景（原订单已完成，续租进行中）
       const rentingComplexId = `RENTING_COMPLEX_${baseTime}_004`;
       const rentingComplexStart = new Date();
       rentingComplexStart.setDate(rentingComplexStart.getDate() - 6);
@@ -755,9 +769,9 @@ Page({
       mockOrders.push({
         id: rentingComplexId,
         statusText: "租赁中",
-        orderStatus: 1, // 大状态：租赁中
-        subStatus: 1,   // 小状态：租赁中
-        price: null, // 有续租不显示价格
+        orderStatus: 1,
+        subStatus: 1,
+        price: null,
         carModel: carModels[3],
         carNumber: carNumbers[3],
         carImage: "../../assets/rsg.png",
@@ -767,19 +781,19 @@ Page({
         managerPhone: phones[0],
         pickupTime: formatDateTime(rentingComplexStart),
         returnTime: formatDateTime(renewal1End),
-        rentalDays: 5, // 3+2=5天
+        rentalDays: 5,
         orderType: activeOrderType,
         vehicleRecordId: `VR_${rentingComplexId}`,
         hasOrderChain: true,
         totalRentalDays: 5,
         isRenewalOrder: false,
         renewalCount: 1,
-        hasPayment: false, // 当前正常租赁中
+        hasPayment: false,
         orderChainDetails: [
           {
             orderId: rentingComplexId,
             orderType: "原订单",
-            orderStatus: "已完成", // 原订单已完成
+            orderStatus: "已完成",
             price: 720,
             rentalDays: 3,
             startTime: formatDateTime(rentingComplexStart),
@@ -791,7 +805,7 @@ Page({
           {
             orderId: `${rentingComplexId}_RENEWAL_1`,
             orderType: "第1次续租",
-            orderStatus: "租赁中", // 续租正在进行
+            orderStatus: "租赁中",
             price: 480,
             rentalDays: 2,
             startTime: formatDateTime(originalEnd),
@@ -803,28 +817,23 @@ Page({
         ]
       });
 
-      // 小状态4：还车审核中 - 业务流程2（有续租，最后超时还车审核中）
-      const auditComplexId = `AUDIT_COMPLEX_${baseTime}_005`;
-      const auditComplexStart = new Date();
-      auditComplexStart.setDate(auditComplexStart.getDate() - 10);
-      auditComplexStart.setHours(9, 0, 0, 0);
-      const auditOriginalEnd = new Date(auditComplexStart);
-      auditOriginalEnd.setDate(auditComplexStart.getDate() + 3);
-      auditOriginalEnd.setHours(18, 0, 0, 0);
-      const auditRenewal1End = new Date(auditOriginalEnd);
-      auditRenewal1End.setDate(auditOriginalEnd.getDate() + 2);
-      auditRenewal1End.setHours(18, 0, 0, 0);
-      const auditRenewal2PlanEnd = new Date(auditRenewal1End);
-      auditRenewal2PlanEnd.setDate(auditRenewal1End.getDate() + 3);
-      auditRenewal2PlanEnd.setHours(18, 0, 0, 0);
-      const auditRenewal2ActualEnd = new Date(auditRenewal2PlanEnd);
-      auditRenewal2ActualEnd.setHours(21, 30, 0, 0); // 最后一次续租超时3.5小时
+      // 租赁中 - 原订单进行中，续租订单待生效
+      const rentingPendingId = `RENTING_PENDING_${baseTime}_005`;
+      const rentingPendingStart = new Date();
+      rentingPendingStart.setDate(rentingPendingStart.getDate() - 1);
+      rentingPendingStart.setHours(9, 0, 0, 0);
+      const originalPendingEnd = new Date(rentingPendingStart);
+      originalPendingEnd.setDate(rentingPendingStart.getDate() + 3);
+      originalPendingEnd.setHours(18, 0, 0, 0);
+      const renewalPendingEnd = new Date(originalPendingEnd);
+      renewalPendingEnd.setDate(originalPendingEnd.getDate() + 2);
+      renewalPendingEnd.setHours(18, 0, 0, 0);
       
       mockOrders.push({
-        id: auditComplexId,
-        statusText: "还车审核中",
-        orderStatus: 1, // 大状态：租赁中
-        subStatus: 4,   // 小状态：还车审核中
+        id: rentingPendingId,
+        statusText: "租赁中",
+        orderStatus: 1,
+        subStatus: 1,
         price: null,
         carModel: carModels[4],
         carNumber: carNumbers[4],
@@ -833,138 +842,335 @@ Page({
         returnStore: stores[1],
         managerName: managers[1],
         managerPhone: phones[1],
-        pickupTime: formatDateTime(auditComplexStart),
-        returnTime: formatDateTime(auditRenewal2ActualEnd),
-        rentalDays: 8, // 3+2+3=8天
+        pickupTime: formatDateTime(rentingPendingStart),
+        returnTime: formatDateTime(renewalPendingEnd), // 显示预计的最终还车时间
+        rentalDays: 5, // 总天数（原订单3天+续租2天）
         orderType: activeOrderType,
-        vehicleRecordId: `VR_${auditComplexId}`,
+        vehicleRecordId: `VR_${rentingPendingId}`,
         hasOrderChain: true,
-        totalRentalDays: 8,
+        totalRentalDays: 5,
         isRenewalOrder: false,
-        renewalCount: 2,
-        hasPayment: false, // 还在审核中
+        renewalCount: 1,
+        hasPayment: false,
         orderChainDetails: [
           {
-            orderId: auditComplexId,
+            orderId: rentingPendingId,
             orderType: "原订单",
-            orderStatus: "已完成", // 原订单正常完成
+            orderStatus: "租赁中", // 原订单还在租赁中
             price: 720,
             rentalDays: 3,
-            startTime: formatDateTime(auditComplexStart),
-            endTime: formatDateTime(auditOriginalEnd),
+            startTime: formatDateTime(rentingPendingStart),
+            endTime: formatDateTime(originalPendingEnd),
             isOvertime: false,
             overtimeHours: 0,
-            createTime: formatCreateTime(new Date(auditComplexStart.getTime() - 24*60*60*1000))
+            createTime: formatCreateTime(new Date(rentingPendingStart.getTime() - 24*60*60*1000))
           },
           {
-            orderId: `${auditComplexId}_RENEWAL_1`,
+            orderId: `${rentingPendingId}_RENEWAL_1`,
             orderType: "第1次续租",
-            orderStatus: "已完成", // 第1次续租正常完成
+            orderStatus: "待生效", // 续租订单待生效
             price: 480,
             rentalDays: 2,
-            startTime: formatDateTime(auditOriginalEnd),
-            endTime: formatDateTime(auditRenewal1End),
+            startTime: formatDateTime(originalPendingEnd), // 续租开始时间 = 原订单结束时间
+            endTime: formatDateTime(renewalPendingEnd),
             isOvertime: false,
             overtimeHours: 0,
-            createTime: formatCreateTime(new Date(auditOriginalEnd.getTime() - 2*60*60*1000))
-          },
-          {
-            orderId: `${auditComplexId}_RENEWAL_2`,
-            orderType: "第2次续租",
-            orderStatus: "还车审核中", // 最后一次续租超时，正在审核
-            price: 720,
-            rentalDays: 3,
-            startTime: formatDateTime(auditRenewal1End),
-            endTime: formatDateTime(auditRenewal2PlanEnd), // 计划结束时间
-            actualEndTime: formatDateTime(auditRenewal2ActualEnd), // 实际还车时间
-            isOvertime: true,
-            overtimeHours: 3.5,
-            overtimeFee: 210, // 基础超时费，审核中可能调整
-            createTime: formatCreateTime(new Date(auditRenewal1End.getTime() - 1*60*60*1000))
+            createTime: formatCreateTime(new Date()) // 续租订单是最近创建的
           }
         ]
       });
 
-      // 小状态5：待补缴 - 业务流程2完成审核（有续租，最后超时还车审核完成需要补缴）
-      const paymentComplexId = `PAYMENT_COMPLEX_${baseTime}_006`;
-      const paymentComplexStart = new Date();
-      paymentComplexStart.setDate(paymentComplexStart.getDate() - 15);
-      paymentComplexStart.setHours(9, 0, 0, 0);
-      const paymentOriginalEnd = new Date(paymentComplexStart);
-      paymentOriginalEnd.setDate(paymentComplexStart.getDate() + 3);
-      paymentOriginalEnd.setHours(18, 0, 0, 0);
-      const paymentRenewal1End = new Date(paymentOriginalEnd);
-      paymentRenewal1End.setDate(paymentOriginalEnd.getDate() + 2);
-      paymentRenewal1End.setHours(18, 0, 0, 0);
-      const paymentRenewal2PlanEnd = new Date(paymentRenewal1End);
-      paymentRenewal2PlanEnd.setDate(paymentRenewal1End.getDate() + 3);
-      paymentRenewal2PlanEnd.setHours(18, 0, 0, 0);
-      const paymentRenewal2ActualEnd = new Date(paymentRenewal2PlanEnd);
-      paymentRenewal2ActualEnd.setHours(22, 0, 0, 0); // 最后一次续租超时4小时
+      // 租赁中 - 原订单进行中，多个续租订单待生效
+      const rentingMultiPendingId = `RENTING_MULTI_PENDING_${baseTime}_006`;
+      const rentingMultiStart = new Date();
+      rentingMultiStart.setDate(rentingMultiStart.getDate() - 1);
+      rentingMultiStart.setHours(10, 0, 0, 0);
+      const originalMultiEnd = new Date(rentingMultiStart);
+      originalMultiEnd.setDate(rentingMultiStart.getDate() + 4);
+      originalMultiEnd.setHours(17, 0, 0, 0);
+      const renewal1MultiEnd = new Date(originalMultiEnd);
+      renewal1MultiEnd.setDate(originalMultiEnd.getDate() + 3);
+      renewal1MultiEnd.setHours(17, 0, 0, 0);
+      const renewal2MultiEnd = new Date(renewal1MultiEnd);
+      renewal2MultiEnd.setDate(renewal1MultiEnd.getDate() + 2);
+      renewal2MultiEnd.setHours(17, 0, 0, 0);
       
       mockOrders.push({
-        id: paymentComplexId,
-        statusText: "待补缴",
-        orderStatus: 1, // 大状态：租赁中
-        subStatus: 5,   // 小状态：待补缴
+        id: rentingMultiPendingId,
+        statusText: "租赁中",
+        orderStatus: 1,
+        subStatus: 1,
         price: null,
         carModel: carModels[0],
-        carNumber: carNumbers[1],
+        carNumber: carNumbers[2],
         carImage: "../../assets/rsg.png",
         pickupStore: stores[2],
         returnStore: stores[2],
         managerName: managers[2],
         managerPhone: phones[2],
-        pickupTime: formatDateTime(paymentComplexStart),
-        returnTime: formatDateTime(paymentRenewal2ActualEnd),
-        rentalDays: 8, // 3+2+3=8天
+        pickupTime: formatDateTime(rentingMultiStart),
+        returnTime: formatDateTime(renewal2MultiEnd), // 显示最终预计还车时间
+        rentalDays: 9, // 总天数（4+3+2=9天）
         orderType: activeOrderType,
-        vehicleRecordId: `VR_${paymentComplexId}`,
+        vehicleRecordId: `VR_${rentingMultiPendingId}`,
         hasOrderChain: true,
-        totalRentalDays: 8,
+        totalRentalDays: 9,
         isRenewalOrder: false,
-        renewalCount: 2,
-        hasPayment: true, // 补缴在最后一个订单上
+        renewalCount: 2, // 有2次续租
+        hasPayment: false,
         orderChainDetails: [
           {
-            orderId: paymentComplexId,
+            orderId: rentingMultiPendingId,
             orderType: "原订单",
-            orderStatus: "已完成", // 原订单正常完成
-            price: 720,
-            rentalDays: 3,
-            startTime: formatDateTime(paymentComplexStart),
-            endTime: formatDateTime(paymentOriginalEnd),
+            orderStatus: "租赁中", // 原订单还在进行中
+            price: 960,
+            rentalDays: 4,
+            startTime: formatDateTime(rentingMultiStart),
+            endTime: formatDateTime(originalMultiEnd),
             isOvertime: false,
             overtimeHours: 0,
-            createTime: formatCreateTime(new Date(paymentComplexStart.getTime() - 24*60*60*1000))
+            createTime: formatCreateTime(new Date(rentingMultiStart.getTime() - 24*60*60*1000))
           },
           {
-            orderId: `${paymentComplexId}_RENEWAL_1`,
+            orderId: `${rentingMultiPendingId}_RENEWAL_1`,
             orderType: "第1次续租",
-            orderStatus: "已完成", // 第1次续租正常完成
+            orderStatus: "待生效", // 第1次续租待生效
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDateTime(originalMultiEnd),
+            endTime: formatDateTime(renewal1MultiEnd),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatCreateTime(new Date(Date.now() - 2*60*60*1000)) // 2小时前创建
+          },
+          {
+            orderId: `${rentingMultiPendingId}_RENEWAL_2`,
+            orderType: "第2次续租",
+            orderStatus: "待生效", // 第2次续租也待生效
             price: 480,
             rentalDays: 2,
-            startTime: formatDateTime(paymentOriginalEnd),
-            endTime: formatDateTime(paymentRenewal1End),
+            startTime: formatDateTime(renewal1MultiEnd),
+            endTime: formatDateTime(renewal2MultiEnd),
             isOvertime: false,
             overtimeHours: 0,
-            createTime: formatCreateTime(new Date(paymentOriginalEnd.getTime() - 2*60*60*1000))
-          },
-          {
-            orderId: `${paymentComplexId}_RENEWAL_2`,
-            orderType: "第2次续租",
-            orderStatus: "待补缴", // 最后一次续租审核完成，需要补缴（补缴计算在最后一个订单上）
-            price: 720,
-            rentalDays: 3,
-            startTime: formatDateTime(paymentRenewal1End),
-            endTime: formatDateTime(paymentRenewal2PlanEnd), // 计划结束时间
-            actualEndTime: formatDateTime(paymentRenewal2ActualEnd), // 实际还车时间
-            isOvertime: true,
-            overtimeHours: 4,
-            overtimeFee: 280, // 管理员审核后确定的最终超时费（包含差异费用）
-            createTime: formatCreateTime(new Date(paymentRenewal1End.getTime() - 1*60*60*1000))
+            createTime: formatCreateTime(new Date(Date.now() - 0.5*60*60*1000)) // 30分钟前创建
           }
         ]
+      });
+    }
+
+    // 已完成状态 - 生成已完成订单链数据
+    if (activeStatus === 2) {
+      // 简单已完成订单
+      const completed1Id = `COMPLETED_1_${baseTime}_001`;
+      const completed1Start = new Date();
+      completed1Start.setDate(completed1Start.getDate() - 10);
+      completed1Start.setHours(9, 0, 0, 0);
+      const completed1End = new Date(completed1Start);
+      completed1End.setDate(completed1Start.getDate() + 3);
+      completed1End.setHours(18, 0, 0, 0);
+      
+      mockOrders.push({
+        id: completed1Id,
+        statusText: "已完成",
+        orderStatus: 2,
+        subStatus: 2,
+        price: null, // 已完成订单也通过订单链查看详情
+        carModel: carModels[0],
+        carNumber: carNumbers[0],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[0],
+        returnStore: stores[0],
+        managerName: managers[0],
+        managerPhone: phones[0],
+        pickupTime: formatDateTime(completed1Start),
+        returnTime: formatDateTime(completed1End),
+        rentalDays: 3,
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${completed1Id}`,
+        hasOrderChain: true, // 已完成订单也显示订单链
+        totalRentalDays: 3,
+        isRenewalOrder: false,
+        renewalCount: 0,
+        hasPayment: false,
+        orderChainDetails: [
+          {
+            orderId: completed1Id,
+            orderType: "原订单",
+            orderStatus: "已完成",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDateTime(completed1Start),
+            endTime: formatDateTime(completed1End),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatCreateTime(new Date(completed1Start.getTime() - 24*60*60*1000))
+          }
+        ]
+      });
+
+      // 已完成 - 有续租的复杂订单
+      const completedComplexId = `COMPLETED_COMPLEX_${baseTime}_002`;
+      const completedComplexStart = new Date();
+      completedComplexStart.setDate(completedComplexStart.getDate() - 15);
+      completedComplexStart.setHours(9, 0, 0, 0);
+      const completedOriginalEnd = new Date(completedComplexStart);
+      completedOriginalEnd.setDate(completedComplexStart.getDate() + 3);
+      completedOriginalEnd.setHours(18, 0, 0, 0);
+      const completedRenewal1End = new Date(completedOriginalEnd);
+      completedRenewal1End.setDate(completedOriginalEnd.getDate() + 2);
+      completedRenewal1End.setHours(18, 0, 0, 0);
+      const completedRenewal2End = new Date(completedRenewal1End);
+      completedRenewal2End.setDate(completedRenewal1End.getDate() + 4);
+      completedRenewal2End.setHours(18, 0, 0, 0);
+      
+      mockOrders.push({
+        id: completedComplexId,
+        statusText: "已完成",
+        orderStatus: 2,
+        subStatus: 2,
+        price: null,
+        carModel: carModels[1],
+        carNumber: carNumbers[1],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[1],
+        returnStore: stores[1],
+        managerName: managers[1],
+        managerPhone: phones[1],
+        pickupTime: formatDateTime(completedComplexStart),
+        returnTime: formatDateTime(completedRenewal2End),
+        rentalDays: 9,
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${completedComplexId}`,
+        hasOrderChain: true,
+        totalRentalDays: 9,
+        isRenewalOrder: false,
+        renewalCount: 2,
+        hasPayment: false,
+        orderChainDetails: [
+          {
+            orderId: completedComplexId,
+            orderType: "原订单",
+            orderStatus: "已完成",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDateTime(completedComplexStart),
+            endTime: formatDateTime(completedOriginalEnd),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatCreateTime(new Date(completedComplexStart.getTime() - 24*60*60*1000))
+          },
+          {
+            orderId: `${completedComplexId}_RENEWAL_1`,
+            orderType: "第1次续租",
+            orderStatus: "已完成",
+            price: 480,
+            rentalDays: 2,
+            startTime: formatDateTime(completedOriginalEnd),
+            endTime: formatDateTime(completedRenewal1End),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatCreateTime(new Date(completedOriginalEnd.getTime() - 2*60*60*1000))
+          },
+          {
+            orderId: `${completedComplexId}_RENEWAL_2`,
+            orderType: "第2次续租",
+            orderStatus: "已完成",
+            price: 960,
+            rentalDays: 4,
+            startTime: formatDateTime(completedRenewal1End),
+            endTime: formatDateTime(completedRenewal2End),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatCreateTime(new Date(completedRenewal1End.getTime() - 1*60*60*1000))
+          }
+        ]
+      });
+
+      // 已完成 - 有超时补缴的订单
+      const completedOvertimeId = `COMPLETED_OVERTIME_${baseTime}_003`;
+      const completedOvertimeStart = new Date();
+      completedOvertimeStart.setDate(completedOvertimeStart.getDate() - 20);
+      completedOvertimeStart.setHours(9, 0, 0, 0);
+      const completedOvertimePlanEnd = new Date(completedOvertimeStart);
+      completedOvertimePlanEnd.setDate(completedOvertimeStart.getDate() + 5);
+      completedOvertimePlanEnd.setHours(18, 0, 0, 0);
+      const completedOvertimeActualEnd = new Date(completedOvertimePlanEnd);
+      completedOvertimeActualEnd.setHours(22, 30, 0, 0); // 超时4.5小时
+      
+      mockOrders.push({
+        id: completedOvertimeId,
+        statusText: "已完成",
+        orderStatus: 2,
+        subStatus: 2,
+        price: null,
+        carModel: carModels[2],
+        carNumber: carNumbers[2],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[2],
+        returnStore: stores[2],
+        managerName: managers[2],
+        managerPhone: phones[2],
+        pickupTime: formatDateTime(completedOvertimeStart),
+        returnTime: formatDateTime(completedOvertimeActualEnd),
+        rentalDays: 5,
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${completedOvertimeId}`,
+        hasOrderChain: true,
+        totalRentalDays: 5,
+        isRenewalOrder: false,
+        renewalCount: 0,
+        hasPayment: true, // 有超时补缴记录
+        orderChainDetails: [
+          {
+            orderId: completedOvertimeId,
+            orderType: "原订单",
+            orderStatus: "已完成",
+            price: 1200,
+            rentalDays: 5,
+            startTime: formatDateTime(completedOvertimeStart),
+            endTime: formatDateTime(completedOvertimePlanEnd),
+            actualEndTime: formatDateTime(completedOvertimeActualEnd),
+            isOvertime: true,
+            overtimeHours: 4.5,
+            overtimeFee: 315, // 已补缴的超时费用
+            createTime: formatCreateTime(new Date(completedOvertimeStart.getTime() - 24*60*60*1000))
+          }
+        ]
+      });
+    }
+
+    // 已取消状态 - 简单订单
+    if (activeStatus === 3) {
+      const cancelledId = `CANCELLED_${baseTime}_001`;
+      const cancelledPickupDate = new Date();
+      cancelledPickupDate.setDate(cancelledPickupDate.getDate() - 5);
+      const cancelledReturnDate = new Date(cancelledPickupDate);
+      cancelledReturnDate.setDate(cancelledPickupDate.getDate() + 3);
+      
+      mockOrders.push({
+        id: cancelledId,
+        statusText: "已取消",
+        orderStatus: 3,
+        subStatus: 3,
+        price: 720,
+        carModel: carModels[3],
+        carNumber: carNumbers[3],
+        carImage: "../../assets/rsg.png",
+        pickupStore: stores[0],
+        returnStore: stores[0],
+        managerName: managers[0],
+        managerPhone: phones[0],
+        pickupTime: formatDateTime(cancelledPickupDate),
+        returnTime: formatDateTime(cancelledReturnDate),
+        rentalDays: 3,
+        orderType: activeOrderType,
+        vehicleRecordId: `VR_${cancelledId}`,
+        hasOrderChain: false, // 已取消订单不显示订单链
+        totalRentalDays: 3,
+        isRenewalOrder: false,
+        renewalCount: 0,
+        hasPayment: false
       });
     }
 

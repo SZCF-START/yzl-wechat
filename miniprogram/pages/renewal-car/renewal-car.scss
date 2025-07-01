@@ -1,6 +1,6 @@
-/* renewal-car.wxss - 修改后支持订单关系展示的续租页面样式 */
+/* renewal-car.wxss - 按照订单页面模式修改的续租页面样式 */
 
-/* 基础样式保持不变 */
+/* 基础容器样式 */
 .renew-container {
   display: flex;
   flex-direction: column;
@@ -9,11 +9,11 @@
   padding-bottom: 140rpx;
 }
 
-.order-info,
+/* 通用卡片样式 */
+.order-card,
 .renew-section,
 .payment-detail,
-.member-card,
-.order-relationship {
+.member-card {
   background-color: #fff;
   margin: 24rpx 20rpx;
   border-radius: 16rpx;
@@ -24,6 +24,7 @@
   transition: all 0.3s ease;
 }
 
+/* 信息头部样式 */
 .info-header {
   display: flex;
   align-items: center;
@@ -52,208 +53,408 @@
   position: relative;
 }
 
-.info-subtitle {
+/* 订单状态样式 */
+.order-status {
   font-size: 24rpx;
-  color: #95a5a6;
-  background-color: rgba(149, 165, 166, 0.1);
-  padding: 4rpx 12rpx;
-  border-radius: 12rpx;
-}
-
-/* 新增：订单关系样式 */
-.order-relationship {
-  background: linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%);
-  border: 2rpx solid #2c5aa0;
-}
-
-.relationship-content {
-  margin-top: 24rpx;
-}
-
-.current-order-info {
-  margin-bottom: 24rpx;
-}
-
-.order-chain-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20rpx;
-  margin-bottom: 16rpx;
-  border-radius: 12rpx;
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.order-chain-item:last-child {
-  margin-bottom: 0;
-}
-
-/* 主订单样式 */
-.main-order {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  border: 2rpx solid #28a745;
-  border-left: 6rpx solid #28a745;
-}
-
-/* 续租订单样式 */
-.renewal-order {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-  border: 2rpx solid #ffc107;
-  border-left: 6rpx solid #ffc107;
-}
-
-/* 新续租订单样式 */
-.new-renewal {
-  background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
-  border: 2rpx solid #17a2b8;
-  border-left: 6rpx solid #17a2b8;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-  100% { transform: scale(1); }
-}
-
-.order-tag {
-  position: absolute;
-  top: -8rpx;
-  right: 16rpx;
-  font-size: 20rpx;
-  padding: 4rpx 12rpx;
+  padding: 6rpx 16rpx;
   border-radius: 20rpx;
-  font-weight: 500;
-  color: white;
-  z-index: 2;
+  font-weight: 600;
 }
 
-.order-tag.main {
-  background-color: #28a745;
+.order-status.completed {
+  background-color: rgba(149, 165, 166, 0.1);
+  color: #95a5a6;
 }
 
-.order-tag.renewal {
-  background-color: #ffc107;
+/* 车辆和门店信息样式 - 复用订单页面样式 */
+.car-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.car-name {
+  font-size: 32rpx;
+  font-weight: 600;
   color: #333;
 }
 
-.order-tag.new {
-  background-color: #17a2b8;
+.car-image {
+  width: 160rpx;
+  height: 90rpx;
+  border-radius: 8rpx;
 }
 
-.order-basic {
+.store-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.store-point {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+}
+
+.orange {
+  background-color: #ff7200;
+}
+
+.green {
+  background-color: #4CD964;
+}
+
+.store-name {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 租赁时间样式 - 复用订单页面样式 */
+.rental-time {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24rpx 0;
+  padding: 16rpx 20rpx;
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
+}
+
+.time-info {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.day-count {
+  font-size: 30rpx;
+  color: #ff7200;
+  font-weight: 600;
+  background-color: rgba(255, 114, 0, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+}
+
+/* 订单链折叠样式 - 完全复用订单页面样式 */
+.order-chain-section {
+  margin-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 20rpx;
+}
+
+.chain-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12rpx;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.chain-header:active {
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  transform: scale(0.98);
+}
+
+.chain-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.chain-icon {
+  font-size: 28rpx;
+}
+
+.chain-title {
+  font-size: 26rpx;
+  color: #495057;
+  font-weight: 500;
+}
+
+.chain-arrow {
+  font-size: 20rpx;
+  color: #6c757d;
+  transform: rotate(-90deg);
+  transition: transform 0.3s ease;
+}
+
+.chain-arrow.expanded {
+  transform: rotate(0deg);
+}
+
+/* 续租和支付标签 */
+.renewal-badge {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12rpx;
+  border: 1rpx solid #bbdefb;
+  font-weight: 500;
+}
+
+.payment-badge {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  background-color: #fff3e0;
+  color: #f57c00;
+  border-radius: 12rpx;
+  border: 1rpx solid #ffcc02;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10rpx);
+  }
+  to {
+    opacity: 1;
+    max-height: 2000rpx;
+    transform: translateY(0);
+  }
+}
+
+/* 链内容样式 */
+.chain-content {
+  padding: 20rpx;
+  background-color: #fafbfc;
+  border-radius: 0 0 12rpx 12rpx;
+  border: 1rpx solid #e9ecef;
+  border-top: none;
+  animation: slideDown 0.3s ease-out;
+}
+
+.chain-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid #e9ecef;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+}
+
+.chain-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 链项目头部 */
+.chain-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.order-type-tag {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+}
+
+.order-type-tag.original {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1rpx solid #c3e6cb;
+}
+
+.order-type-tag.renewal {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1rpx solid #ffeaa7;
+}
+
+.order-status-tag {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 10rpx;
+  font-weight: 500;
+}
+
+/* 状态标签样式 */
+.order-status-tag.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.order-status-tag.status-renting {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.order-status-tag.status-pending {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.order-status-tag.status-payment {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.order-status-tag.status-waiting {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.order-status-tag.status-unknown {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+/* 链详情行 */
+.chain-item-body {
+  margin-top: 12rpx;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+  font-size: 24rpx;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-label {
+  color: #6c757d;
+  font-weight: 500;
+  min-width: 140rpx;
+}
+
+.detail-value {
+  color: #495057;
+  font-weight: 400;
+  text-align: right;
   flex: 1;
+}
+
+.price-value {
+  color: #ff7200;
+  font-weight: 600;
+}
+
+/* 超时样式 */
+.overtime-row {
+  background-color: #fff3cd;
+  padding: 8rpx 12rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid #ffeaa7;
+  margin: 8rpx 0;
+}
+
+.overtime-text {
+  color: #856404;
+  font-weight: 600;
+}
+
+.overtime-fee {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* 出车记录信息 */
+.vehicle-record {
+  margin-top: 20rpx;
+  padding: 16rpx;
+  background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+  border-radius: 12rpx;
+  border: 1rpx solid #c3e6cb;
+}
+
+.record-header {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.record-icon {
+  font-size: 24rpx;
+}
+
+.record-title {
+  font-size: 26rpx;
+  color: #155724;
+  font-weight: 600;
+}
+
+.record-content {
   display: flex;
   flex-direction: column;
   gap: 8rpx;
 }
 
-.order-id {
-  font-size: 26rpx;
-  color: #333;
-  font-weight: 500;
-}
-
-.order-status {
-  font-size: 22rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 12rpx;
-  align-self: flex-start;
-}
-
-.order-status.completed {
-  background-color: rgba(40, 167, 69, 0.1);
-  color: #28a745;
-}
-
-.order-status.pending {
-  background-color: rgba(23, 162, 184, 0.1);
-  color: #17a2b8;
-}
-
-.order-period {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4rpx;
-}
-
-.period-text {
-  font-size: 24rpx;
-  color: #666;
-}
-
-.period-days {
-  font-size: 22rpx;
-  color: #ff7200;
-  font-weight: 500;
-}
-
-/* 关系说明样式 */
-.relationship-note {
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 12rpx;
-  padding: 20rpx;
-  border: 1rpx solid #e3f2fd;
-}
-
-.note-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12rpx;
-  font-size: 24rpx;
-  color: #666;
-}
-
-.note-item:last-child {
-  margin-bottom: 0;
-}
-
-.note-icon {
-  font-size: 28rpx;
-  margin-right: 12rpx;
-  width: 32rpx;
-  text-align: center;
-}
-
-.note-text {
-  flex: 1;
-  line-height: 1.4;
-}
-
-/* 新订单预览样式 */
-.new-order-preview {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12rpx;
-  padding: 20rpx;
-  margin-bottom: 24rpx;
-  border: 1rpx solid #dee2e6;
-}
-
-.preview-row {
+.record-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12rpx;
-  font-size: 26rpx;
+  font-size: 22rpx;
 }
 
-.preview-row:last-child {
-  margin-bottom: 0;
-}
-
-.preview-label {
-  color: #6c757d;
+.record-label {
+  color: #155724;
   font-weight: 500;
 }
 
-.preview-value {
-  color: #495057;
+.record-value {
+  color: #155724;
   font-weight: 400;
 }
 
-/* 原有样式保持不变 */
+/* 支付提醒样式 */
+.payment-notice {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 12rpx;
+  padding: 12rpx 16rpx;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-radius: 8rpx;
+  border: 1rpx solid #ffb74d;
+}
+
+.notice-icon {
+  font-size: 24rpx;
+}
+
+.notice-text {
+  font-size: 22rpx;
+  color: #ef6c00;
+  font-weight: 500;
+}
+
+.payment-status {
+  color: #f57c00;
+  font-weight: 600;
+}
+
+/* 基本信息样式 */
+.basic-info {
+  margin-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 20rpx;
+}
+
 .info-row {
   display: flex;
   align-items: center;
@@ -361,6 +562,43 @@
   font-size: 24rpx;
   color: #ff7200;
   font-style: italic;
+}
+
+/* 新订单预览样式 */
+.new-order-preview {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid #dee2e6;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+}
+
+.preview-row:last-child {
+  margin-bottom: 0;
+}
+
+.preview-label {
+  color: #6c757d;
+  font-weight: 500;
+  min-width: 160rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.preview-value {
+  color: #495057;
+  font-weight: 400;
+  flex: 1;
+  text-align: right;
+  word-break: break-all;
 }
 
 /* 续租输入区域 */
@@ -483,8 +721,8 @@
   font-style: italic;
 }
 
-/* 支付明细 */
-.detail-row {
+/* 支付明细行样式 */
+.payment-detail .detail-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -493,12 +731,12 @@
   padding: 12rpx 0;
 }
 
-.detail-label {
+.payment-detail .detail-label {
   color: #7f8c8d;
   font-weight: 500;
 }
 
-.detail-value {
+.payment-detail .detail-value {
   color: #2c3e50;
   font-weight: 400;
   position: relative;
@@ -665,39 +903,43 @@
   z-index: 1000;
   backdrop-filter: blur(5rpx);
   animation: fadeIn 0.3s ease;
+  padding: 40rpx;
 }
 
 .modal-content {
   background-color: #fff;
   border-radius: 20rpx;
-  margin: 40rpx;
-  max-height: 80vh;
-  overflow-y: auto;
-  width: calc(100% - 80rpx);
+  width: 100%;
+  max-width: 600rpx;
+  max-height: calc(100vh - 120rpx);
   box-shadow: 0 10rpx 40rpx rgba(0,0,0,0.2);
   animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 32rpx;
+  padding: 24rpx 32rpx;
   border-bottom: 2rpx solid #f8f9fa;
   background: linear-gradient(135deg, #fff, #f8f9fa);
+  border-radius: 20rpx 20rpx 0 0;
+  flex-shrink: 0;
 }
 
 .modal-title {
-  font-size: 34rpx;
+  font-size: 32rpx;
   font-weight: 600;
   color: #2c3e50;
 }
 
 .modal-close {
-  font-size: 40rpx;
+  font-size: 36rpx;
   color: #95a5a6;
-  width: 48rpx;
-  height: 48rpx;
+  width: 44rpx;
+  height: 44rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -713,30 +955,38 @@
 }
 
 .modal-body {
-  padding: 32rpx;
+  padding: 24rpx 32rpx 32rpx;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-/* 确认详情样式 */
+/* 确认详情样式 - 优化布局，避免滚动 */
 .confirm-detail {
-  margin-bottom: 32rpx;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .confirm-section {
-  margin-bottom: 24rpx;
-  padding: 20rpx;
+  margin-bottom: 20rpx;
+  padding: 16rpx;
   background-color: #f8f9fa;
   border-radius: 12rpx;
+  flex-shrink: 0;
 }
 
-.confirm-section:last-child {
-  margin-bottom: 0;
+.confirm-section:last-of-type {
+  margin-bottom: 24rpx;
 }
 
 .section-title {
-  font-size: 30rpx;
+  font-size: 28rpx;
   color: #495057;
   font-weight: 600;
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
   display: block;
 }
 
@@ -744,8 +994,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12rpx;
-  padding: 8rpx 0;
+  margin-bottom: 8rpx;
+  padding: 4rpx 0;
 }
 
 .confirm-row:last-child {
@@ -756,40 +1006,48 @@
   background: linear-gradient(135deg, #fff5f0, #fff8f5);
   border: 2rpx solid #ff7200;
   border-radius: 8rpx;
-  padding: 12rpx;
+  padding: 8rpx;
 }
 
 .confirm-label {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #6c757d;
   font-weight: 500;
+  min-width: 140rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .confirm-value {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #495057;
   font-weight: 400;
+  flex: 1;
+  text-align: right;
+  word-break: break-all;
 }
 
 .confirm-value.highlight {
   color: #ff7200;
   font-weight: 700;
-  font-size: 30rpx;
+  font-size: 28rpx;
 }
 
-/* 弹窗按钮 */
+/* 弹窗按钮 - 固定在底部 */
 .modal-buttons {
   display: flex;
-  gap: 20rpx;
+  gap: 16rpx;
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 .cancel-btn,
 .confirm-btn {
   flex: 1;
-  height: 88rpx;
+  height: 80rpx;
   border: none;
-  border-radius: 44rpx;
-  font-size: 30rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -856,13 +1114,30 @@
     gap: 16rpx;
   }
   
-  .order-chain-item {
+  .car-info {
     flex-direction: column;
-    align-items: stretch;
-    gap: 12rpx;
+    align-items: flex-start;
+    gap: 16rpx;
   }
   
-  .order-period {
+  .rental-time {
+    flex-wrap: wrap;
+    gap: 8rpx;
+  }
+  
+  .chain-info {
+    flex-direction: column;
     align-items: flex-start;
+    gap: 8rpx;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4rpx;
+  }
+  
+  .detail-value {
+    text-align: left;
   }
 }

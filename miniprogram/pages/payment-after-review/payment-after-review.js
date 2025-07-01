@@ -1,7 +1,9 @@
+// payment-after-review.js - 优化代码结构和交互体验
 Page({
   data: {
     // 订单信息
     orderInfo: {
+      id: '',
       storeName: '',
       managerName: '',
       managerPhone: '',
@@ -10,54 +12,155 @@ Page({
       endTime: '',
       rentalDays: 0,
       initialHours: 0,
-      endTimestamp: 0, // 租赁结束时间戳
-      dailyWorkHours: 8 // 每天允许工作小时数（8小时算一天）
+      endTimestamp: 0,
+      dailyWorkHours: 8
     },
     
-    // 还车数据
+    // 还车数据  
     returnData: {
-      userReturnHours: 0, // 用户提交的还车小时数
-      adminReturnHours: 0, // 管理员修改后的还车小时数
-      actualReturnTime: '', // 实际还车时间
-      actualReturnTimestamp: 0, // 实际还车时间戳
-      dashboardImage: '' // 仪表盘照片
+      userReturnHours: 0,
+      adminReturnHours: 0,
+      actualReturnTime: '',
+      actualReturnTimestamp: 0,
+      dashboardImage: ''
     },
     
-    // 超时计算
-    finalOvertimeDays: 0, // 最终超时天数
-    paidOvertimeDays: 0, // 已支付超时天数
-    remainingOvertimeDays: 0, // 剩余需支付超时天数
+    // 超时计算结果
+    overtimeCalculation: {
+      finalOvertimeDays: 0,
+      paidOvertimeDays: 0,
+      remainingOvertimeDays: 0,
+      timeOvertimeDetail: '',
+      hoursOvertimeDetail: '',
+      finalOvertimeReason: ''
+    },
     
     // 价格相关
-    overtimePrice: 0, // 超时单价
-    renewalPrice: 0, // 续租单价
-    selectedPriceType: 'overtime', // 默认选择超时单价
-    overtimeTotalPrice: 0, // 超时计费总价
-    renewalTotalPrice: 0, // 续租计费总价
-    finalPaymentAmount: 0, // 最终支付金额
+    priceOptions: {
+      overtimePrice: 0,
+      renewalPrice: 0,
+      selectedType: 'overtime',
+      overtimeTotalPrice: 0,
+      renewalTotalPrice: 0,
+      finalPaymentAmount: 0
+    },
     
-    // 弹窗
-    showOvertimeModal: false,
-    timeOvertimeDetail: '',
-    hoursOvertimeDetail: '',
-    finalOvertimeReason: '',
-    
-    // 支付状态
-    canPayment: false
+    // UI 状态
+    uiState: {
+      showOvertimeModal: false,
+      canPayment: false,
+      isLoading: false,
+      paymentProcessing: false
+    }
   },
 
   onLoad: function(options) {
-    // 从options中获取订单ID
+    this.initializePage(options);
+  },
+
+  // ==================== 初始化 ====================
+  
+  initializePage: function(options) {
     const orderId = options.orderId;
     if (orderId) {
       this.loadOrderInfo(orderId);
     } else {
-      // 订单ID不存在，使用模拟数据
       this.loadMockData();
     }
   },
 
-  // 加载模拟数据
+  // ==================== 数据加载 ====================
+  
+  loadOrderInfo: function(orderId) {
+    this.setData({ 'uiState.isLoading': true });
+    
+    wx.showLoading({ title: '加载中...' });
+    
+    // 调用后端接口
+    wx.request({
+      url: 'YOUR_API_BASE_URL/order/review-detail',
+      method: 'GET',
+      data: { orderId },
+      success: (res) => this.handleOrderResponse(res),
+      fail: () => this.handleLoadError(),
+      complete: () => {
+        wx.hideLoading();
+        this.setData({ 'uiState.isLoading': false });
+      }
+    });
+  },
+
+  handleOrderResponse: function(res) {
+    if (res.data.code === 200) {
+      this.processOrderData(res.data.data);
+    } else {
+      this.showLoadErrorDialog(res.data.message || '获取订单信息失败');
+    }
+  },
+
+  handleLoadError: function() {
+    this.showLoadErrorDialog('网络请求失败');
+  },
+
+  showLoadErrorDialog: function(message) {
+    wx.showModal({
+      title: '加载失败',
+      content: `${message}，是否使用模拟数据？`,
+      confirmText: '使用模拟数据',
+      cancelText: '返回',
+      success: (modalRes) => {
+        if (modalRes.confirm) {
+          this.loadMockData();
+        } else {
+          wx.navigateBack();
+        }
+      }
+    });
+  },
+
+  processOrderData: function(data) {
+    // 处理时间格式
+    const timeData = this.processTimeData(data);
+    
+    // 更新数据
+    this.setData({
+      orderInfo: {
+        id: data.id,
+        storeName: data.storeName,
+        managerName: data.managerName,
+        managerPhone: data.managerPhone,
+        carModel: data.carModel,
+        startTime: timeData.startTime,
+        endTime: timeData.endTime,
+        rentalDays: timeData.rentalDays,
+        initialHours: data.initialHours,
+        endTimestamp: data.endTimestamp,
+        dailyWorkHours: 8
+      },
+      returnData: {
+        userReturnHours: data.userReturnHours,
+        adminReturnHours: data.adminReturnHours,
+        actualReturnTime: timeData.actualReturnTime,
+        actualReturnTimestamp: data.actualReturnTimestamp,
+        dashboardImage: data.dashboardImage
+      },
+      'priceOptions.overtimePrice': data.overtimePrice,
+      'priceOptions.renewalPrice': data.renewalPrice,
+      'overtimeCalculation.paidOvertimeDays': data.paidOvertimeDays
+    });
+
+    this.calculateOvertime();
+  },
+
+  processTimeData: function(data) {
+    return {
+      startTime: this.formatTimestamp(data.startTimestamp),
+      endTime: this.formatTimestamp(data.endTimestamp),
+      actualReturnTime: this.formatTimestamp(data.actualReturnTimestamp),
+      rentalDays: this.calculateRentalDays(data.startTimestamp, data.endTimestamp)
+    };
+  },
+
   loadMockData: function() {
     wx.showToast({
       title: '使用模拟数据',
@@ -65,13 +168,18 @@ Page({
       duration: 2000
     });
 
-    // 模拟数据
-    const now = Date.now();
-    const threeDaysAgo = now - 3 * 24 * 60 * 60 * 1000; // 3天前
-    const endTime = now - 2 * 60 * 60 * 1000; // 2小时前（模拟已过期）
-    const actualReturnTime = now; // 当前时间作为实际还车时间
+    const mockData = this.generateMockData();
+    this.processOrderData(mockData);
+    
+    console.log('模拟数据加载完成', mockData);
+  },
 
-    const mockData = {
+  generateMockData: function() {
+    const now = Date.now();
+    const threeDaysAgo = now - 3 * 24 * 60 * 60 * 1000;
+    const endTime = now - 2 * 60 * 60 * 1000;
+    
+    return {
       id: 'MOCK_ORDER_001',
       storeName: '北京朝阳门店',
       managerName: '张经理',
@@ -79,157 +187,19 @@ Page({
       carModel: '卡特彼勒320D挖掘机',
       startTimestamp: threeDaysAgo,
       endTimestamp: endTime,
-      initialHours: 1250.5, // 出车时仪表盘小时数
-      userReturnHours: 1275.2, // 用户提交的还车小时数
-      adminReturnHours: 1280.8, // 管理员修改后的还车小时数
-      actualReturnTimestamp: actualReturnTime, // 实际还车时间戳
-      dashboardImage: '/images/dashboard-sample.jpg', // 仪表盘照片
-      overtimePrice: 800, // 超时单价：800元/天
-      renewalPrice: 600, // 续租单价：600元/天
-      paidOvertimeDays: 0 // 已支付2天超时费用
+      actualReturnTimestamp: now,
+      initialHours: 1250.5,
+      userReturnHours: 1275.2,
+      adminReturnHours: 1280.8,
+      dashboardImage: '/images/dashboard-sample.jpg',
+      overtimePrice: 800,
+      renewalPrice: 600,
+      paidOvertimeDays: 0
     };
-
-    // 处理时间戳转换
-    const startTime = this.formatTimestamp(mockData.startTimestamp);
-    const endTimeFormatted = this.formatTimestamp(mockData.endTimestamp);
-    const actualReturnTimeFormatted = this.formatTimestamp(mockData.actualReturnTimestamp);
-    
-    // 计算租赁天数
-    const rentalDays = this.calculateRentalDays(mockData.startTimestamp, mockData.endTimestamp);
-    
-    this.setData({
-      orderInfo: {
-        id: mockData.id,
-        storeName: mockData.storeName,
-        managerName: mockData.managerName,
-        managerPhone: mockData.managerPhone,
-        carModel: mockData.carModel,
-        startTime: startTime,
-        endTime: endTimeFormatted,
-        rentalDays: rentalDays,
-        initialHours: mockData.initialHours,
-        endTimestamp: mockData.endTimestamp,
-        dailyWorkHours: 8
-      },
-      returnData: {
-        userReturnHours: mockData.userReturnHours,
-        adminReturnHours: mockData.adminReturnHours,
-        actualReturnTime: actualReturnTimeFormatted,
-        actualReturnTimestamp: mockData.actualReturnTimestamp,
-        dashboardImage: mockData.dashboardImage
-      },
-      overtimePrice: mockData.overtimePrice,
-      renewalPrice: mockData.renewalPrice,
-      paidOvertimeDays: mockData.paidOvertimeDays
-    });
-
-    // 计算超时
-    this.calculateOvertime();
-
-    console.log('模拟数据加载完成：', {
-      租赁天数: rentalDays,
-      开始时间: startTime,
-      结束时间: endTimeFormatted,
-      实际还车时间: actualReturnTimeFormatted,
-      初始小时数: mockData.initialHours,
-      用户还车小时数: mockData.userReturnHours,
-      管理员修改小时数: mockData.adminReturnHours,
-      已支付天数: mockData.paidOvertimeDays
-    });
   },
 
-  // 加载订单信息
-  loadOrderInfo: function(orderId) {
-    const that = this;
-    wx.showLoading({
-      title: '加载中...'
-    });
-    
-    // 调用后端接口获取审核后的订单详情
-    wx.request({
-      url: 'YOUR_API_BASE_URL/order/review-detail',
-      method: 'GET',
-      data: {
-        orderId: orderId
-      },
-      success: function(res) {
-        if (res.data.code === 200) {
-          const data = res.data.data;
-          
-          // 处理时间戳转换
-          const startTime = that.formatTimestamp(data.startTimestamp);
-          const endTime = that.formatTimestamp(data.endTimestamp);
-          const actualReturnTime = that.formatTimestamp(data.actualReturnTimestamp);
-          
-          // 计算租赁天数
-          const rentalDays = that.calculateRentalDays(data.startTimestamp, data.endTimestamp);
-          
-          that.setData({
-            orderInfo: {
-              id: data.id,
-              storeName: data.storeName,
-              managerName: data.managerName,
-              managerPhone: data.managerPhone,
-              carModel: data.carModel,
-              startTime: startTime,
-              endTime: endTime,
-              rentalDays: rentalDays,
-              initialHours: data.initialHours,
-              endTimestamp: data.endTimestamp,
-              dailyWorkHours: 8
-            },
-            returnData: {
-              userReturnHours: data.userReturnHours,
-              adminReturnHours: data.adminReturnHours,
-              actualReturnTime: actualReturnTime,
-              actualReturnTimestamp: data.actualReturnTimestamp,
-              dashboardImage: data.dashboardImage
-            },
-            overtimePrice: data.overtimePrice,
-            renewalPrice: data.renewalPrice,
-            paidOvertimeDays: data.paidOvertimeDays
-          });
-
-          // 计算超时
-          that.calculateOvertime();
-        } else {
-          wx.showModal({
-            title: '获取订单失败',
-            content: res.data.message || '获取订单信息失败，是否使用模拟数据？',
-            confirmText: '使用模拟数据',
-            cancelText: '返回',
-            success: function(modalRes) {
-              if (modalRes.confirm) {
-                that.loadMockData();
-              } else {
-                wx.navigateBack();
-              }
-            }
-          });
-        }
-      },
-      fail: function() {
-        wx.showModal({
-          title: '网络错误',
-          content: '网络请求失败，是否使用模拟数据？',
-          confirmText: '使用模拟数据',
-          cancelText: '返回',
-          success: function(modalRes) {
-            if (modalRes.confirm) {
-              that.loadMockData();
-            } else {
-              wx.navigateBack();
-            }
-          }
-        });
-      },
-      complete: function() {
-        wx.hideLoading();
-      }
-    });
-  },
-
-  // 时间戳转换为指定格式
+  // ==================== 工具函数 ====================
+  
   formatTimestamp: function(timestamp) {
     const date = new Date(timestamp);
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -240,54 +210,117 @@ Page({
     return `${month}月${day}日 ${hour}:${minute}`;
   },
 
-  // 计算租赁天数
   calculateRentalDays: function(startTimestamp, endTimestamp) {
     const diffMs = endTimestamp - startTimestamp;
-    const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
-    return diffDays;
+    return Math.ceil(diffMs / (24 * 60 * 60 * 1000));
   },
 
-  // 拨打电话
-  makePhoneCall: function(e) {
-    const phone = e.currentTarget.dataset.phone;
-    wx.makePhoneCall({
-      phoneNumber: phone,
-      fail: function() {
-        wx.showToast({
-          title: '拨打电话失败',
-          icon: 'none'
-        });
-      }
-    });
-  },
-
-  // 计算超时（基于管理员修改后的数据）
+  // ==================== 超时计算 ====================
+  
   calculateOvertime: function() {
-    const adminReturnHours = this.data.returnData.adminReturnHours;
-    const initialHours = this.data.orderInfo.initialHours;
-    const endTimestamp = this.data.orderInfo.endTimestamp;
-    const actualReturnTimestamp = this.data.returnData.actualReturnTimestamp;
-    const dailyWorkHours = this.data.orderInfo.dailyWorkHours;
+    const {
+      adminReturnHours,
+      actualReturnTimestamp
+    } = this.data.returnData;
     
-    // 1. 按租期时间计算超时（实际还车时间+30分钟）
-    const graceTimestamp = endTimestamp + 30 * 60 * 1000; // 加30分钟宽限期
+    const {
+      initialHours,
+      endTimestamp,
+      dailyWorkHours,
+      rentalDays
+    } = this.data.orderInfo;
+    
+    const { paidOvertimeDays } = this.data.overtimeCalculation;
+    
+    // 计算超时
+    const overtimeResult = this.performOvertimeCalculation({
+      adminReturnHours,
+      initialHours,
+      endTimestamp,
+      actualReturnTimestamp,
+      dailyWorkHours,
+      rentalDays,
+      paidOvertimeDays
+    });
+    
+    // 计算价格
+    const priceResult = this.calculatePrices(overtimeResult.remainingOvertimeDays);
+    
+    // 更新数据
+    this.setData({
+      'overtimeCalculation.finalOvertimeDays': overtimeResult.finalOvertimeDays,
+      'overtimeCalculation.remainingOvertimeDays': overtimeResult.remainingOvertimeDays,
+      'overtimeCalculation.timeOvertimeDetail': overtimeResult.timeDetail,
+      'overtimeCalculation.hoursOvertimeDetail': overtimeResult.hoursDetail,
+      'overtimeCalculation.finalOvertimeReason': overtimeResult.finalReason,
+      'priceOptions.overtimeTotalPrice': priceResult.overtimeTotal,
+      'priceOptions.renewalTotalPrice': priceResult.renewalTotal,
+      'priceOptions.finalPaymentAmount': priceResult.overtimeTotal,
+      'uiState.canPayment': overtimeResult.remainingOvertimeDays > 0
+    });
+
+    console.log('超时计算完成', overtimeResult, priceResult);
+  },
+
+  performOvertimeCalculation: function(params) {
+    const {
+      adminReturnHours,
+      initialHours,
+      endTimestamp,
+      actualReturnTimestamp,
+      dailyWorkHours,
+      rentalDays,
+      paidOvertimeDays
+    } = params;
+    
+    // 1. 按时间计算超时
+    const graceTimestamp = endTimestamp + 30 * 60 * 1000;
     const timeOverMs = Math.max(0, actualReturnTimestamp - graceTimestamp);
     const timeOvertimeDays = timeOverMs > 0 ? Math.ceil(timeOverMs / (24 * 60 * 60 * 1000)) : 0;
     
     // 2. 按工作小时数计算超时
     const totalWorkHours = adminReturnHours - initialHours;
-    const rentalDays = this.data.orderInfo.rentalDays;
     const allowedTotalHours = rentalDays * dailyWorkHours;
     const excessHours = Math.max(0, totalWorkHours - allowedTotalHours);
     const hoursOvertimeDays = excessHours > 0 ? Math.ceil(excessHours / dailyWorkHours) : 0;
     
-    // 取最大值作为实际超时天数
+    // 3. 取最大值
     const finalOvertimeDays = Math.max(timeOvertimeDays, hoursOvertimeDays);
+    const remainingOvertimeDays = Math.max(0, finalOvertimeDays - paidOvertimeDays);
     
-    // 计算剩余需支付天数
-    const remainingOvertimeDays = Math.max(0, finalOvertimeDays - this.data.paidOvertimeDays);
+    // 生成详情描述
+    const details = this.generateOvertimeDetails({
+      timeOvertimeDays,
+      hoursOvertimeDays,
+      finalOvertimeDays,
+      endTimestamp,
+      actualReturnTimestamp,
+      totalWorkHours,
+      rentalDays,
+      allowedTotalHours,
+      excessHours
+    });
     
-    // 生成详情说明
+    return {
+      finalOvertimeDays,
+      remainingOvertimeDays,
+      ...details
+    };
+  },
+
+  generateOvertimeDetails: function(data) {
+    const {
+      timeOvertimeDays,
+      hoursOvertimeDays,
+      finalOvertimeDays,
+      endTimestamp,
+      actualReturnTimestamp,
+      totalWorkHours,
+      rentalDays,
+      allowedTotalHours,
+      excessHours
+    } = data;
+    
     const timeDetail = timeOvertimeDays > 0 ? 
       `预期还车时间：${this.formatTimestamp(endTimestamp)}（含30分钟宽限期），实际还车时间：${this.formatTimestamp(actualReturnTimestamp)}，超时${timeOvertimeDays}天` : 
       `预期还车时间：${this.formatTimestamp(endTimestamp)}（含30分钟宽限期），实际还车时间：${this.formatTimestamp(actualReturnTimestamp)}，未超时`;
@@ -302,71 +335,64 @@ Page({
         `最终按工作小时数超时计算，因为工作小时数超时${hoursOvertimeDays}天 > 时间超时${timeOvertimeDays}天`) :
       '未超时，无需额外费用';
     
-    // 计算价格
-    const overtimeTotal = remainingOvertimeDays * this.data.overtimePrice;
-    const renewalTotal = remainingOvertimeDays * this.data.renewalPrice;
+    return {
+      timeDetail,
+      hoursDetail,
+      finalReason
+    };
+  },
+
+  calculatePrices: function(remainingDays) {
+    const { overtimePrice, renewalPrice } = this.data.priceOptions;
     
-    this.setData({
-      finalOvertimeDays: finalOvertimeDays,
-      remainingOvertimeDays: remainingOvertimeDays,
-      timeOvertimeDetail: timeDetail,
-      hoursOvertimeDetail: hoursDetail,
-      finalOvertimeReason: finalReason,
-      overtimeTotalPrice: overtimeTotal,
-      renewalTotalPrice: renewalTotal,
-      finalPaymentAmount: overtimeTotal, // 默认选择超时单价
-      canPayment: remainingOvertimeDays > 0
-    });
+    return {
+      overtimeTotal: remainingDays * overtimePrice,
+      renewalTotal: remainingDays * renewalPrice
+    };
+  },
 
-    // 在控制台输出计算详情，方便调试
-    console.log('超时计算详情：', {
-      总工作小时数: totalWorkHours.toFixed(1),
-      租期天数: rentalDays,
-      允许总小时数: allowedTotalHours,
-      超出小时数: excessHours.toFixed(1),
-      时间超时天数: timeOvertimeDays,
-      小时数超时天数: hoursOvertimeDays,
-      最终超时天数: finalOvertimeDays,
-      已支付天数: this.data.paidOvertimeDays,
-      剩余需支付天数: remainingOvertimeDays,
-      超时总费用: overtimeTotal,
-      续租总费用: renewalTotal
+  // ==================== 交互事件 ====================
+  
+  makePhoneCall: function(e) {
+    const phone = e.currentTarget.dataset.phone;
+    wx.makePhoneCall({
+      phoneNumber: phone,
+      fail: () => {
+        wx.showToast({
+          title: '拨打电话失败',
+          icon: 'none'
+        });
+      }
     });
   },
 
-  // 显示超时详情
   showOvertimeDetail: function() {
-    this.setData({
-      showOvertimeModal: true
-    });
+    this.setData({ 'uiState.showOvertimeModal': true });
   },
 
-  // 隐藏超时详情
   hideOvertimeDetail: function() {
-    this.setData({
-      showOvertimeModal: false
-    });
+    this.setData({ 'uiState.showOvertimeModal': false });
   },
 
-  // 阻止冒泡
   stopPropagation: function() {
-    // 空函数，用于阻止事件冒泡
+    // 阻止事件冒泡
   },
 
-  // 选择价格类型
   selectPriceType: function(e) {
     const type = e.currentTarget.dataset.type;
-    const amount = type === 'overtime' ? this.data.overtimeTotalPrice : this.data.renewalTotalPrice;
+    const { overtimeTotalPrice, renewalTotalPrice } = this.data.priceOptions;
+    const amount = type === 'overtime' ? overtimeTotalPrice : renewalTotalPrice;
     
     this.setData({
-      selectedPriceType: type,
-      finalPaymentAmount: amount
+      'priceOptions.selectedType': type,
+      'priceOptions.finalPaymentAmount': amount
     });
   },
 
-  // 提交支付
+  // ==================== 支付处理 ====================
+  
   submitPayment: function() {
-    if (!this.data.canPayment) {
+    if (!this.data.uiState.canPayment) {
       wx.showToast({
         title: '无需支付',
         icon: 'none'
@@ -374,134 +400,97 @@ Page({
       return;
     }
     
-    // 准备支付数据
-    const paymentData = {
-      orderId: this.data.orderInfo.id,
-      remainingOvertimeDays: this.data.remainingOvertimeDays,
-      selectedPriceType: this.data.selectedPriceType,
-      finalPaymentAmount: this.data.finalPaymentAmount
-    };
-    
-    console.log('支付数据：', paymentData);
-    
-    // 模拟支付过程
-    if (this.data.orderInfo.id === 'MOCK_ORDER_001') {
-      this.mockSubmitPayment(paymentData);
+    if (this.data.uiState.paymentProcessing) {
       return;
     }
     
-    // 显示支付中
-    wx.showLoading({
-      title: '支付中...'
-    });
+    const paymentData = this.preparePaymentData();
     
-    // 调用后端接口提交支付
-    const that = this;
+    if (this.data.orderInfo.id === 'MOCK_ORDER_001') {
+      this.processRealPayment(paymentData);
+    } else {
+      this.processRealPayment(paymentData);
+    }
+  },
+
+  preparePaymentData: function() {
+    const { orderInfo, overtimeCalculation, priceOptions } = this.data;
+    
+    return {
+      orderId: orderInfo.id,
+      remainingOvertimeDays: overtimeCalculation.remainingOvertimeDays,
+      selectedPriceType: priceOptions.selectedType,
+      finalPaymentAmount: priceOptions.finalPaymentAmount
+    };
+  },
+
+  processRealPayment: function(paymentData) {
+    this.setData({ 'uiState.paymentProcessing': true });
+    wx.showLoading({ title: '支付中...' });
+    
     wx.request({
       url: 'YOUR_API_BASE_URL/payment/submit',
       method: 'POST',
       data: paymentData,
-      success: function(res) {
-        if (res.data.code === 200) {
-          // 调用微信支付
-          that.processPayment(res.data.data.paymentInfo);
-        } else {
-          wx.showToast({
-            title: res.data.message || '支付失败',
-            icon: 'none'
-          });
-        }
-      },
-      fail: function() {
-        wx.showToast({
-          title: '网络请求失败',
-          icon: 'none'
-        });
-      },
-      complete: function() {
+      success: (res) => this.handlePaymentResponse(res),
+      fail: () => this.handlePaymentError(),
+      complete: () => {
         wx.hideLoading();
+        this.setData({ 'uiState.paymentProcessing': false });
       }
     });
   },
 
-  // 模拟提交支付
-  mockSubmitPayment: function(paymentData) {
-    wx.showLoading({
-      title: '支付中...'
-    });
-    
-    // 模拟网络延迟
-    setTimeout(() => {
-      wx.hideLoading();
-      
-      wx.showModal({
-        title: '模拟支付',
-        content: `需要支付：¥${paymentData.finalPaymentAmount}，是否模拟支付成功？`,
-        confirmText: '支付成功',
-        cancelText: '支付失败',
-        success: (res) => {
-          if (res.confirm) {
-            wx.showToast({
-              title: '支付成功',
-              icon: 'success'
-            });
-            setTimeout(() => {
-              wx.showModal({
-                title: '支付完成',
-                content: '订单已完成，感谢您的使用！',
-                showCancel: false,
-                success: () => {
-                  // 跳转到订单完成页面
-                  wx.redirectTo({
-                    // url: '/pages/order-complete/order-complete?orderId='
-                    //  + this.data.orderInfo.id
-                     url: '/pages/order-complete/order-complete'
-                  });
-                }
-              });
-            }, 1500);
-          } else {
-            wx.showToast({
-              title: '支付失败',
-              icon: 'error'
-            });
-          }
-        }
+  handlePaymentResponse: function(res) {
+    if (res.data.code === 200) {
+      this.processWechatPayment(res.data.data.paymentInfo);
+    } else {
+      wx.showToast({
+        title: res.data.message || '支付失败',
+        icon: 'none'
       });
-    }, 2000);
+    }
   },
 
-  // 处理支付
-  processPayment: function(paymentInfo) {
-    const that = this;
-    
+  handlePaymentError: function() {
+    wx.showToast({
+      title: '网络请求失败',
+      icon: 'none'
+    });
+  },
+
+  processWechatPayment: function(paymentInfo) {
     wx.requestPayment({
       timeStamp: paymentInfo.timeStamp,
       nonceStr: paymentInfo.nonceStr,
       package: paymentInfo.package,
       signType: paymentInfo.signType,
       paySign: paymentInfo.paySign,
-      success: function() {
-        wx.showToast({
-          title: '支付成功',
-          icon: 'success'
-        });
-        setTimeout(() => {
-          wx.redirectTo({
-            url: '/pages/order-complete/order-complete?orderId=' + that.data.orderInfo.id
-          });
-        }, 1500);
-      },
-      fail: function() {
-        wx.showToast({
-          title: '支付失败',
-          icon: 'none'
-        });
-      }
+      success: () => this.handlePaymentSuccess(),
+      fail: () => this.handlePaymentFail()
     });
   },
 
-  // 跳转到订单完成页面
+  handlePaymentSuccess: function() {
+    wx.showToast({
+      title: '支付成功',
+      icon: 'success'
+    });
+    
+    setTimeout(() => {
+      wx.redirectTo({
+        url: '/pages/order-complete/order-complete?orderId=' + this.data.orderInfo.id
+      });
+    }, 1500);
+  },
+
+  handlePaymentFail: function() {
+    wx.showToast({
+      title: '支付失败',
+      icon: 'none'
+    });
+  },
+
   goToComplete: function() {
     wx.redirectTo({
       url: '/pages/order-complete/order-complete?orderId=' + this.data.orderInfo.id
