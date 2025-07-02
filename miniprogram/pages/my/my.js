@@ -1,53 +1,36 @@
 const loginCheck = require('../../behaviors/loginCheck.js');
 import config from '../../config/config.js'
 import { startEid } from '../../mp_ecard_sdk/main'
+
 Page({
   behaviors: [loginCheck],
-  /**
-   * 页面的初始数据
-   */
+  
   data: {
-    // avatarUrl: '../../assets/rsg.png',
-    // showPrivacy: false
-    isLoggedIn: wx.getStorageSync('isLoggedIn'), // 是否已登录
+    isLoggedIn: false, // 初始化为false，在onShow中更新
     needsReload: false,
-    username: wx.getStorageSync('userInfo').wechatName,
-    avatarUrl: wx.getStorageSync('userInfo').avatar,
+    username: '',
+    avatarUrl: '../../assets/yh.png',
     eidToken: "",
+    isRealNameVerified: false, // 实名认证状态
 
     tags: [
-      { id: '1', name: '实名认证', icon: '../../assets/myquickaccess/smrz.png', url: '/pages/auth/auth' },
-      { id: '2', name: '出车记录', icon: '../../assets/myquickaccess/ccjl.png', url: '/pages/record/record' },
-      { id: '3', name: '出车管理', icon: '../../assets/myquickaccess/ccgl.png', url: '/pages/manage/manage' },
-      { id: '4', name: '属具记录', icon: '../../assets/myquickaccess/sjjl.png', url: '/pages/equipment/record' },
-      { id: '5', name: '属具管理', icon: '../../assets/myquickaccess/sjgl.png', url: '/pages/equipment/manage' },
-      { id: '6', name: '押金审核', icon: '../../assets/myquickaccess/yjsh.png', url: '/pages/deposit/review' }
+      { id: '1', name: '实名认证', icon: '../../assets/myquickaccess/smrz.png', url: '/pages/auth-info/auth-info' },
+      { id: '2', name: '出车记录', icon: '../../assets/myquickaccess/ccjl.png', url: '/pages/vehicle-record/vehicle-record' },
+      { id: '3', name: '属具记录', icon: '../../assets/myquickaccess/sjjl.png', url: '/pages/equipment/record' },
     ]
   },
 
-  // chooseavatar(event) {
-  //   console.log(event);
-  //   const {avatarUrl} = event.detail
-  //   this.setData({
-  //     avatarUrl
-  //   })
-  // },
-
-  // onSubmit (event) {
-  //   const {nickname} = event.detail.value
-  //   console.log(nickname);
-  // },
-
   goToLogin() {
+    console.log("77777777766666");
     const redirectUrl = '/pages/my/my'
     wx.navigateTo({
-      url: `/pages/login/login?redirect=${encodeURIComponent(redirectUrl)}`, // 跳转到登录页路径
+      url: `/pages/login/login?redirect=${encodeURIComponent(redirectUrl)}`,
     });
   },
   
   goToMembership() {
     wx.navigateTo({
-      url: '/pages/membership/membership' // 替换成你的会员页面路径
+      url: '/pages/membership/membership'
     });
   },
 
@@ -59,93 +42,141 @@ Page({
   },
 
   openSettings() {
-    if (!this.checkLogin('pages/settings/settings', {})) return;
+    if (!this.checkLogin('/pages/settings/settings', {})) return;
     wx.navigateTo({
-      url: '/pages/settings/settings', // 跳转到设置页路径
+      url: '/pages/settings/settings',
     });
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
+  // 跳转到订单页面（tabBar）
+  goToOrders() {
+    if (!this.checkLogin()) return;
+    wx.switchTab({
+      url: '/pages/order/order' // 假设订单页面是tabBar页面
+    });
+  },
+
   onLoad(options) {
-    this.getEidToken()
+    this.getEidToken();
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
   onReady() {
-    this.getEidToken()
+    this.getEidToken();
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
   onShow() {
-    // 如果需要重新加载数据
-
+    // 每次显示页面时刷新用户信息
+    this.refreshUserInfo();
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
+  onHide() {},
+  onUnload() {},
+  onPullDownRefresh() {},
+  onReachBottom() {},
+  onShareAppMessage() {},
 
+  // 刷新用户信息
+  refreshUserInfo() {
+    const isLoggedIn = wx.getStorageSync('isLoggedIn') || false;
+    
+    if (isLoggedIn) {
+      const userInfo = wx.getStorageSync('userInfo') || {};
+      this.setData({
+        isLoggedIn: true,
+        username: userInfo.wechatName || '用户昵称',
+        avatarUrl: userInfo.avatar || '../../assets/yh.png',
+        needsReload: false
+      });
+      
+      // 如果已登录，检查实名认证状态
+      this.checkRealNameStatus();
+    } else {
+      this.setData({
+        isLoggedIn: false,
+        username: '用户昵称',
+        avatarUrl: '../../assets/yh.png',
+        isRealNameVerified: false
+      });
+    }
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
+  // 检查实名认证状态
+  checkRealNameStatus() {
+    // 模拟API调用检查实名认证状态
+    // 这里先用随机数模拟，实际项目中替换为真实API调用
+    console.log("99999999999900000000000");
+    const mockApiCall = () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          console.log("55555555555555");
+          // 随机返回true或false模拟实名认证状态
+          const isVerified = Math.random() > 0.5;
+          resolve(isVerified);
+        }, 500);
+      });
+    };
 
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
-  },
-
-  reloadData() {
-    // 重新获取登录状态和用户信息
-    const isLoggedIn = wx.getStorageSync('isLoggedIn');
-    const username = wx.getStorageSync('userInfo').wechatName || '用户昵称';
-    const avatarUrl = wx.getStorageSync('userInfo').avatar || '../../assets/yh.png';
-
-    this.setData({
-      isLoggedIn,
-      username,
-      avatarUrl,
-      needsReload: false // 重置标识
+    mockApiCall().then((isVerified) => {
+      console.log("isVerified4444444:",isVerified);
+      this.setData({
+        isRealNameVerified: isVerified
+      });
+    }).catch((error) => {
+      console.error('检查实名认证状态失败:', error);
     });
+
+    // 真实API调用示例（注释掉的代码）
+    /*
+    wx.request({
+      url: config.baseUrl + 'user/checkRealNameStatus',
+      method: 'GET',
+      header: {
+        'Authorization': wx.getStorageSync('token') || ''
+      },
+      success: (res) => {
+        if (res.data && res.data.success) {
+          this.setData({
+            isRealNameVerified: res.data.data.isVerified || false
+          });
+        }
+      },
+      fail: (error) => {
+        console.error('检查实名认证状态失败:', error);
+      }
+    });
+    */
   },
 
   navigateToPage(e) {
-    
     const url = e.currentTarget.dataset.url;
-    console.log(e.currentTarget);
-    if (!this.checkLogin(url, {})) {
-      return
+    
+    // 检查登录状态
+    if (!this.checkLogin('', {})) {
+      this.goToLogin
     }
-    // 如果是实名认证页面，先进行人脸核身
-    if (url === "/pages/auth/auth") {
-      console.log("this.data.eidToken:",this.data.eidToken);
+
+    // 如果是实名认证页面，需要特殊处理
+    if (url === "/pages/auth-info/auth-info") {
+      this.handleRealNameAuth();
+    } else {
+      // 普通页面直接跳转
+      wx.navigateTo({
+        url: url
+      });
+    }
+  },
+
+  // 处理实名认证逻辑
+  handleRealNameAuth() {
+    console.log("11111111111111222222");
+    if (this.data.isRealNameVerified) {
+      // 已通过实名认证，跳转到实名认证信息页面
+      wx.navigateTo({
+        url: '/pages/auth-info/auth-info' // 显示实名认证信息的页面
+      });
+    } else {
+      console.log("000000000000");
+      // 未通过实名认证，进行人脸核身
       if (!this.data.eidToken) {
         wx.showToast({
           title: "获取 Token 失败，请稍后重试",
@@ -154,69 +185,90 @@ Page({
         return;
       }
 
-      wx.showLoading({ title: "实名认证中..." });
-      
-
-
-      this.goSDK(this.data.eidToken)
-    } else {
-      // 普通页面直接跳转
-      wx.navigateTo({
-        url: url
-      });
+      // wx.showLoading({ title: "实名认证中..." });
+      this.goSDK(this.data.eidToken, '/pages/auth-info/auth-info');
     }
-  },  
+  },
 
-  // 🔹 获取 e 证通身份验证 Token
+  // 获取 e 证通身份验证 Token
   getEidToken() {
     wx.request({
       url: config.baseUrl + 'wechat/tencent/realnameauth/getEidToken', 
       method: "GET",
       data: {},
       success: (res) => {
-        console.log("res4444444:",res.data.result.EidToken);
-        
-        if (res.data && res.data.result.EidToken) {
-          console.log("9999999999999999");
+        if (res.data && res.data.result && res.data.result.EidToken) {
           this.setData({ eidToken: res.data.result.EidToken });
         }
+      },
+      fail: (error) => {
+        console.error('获取EidToken失败:', error);
       }
     });
   },
 
-  goSDK(token) {
+  goSDK(token, targetUrl) {
     startEid({
-        data: {
-          token,
-        },
-        verifyCallback: (res) => {
-          console.log("44444444444444");
-          wx.hideLoading();
-          const { verifyDone } = res;
+      data: {
+        token,
+      },
+      verifyCallback: (res) => {
+        wx.hideLoading();
+        const { verifyDone } = res;
 
-          if (verifyDone) {
-            wx.showToast({
-              title: "核身成功",
-              icon: "success"
-            });
+        if (verifyDone) {
+          wx.showToast({
+            title: "核身成功",
+            icon: "success"
+          });
 
-            // 核身成功后再跳转
-            wx.navigateTo({
-              url: url
-            });
-          } else {
-            wx.showToast({
-              title: "核身失败，请重试",
-              icon: "none"
-            });
-          }
-        },
-        verifyDoneCallback(res) {  
-            const { token, verifyDone } = res;
-            console.log('收到核身完成的res:', res);
-            console.log('核身的token是:', token); 
-            console.log('是否完成核身:', verifyDone);          
-        },
+          // 核身成功后跳转到目标页面
+          wx.navigateTo({
+            url: targetUrl
+          });
+
+          // 更新实名认证状态
+          this.setData({
+            isRealNameVerified: true
+          });
+        } else {
+          wx.showToast({
+            title: "核身失败，请重试",
+            icon: "none"
+          });
+        }
+      },
+      verifyDoneCallback(res) {  
+        const { token, verifyDone } = res;
+        console.log('收到核身完成的res:', res);
+        console.log('核身的token是:', token); 
+        console.log('是否完成核身:', verifyDone);          
+      },
     });
   },
+
+  // 处理菜单项点击
+  handleMenuClick(e) {
+    const type = e.currentTarget.dataset.type;
+    
+    switch(type) {
+      case 'orders':
+        this.goToOrders();
+        break;
+      case 'coupons':
+        if (!this.checkLogin()) return;
+        wx.navigateTo({
+          url: '/pages/coupons/coupons'
+        });
+        break;
+      case 'settings':
+        this.openSettings();
+        break;
+      default:
+        wx.showToast({
+          title: '功能开发中',
+          icon: 'none'
+        });
+    }
+  }
 })

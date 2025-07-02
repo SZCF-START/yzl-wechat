@@ -148,6 +148,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
+    console.log("options.redirect:",decodeURIComponent(options.redirect));
     this.setData({
       redirectUrl: options.redirect ? decodeURIComponent(options.redirect) : '/pages/index/index'
     });
@@ -164,7 +165,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-
+    // console.log("options.redirect:onShow",decodeURIComponent(options.redirect));
   },
 
   /**

@@ -10,11 +10,14 @@ module.exports = Behavior({
     
       if (!token) {
         // 如果没有传入 route，则自动获取当前页面路径和参数
+        console.log("route444444:",route);
         if (!route) {
           const pages = getCurrentPages();
+          console.log("pages:",pages);
           if (pages.length > 0) {
             const currentPage = pages[pages.length - 1];
             route = currentPage.route;
+            route = `/${route}`;
             options = currentPage.options || {};
           }
         }
@@ -27,8 +30,8 @@ module.exports = Behavior({
             .join('&');
         }
     
-        const redirectUrl = queryString ? `/${route}?${queryString}` : `/${route}`;
-    
+        const redirectUrl = queryString ? `${route}?${queryString}` : `${route}`;
+        console.log("redirectUrl00000000000:",redirectUrl);
         // 跳转到登录页面，并携带重定向信息
         wx.reLaunch({
           url: `/pages/login/login?redirect=${encodeURIComponent(redirectUrl)}`

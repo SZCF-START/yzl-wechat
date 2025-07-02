@@ -29,12 +29,12 @@ App({
     // 原有初始化
     initEid();
     // this.methods.updateManager()
-    // this.overridePage();
+    this.overridePage();
     // 启动时检查一次隐私权限
     // privacyStatusManager.initPrivacyCheck();
     
     // 新增：初始化数据管理
-    this.initDataManager();
+    // this.initDataManager();
     
     // 新增：检查更新
     this.checkForUpdate();

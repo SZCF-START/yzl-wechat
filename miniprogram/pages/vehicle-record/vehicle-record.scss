@@ -1,0 +1,649 @@
+/* vehicle-record.wxss - 出车记录页面样式 - 重新编写 */
+
+/* 页面容器 */
+.record-container {
+  height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 页面标题 - 固定在顶部 */
+.page-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  padding: 30rpx 0 20rpx 0;
+  text-align: center;
+  z-index: 20;
+  box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.05);
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.store-info {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 出车记录状态栏 - 固定在页面标题下方 */
+.record-status-bar {
+  position: fixed;
+  top: 120rpx; /* 页面标题高度 */
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #fff;
+  padding: 20rpx 0 30rpx 0;
+  border-bottom: 1rpx solid #eee;
+  z-index: 19;
+}
+
+.status-item {
+  position: relative;
+  font-size: 28rpx;
+  color: #666;
+  padding: 10rpx 0;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.active-status {
+  color: #ff7200;
+  font-weight: 500;
+}
+
+/* 活跃状态下划线 */
+.active-line {
+  position: absolute;
+  bottom: -15rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 4rpx;
+  background-color: #ff7200;
+  border-radius: 2rpx;
+}
+
+/* ===== 关键：滚动区域从状态栏下方开始 ===== */
+.record-list {
+  position: fixed;
+  top: 210rpx; /* 页面标题(120rpx) + 状态栏(90rpx) */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto; /* 滚动条从这里开始 */
+  overflow-x: hidden;
+  padding: 20rpx;
+  background-color: #f5f5f5;
+}
+
+/* 出车记录项 */
+.record-item {
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.08);
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: visible;
+  z-index: 1;
+}
+
+.record-item.more-open {
+  z-index: 100;
+}
+
+.record-item:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 20rpx rgba(0,0,0,0.12);
+}
+
+/* 记录头部 */
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.success-status {
+  font-size: 28rpx;
+  font-weight: 600;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  background-color: rgba(255, 114, 0, 0.1);
+  color: #ff7200;
+}
+
+/* 状态样式 */
+.record-item.status-renting .success-status {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.record-item.status-waiting .success-status {
+  background-color: rgba(241, 196, 15, 0.1);
+  color: #f1c40f;
+}
+
+.record-item.status-completed .success-status {
+  background-color: rgba(149, 165, 166, 0.1);
+  color: #95a5a6;
+}
+
+/* 车辆信息 */
+.car-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.car-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.car-image {
+  width: 160rpx;
+  height: 90rpx;
+  border-radius: 8rpx;
+}
+
+/* 车辆编号信息 */
+.car-number-info {
+  margin-bottom: 20rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.car-number-label {
+  color: #999;
+}
+
+.car-number {
+  color: #333;
+  font-weight: 500;
+}
+
+/* 租售人信息 */
+.renter-info {
+  margin-bottom: 20rpx;
+}
+
+.renter-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+  font-size: 26rpx;
+}
+
+.renter-item:last-child {
+  margin-bottom: 0;
+}
+
+.renter-label {
+  color: #999;
+  min-width: 100rpx;
+}
+
+.renter-name,
+.renter-phone {
+  color: #333;
+  font-weight: 500;
+}
+
+/* 租赁时间 */
+.rental-time {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24rpx 0;
+  padding: 16rpx 20rpx;
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
+}
+
+.time-info {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.day-count {
+  font-size: 30rpx;
+  color: #ff7200;
+  font-weight: 600;
+  background-color: rgba(255, 114, 0, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+}
+
+/* 订单链折叠区域 */
+.order-chain-section {
+  margin-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 20rpx;
+}
+
+.chain-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12rpx;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.chain-header:active {
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  transform: scale(0.98);
+}
+
+.chain-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.chain-icon {
+  font-size: 28rpx;
+}
+
+.chain-title {
+  font-size: 26rpx;
+  color: #495057;
+  font-weight: 500;
+}
+
+.chain-arrow {
+  font-size: 20rpx;
+  color: #6c757d;
+  transform: rotate(-90deg);
+  transition: transform 0.3s ease;
+}
+
+.chain-arrow.expanded {
+  transform: rotate(0deg);
+}
+
+/* 续租和补缴标签 */
+.renewal-badge {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12rpx;
+  border: 1rpx solid #bbdefb;
+  font-weight: 500;
+}
+
+.payment-badge {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  background-color: #fff3e0;
+  color: #f57c00;
+  border-radius: 12rpx;
+  border: 1rpx solid #ffcc02;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10rpx);
+  }
+  to {
+    opacity: 1;
+    max-height: 2000rpx;
+    transform: translateY(0);
+  }
+}
+
+/* 订单链内容 */
+.chain-content {
+  padding: 20rpx;
+  background-color: #fafbfc;
+  border-radius: 0 0 12rpx 12rpx;
+  border: 1rpx solid #e9ecef;
+  border-top: none;
+  animation: slideDown 0.3s ease-out;
+}
+
+.chain-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid #e9ecef;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+}
+
+.chain-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 订单链项头部 */
+.chain-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.order-type-tag {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+}
+
+.order-type-tag.original {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1rpx solid #c3e6cb;
+}
+
+.order-type-tag.renewal {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1rpx solid #ffeaa7;
+}
+
+.order-status-tag {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 10rpx;
+  font-weight: 500;
+}
+
+/* 订单状态样式 */
+.order-status-tag.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.order-status-tag.status-renting {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.order-status-tag.status-pending {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.order-status-tag.status-payment {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.order-status-tag.status-waiting {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.order-status-tag.status-unknown {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+/* 订单链详细信息行 */
+.chain-item-body {
+  margin-top: 12rpx;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+  font-size: 24rpx;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-label {
+  color: #6c757d;
+  font-weight: 500;
+  min-width: 140rpx;
+}
+
+.detail-value {
+  color: #495057;
+  font-weight: 400;
+  text-align: right;
+  flex: 1;
+}
+
+.price-value {
+  color: #ff7200;
+  font-weight: 600;
+}
+
+/* 超时样式 */
+.overtime-row {
+  background-color: #fff3cd;
+  padding: 8rpx 12rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid #ffeaa7;
+  margin: 8rpx 0;
+}
+
+.overtime-text {
+  color: #856404;
+  font-weight: 600;
+}
+
+.overtime-fee {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* 补缴提示样式 */
+.payment-notice {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 12rpx;
+  padding: 12rpx 16rpx;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-radius: 8rpx;
+  border: 1rpx solid #ffb74d;
+}
+
+.notice-icon {
+  font-size: 24rpx;
+}
+
+.notice-text {
+  font-size: 22rpx;
+  color: #ef6c00;
+  font-weight: 500;
+}
+
+/* 操作按钮区域 */
+.record-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 24rpx;
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 20rpx;
+  gap: 12rpx;
+}
+
+/* 更多操作按钮 */
+.more-action {
+  font-size: 26rpx;
+  color: #999;
+  padding: 10rpx 0;
+  margin-right: auto;
+  position: relative;
+  z-index: 50;
+  cursor: pointer;
+  min-width: 60rpx;
+  text-align: left;
+}
+
+.more-action:active {
+  color: #666;
+}
+
+/* 更多操作下拉菜单 */
+.more-dropdown {
+  position: absolute;
+  top: 50rpx;
+  left: 0;
+  min-width: 200rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.15);
+  z-index: 999;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-10rpx) scale(0.95);
+  transition: all 0.2s ease-out;
+  pointer-events: none;
+}
+
+.more-dropdown.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.dropdown-item {
+  padding: 20rpx 24rpx;
+  font-size: 26rpx;
+  color: #333;
+  border-bottom: 1rpx solid #f0f0f0;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:active {
+  background-color: #f8f8f8;
+}
+
+/* 操作按钮 */
+.action-button {
+  font-size: 24rpx;
+  color: #666;
+  border: 1rpx solid #ddd;
+  border-radius: 20rpx;
+  padding: 8rpx 16rpx;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.action-button:active {
+  background-color: #f5f5f5;
+  transform: scale(0.98);
+}
+
+.action-button.highlight {
+  color: #ff7200;
+  border-color: #ff7200;
+}
+
+.action-button.highlight:active {
+  background-color: rgba(255, 114, 0, 0.1);
+}
+
+/* 无记录状态 */
+.no-record {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.no-record image {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.6;
+}
+
+.no-record text {
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 加载更多 */
+.load-more {
+  text-align: center;
+  padding: 30rpx 0;
+  color: #999;
+  font-size: 26rpx;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 750rpx) {
+  .record-actions {
+    flex-wrap: wrap;
+    gap: 8rpx;
+  }
+  
+  .action-button {
+    font-size: 22rpx;
+    padding: 6rpx 12rpx;
+  }
+  
+  .chain-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8rpx;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4rpx;
+  }
+  
+  .detail-value {
+    text-align: left;
+  }
+  
+  .more-action {
+    min-width: 80rpx;
+    padding: 12rpx 8rpx;
+  }
+  
+  .more-dropdown {
+    min-width: 180rpx;
+  }
+}

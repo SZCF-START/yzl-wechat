@@ -7,7 +7,6 @@
     "pages/my/my",
     "pages/login/login",
     "pages/auth/auth",
-    "pages/record/record",
     "pages/manage/manage",
     "pages/equipment/record",
     "pages/equipment/manage",
@@ -36,7 +35,9 @@
     "pages/payment-after-review/payment-after-review",
     "pages/order-complete/order-complete",
     "pages/renewal-car/renewal-car",
-    "pages/renewal-success/renewal-success"
+    "pages/renewal-success/renewal-success",
+    "pages/auth-info/auth-info",
+    "pages/vehicle-record/vehicle-record"
   ],
   "permission": {
     "scope.userLocation": {

@@ -1,0 +1,188 @@
+<!-- vehicle-record.wxml - 挖机出车记录列表页面 -->
+<view class="record-container" bindtap="onPageTap">
+  
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <!-- <view class="page-title">出车记录</view> -->
+    <view class="page-title" wx:if="{{storeInfo}}">{{storeInfo.name}}</view>
+  </view>
+  
+  <!-- 出车记录状态切换 -->
+  <view class="record-status-bar">
+    <view 
+      wx:for="{{statusList}}" 
+      wx:key="id" 
+      class="status-item {{activeStatus == item.id ? 'active-status' : ''}}" 
+      bindtap="switchStatus" 
+      data-status="{{item.id}}">
+      <text>{{item.name}}</text>
+      <!-- 活跃状态下划线 -->
+      <view class="active-line" wx:if="{{activeStatus == item.id}}"></view>
+    </view>
+  </view>
+  
+  <!-- 出车记录列表 -->
+  <view class="record-list">
+    <block wx:if="{{recordList.length > 0}}">
+      
+      <!-- 出车记录项 -->
+      <view wx:for="{{recordList}}" wx:key="id" class="record-item {{item.statusClassName}} {{item.cssClasses}}">
+        
+        <!-- 记录头部：状态 -->
+        <view class="record-header">
+          <view class="success-status">{{item.statusText}}</view>
+        </view>
+        
+        <!-- 车辆信息 -->
+        <view class="car-info">
+          <view class="car-name">{{item.carModel}}</view>
+          <image class="car-image" src="{{item.carImage}}" mode="aspectFit"></image>
+        </view>
+        
+        <!-- 车辆编号 -->
+        <view class="car-number-info">
+          <text class="car-number-label">车辆编号：</text>
+          <text class="car-number">{{item.carNumber}}</text>
+        </view>
+        
+        <!-- 租售人信息 -->
+        <view class="renter-info">
+          <view class="renter-item">
+            <text class="renter-label">租售人：</text>
+            <text class="renter-name">{{item.renterName}}</text>
+          </view>
+          <view class="renter-item">
+            <text class="renter-label">联系方式：</text>
+            <text class="renter-phone">{{item.renterPhone}}</text>
+          </view>
+        </view>
+        
+        <!-- 租赁时间 -->
+        <view class="rental-time">
+          <view class="time-info">{{item.startTime}}</view>
+          <view class="time-info">—</view>
+          <view class="day-count">{{item.rentalDays}}天</view>
+          <view class="time-info">—</view>
+          <view class="time-info">{{item.endTime}}</view>
+        </view>
+        
+        <!-- 订单链折叠区域 -->
+        <view class="order-chain-section" wx:if="{{item.hasOrderChain}}">
+          <!-- 折叠头部 -->
+          <view class="chain-header" catchtap="toggleOrderChain" data-record-id="{{item.id}}">
+            <view class="chain-info">
+              <text class="chain-icon">🔗</text>
+              <text class="chain-title">订单链详情 ({{item.chainSummary.totalOrders}}个订单)</text>
+              <!-- 使用预计算的标签 -->
+              <view wx:for="{{item.chainSummary.badges}}" wx:key="type" wx:for-item="badge" class="{{badge.type}}-badge">
+                {{badge.text}}
+              </view>
+            </view>
+            <view class="chain-arrow {{item.isChainExpanded ? 'expanded' : ''}}">
+              ▼
+            </view>
+          </view>
+          
+          <!-- 折叠内容 -->
+          <view class="chain-content" wx:if="{{item.isChainExpanded}}">
+            
+            <!-- 订单链条列表 -->
+            <view wx:for="{{item.processedChainDetails}}" wx:key="orderId" wx:for-item="chainItem" class="chain-item">
+              
+              <!-- 订单类型和状态 -->
+              <view class="chain-item-header">
+                <view class="order-type-tag {{chainItem.typeClassName}}">
+                  {{chainItem.orderType}}
+                </view>
+                <view class="order-status-tag {{chainItem.statusClassName}}">
+                  {{chainItem.orderStatus}}
+                </view>
+              </view>
+              
+              <!-- 订单详细信息 -->
+              <view class="chain-item-body">
+                <view class="detail-row">
+                  <text class="detail-label">订单编号:</text>
+                  <text class="detail-value">{{chainItem.orderId}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">订单价格:</text>
+                  <text class="detail-value price-value">{{chainItem.formattedPrice}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">生效时间:</text>
+                  <text class="detail-value">{{chainItem.formattedEffectiveTime}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">租期天数:</text>
+                  <text class="detail-value">{{chainItem.rentalDays}}天</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">创建时间:</text>
+                  <text class="detail-value">{{chainItem.formattedCreateTime}}</text>
+                </view>
+                
+                <!-- 超时信息 -->
+                <block wx:if="{{chainItem.showOvertimeInfo}}">
+                  <view class="detail-row overtime-row">
+                    <text class="detail-label">超时情况:</text>
+                    <text class="detail-value overtime-text">超时{{chainItem.overtimeHours}}小时</text>
+                  </view>
+                  <view class="detail-row" wx:if="{{chainItem.actualEndTime}}">
+                    <text class="detail-label">实际还车:</text>
+                    <text class="detail-value">{{chainItem.actualEndTime}}</text>
+                  </view>
+                  <view class="detail-row" wx:if="{{chainItem.formattedOvertimeFee}}">
+                    <text class="detail-label">超时费用:</text>
+                    <text class="detail-value overtime-fee">{{chainItem.formattedOvertimeFee}}</text>
+                  </view>
+                  <!-- 补缴订单标识 -->
+                  <view class="payment-notice" wx:if="{{chainItem.showPaymentNotice}}">
+                    <text class="notice-icon">💰</text>
+                    <text class="notice-text">此订单需要补缴超时费用</text>
+                  </view>
+                </block>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 操作按钮区域 -->
+        <view class="record-actions">
+          
+          <!-- 更多操作下拉菜单 -->
+          <view class="more-action" catchtap="showMoreActions" data-id="{{item.id}}">
+            更多
+            <!-- 下拉菜单内容 -->
+            <view class="more-dropdown {{item.isMoreMenuOpen ? 'show' : ''}}" catchtap="stopPropagation">
+              <view wx:for="{{item.moreMenuItems}}" wx:key="action" wx:for-item="menuItem" class="dropdown-item" catchtap="handleAction" data-action="{{menuItem.action}}" data-id="{{item.id}}">
+                {{menuItem.text}}
+              </view>
+            </view>
+          </view>
+          
+          <!-- 使用预计算的操作按钮配置 -->
+          <view wx:for="{{item.actionButtons}}" wx:key="action" wx:for-item="button" class="action-button {{button.highlight ? 'highlight' : ''}}" bindtap="handleAction" data-action="{{button.action}}" data-id="{{item.id}}">
+            {{button.text}}
+          </view>
+          
+        </view>
+      </view>
+      
+    </block>
+    
+    <!-- 无记录状态 -->
+    <view class="no-record" wx:else>
+      <image src="/images/no-record.png" mode="aspectFit"></image>
+      <text>暂无出车记录</text>
+    </view>
+    
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{recordList.length > 0}}">
+      <text wx:if="{{isLoading}}">加载中...</text>
+      <text wx:elif="{{hasMoreRecords}}" bindtap="loadMoreRecords">加载更多</text>
+      <text wx:else>没有更多数据了</text>
+    </view>
+  </view>
+  
+</view>
