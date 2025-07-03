@@ -37,7 +37,8 @@
     "pages/renewal-car/renewal-car",
     "pages/renewal-success/renewal-success",
     "pages/auth-info/auth-info",
-    "pages/vehicle-record/vehicle-record"
+    "pages/vehicle-record/vehicle-record",
+    "pages/audit-return/audit-return"
   ],
   "permission": {
     "scope.userLocation": {

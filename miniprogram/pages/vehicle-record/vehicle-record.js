@@ -155,6 +155,49 @@ Page({
     }
   },
 
+  /**
+   * 拨打电话
+   */
+  makePhoneCall: function(e) {
+    const phoneNumber = e.currentTarget.dataset.phone;
+    
+    if (!phoneNumber) {
+      wx.showToast({
+        title: '电话号码无效',
+        icon: 'none',
+        duration: 2000
+      });
+      return;
+    }
+
+    // 显示确认对话框
+    wx.showModal({
+      title: '拨打电话',
+      content: `确定要拨打 ${phoneNumber} 吗？`,
+      confirmText: '拨打',
+      cancelText: '取消',
+      success: function(res) {
+        if (res.confirm) {
+          // 用户确认拨打
+          wx.makePhoneCall({
+            phoneNumber: phoneNumber,
+            success: function() {
+              console.log('拨打电话成功');
+            },
+            fail: function(err) {
+              console.error('拨打电话失败：', err);
+              wx.showToast({
+                title: '拨打失败，请检查设备',
+                icon: 'none',
+                duration: 2000
+              });
+            }
+          });
+        }
+      }
+    });
+  },
+
   // 预处理出车记录数据
   processRecordData: function(record) {
     const processedRecord = { ...record };

@@ -1,9 +1,8 @@
-<!-- vehicle-record.wxml - 挖机出车记录列表页面 -->
+<!-- vehicle-record.wxml - 挖机出车记录列表页面 - 重新设计 -->
 <view class="record-container" bindtap="onPageTap">
   
   <!-- 页面标题 -->
   <view class="page-header">
-    <!-- <view class="page-title">出车记录</view> -->
     <view class="page-title" wx:if="{{storeInfo}}">{{storeInfo.name}}</view>
   </view>
   
@@ -33,36 +32,35 @@
           <view class="success-status">{{item.statusText}}</view>
         </view>
         
-        <!-- 车辆信息 -->
+        <!-- 车辆基本信息 -->
         <view class="car-info">
           <view class="car-name">{{item.carModel}}</view>
           <image class="car-image" src="{{item.carImage}}" mode="aspectFit"></image>
         </view>
         
-        <!-- 车辆编号 -->
-        <view class="car-number-info">
-          <text class="car-number-label">车辆编号：</text>
-          <text class="car-number">{{item.carNumber}}</text>
-        </view>
-        
-        <!-- 租售人信息 -->
-        <view class="renter-info">
-          <view class="renter-item">
-            <text class="renter-label">租售人：</text>
-            <text class="renter-name">{{item.renterName}}</text>
+        <!-- 车辆详细信息区域 - 统一设计 -->
+        <view class="vehicle-details">
+          <view class="info-row">
+            <text class="info-label">车辆编号：</text>
+            <text class="info-value highlight">{{item.carNumber}}</text>
           </view>
-          <view class="renter-item">
-            <text class="renter-label">联系方式：</text>
-            <text class="renter-phone">{{item.renterPhone}}</text>
+          <view class="info-divider"></view>
+          <view class="info-row">
+            <text class="info-label">租售人：</text>
+            <text class="info-value">{{item.renterName}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">联系方式：</text>
+            <text class="info-value phone clickable" bindtap="makePhoneCall" data-phone="{{item.renterPhone}}">{{item.renterPhone}}</text>
           </view>
         </view>
         
         <!-- 租赁时间 -->
         <view class="rental-time">
           <view class="time-info">{{item.startTime}}</view>
-          <view class="time-info">—</view>
+          <view class="time-separator">—</view>
           <view class="day-count">{{item.rentalDays}}天</view>
-          <view class="time-info">—</view>
+          <view class="time-separator">—</view>
           <view class="time-info">{{item.endTime}}</view>
         </view>
         
@@ -99,41 +97,41 @@
                 </view>
               </view>
               
-              <!-- 订单详细信息 -->
+              <!-- 订单详细信息 - 使用统一的信息行样式 -->
               <view class="chain-item-body">
                 <view class="detail-row">
-                  <text class="detail-label">订单编号:</text>
+                  <text class="detail-label">订单编号：</text>
                   <text class="detail-value">{{chainItem.orderId}}</text>
                 </view>
                 <view class="detail-row">
-                  <text class="detail-label">订单价格:</text>
+                  <text class="detail-label">订单价格：</text>
                   <text class="detail-value price-value">{{chainItem.formattedPrice}}</text>
                 </view>
                 <view class="detail-row">
-                  <text class="detail-label">生效时间:</text>
+                  <text class="detail-label">生效时间：</text>
                   <text class="detail-value">{{chainItem.formattedEffectiveTime}}</text>
                 </view>
                 <view class="detail-row">
-                  <text class="detail-label">租期天数:</text>
+                  <text class="detail-label">租期天数：</text>
                   <text class="detail-value">{{chainItem.rentalDays}}天</text>
                 </view>
                 <view class="detail-row">
-                  <text class="detail-label">创建时间:</text>
+                  <text class="detail-label">创建时间：</text>
                   <text class="detail-value">{{chainItem.formattedCreateTime}}</text>
                 </view>
                 
                 <!-- 超时信息 -->
                 <block wx:if="{{chainItem.showOvertimeInfo}}">
                   <view class="detail-row overtime-row">
-                    <text class="detail-label">超时情况:</text>
+                    <text class="detail-label">超时情况：</text>
                     <text class="detail-value overtime-text">超时{{chainItem.overtimeHours}}小时</text>
                   </view>
                   <view class="detail-row" wx:if="{{chainItem.actualEndTime}}">
-                    <text class="detail-label">实际还车:</text>
+                    <text class="detail-label">实际还车：</text>
                     <text class="detail-value">{{chainItem.actualEndTime}}</text>
                   </view>
                   <view class="detail-row" wx:if="{{chainItem.formattedOvertimeFee}}">
-                    <text class="detail-label">超时费用:</text>
+                    <text class="detail-label">超时费用：</text>
                     <text class="detail-value overtime-fee">{{chainItem.formattedOvertimeFee}}</text>
                   </view>
                   <!-- 补缴订单标识 -->

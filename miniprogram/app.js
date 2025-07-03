@@ -43,9 +43,9 @@ App({
     this.getSystemInfo();
     
     // 新增：开发环境测试
-    if (this.isDevelopment()) {
-      this.runDevelopmentTests();
-    }
+    // if (this.isDevelopment()) {
+    //   this.runDevelopmentTests();
+    // }
   },
 
   onShow(options) {
