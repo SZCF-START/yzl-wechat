@@ -54,6 +54,7 @@
   background-color: #f0f4ff; /* 未激活灰背景 */
   color: #666;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .tab-item.active {
@@ -61,7 +62,6 @@
   color: #ff8c00;
   font-weight: 500;
 }
-
 
 /* 选项卡分隔线 */
 .tab-item:not(:last-child)::after {
@@ -97,9 +97,17 @@
   display: flex;
   flex-direction: column;
   align-items: center; /* 可根据需求调整对齐方式 */
+  transition: all 0.2s ease;
 }
 
-/* 上方提示，如“城市选择”“门店选择” */
+/* 添加点击反馈 */
+.city-block:active,
+.store-block:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+/* 上方提示，如"城市选择""门店选择" */
 .upper-label {
   font-size: 24rpx;
   color: #999;
@@ -114,16 +122,23 @@
   font-size: 30rpx;
   color: #333;
 }
+
 .subscript {
   font-size: 20rpx;
   color: #999;
   margin-left: 6rpx;
 }
 
+/* 占位符文字样式 */
+.placeholder-text {
+  color: #bbb !important;
+}
+
 /* 异地还车提示行 */
 .row-ydhc {
   justify-content: flex-end;
 }
+
 .tip-ydhc {
   font-size: 22rpx;
   color: #999;
@@ -136,26 +151,37 @@
   padding: 20rpx;
   cursor: pointer;
   margin: 10px 10px 0;
+  transition: all 0.2s ease;
 }
+
+.row-date:active {
+  transform: scale(0.98);
+  background-color: #f0f0f0;
+}
+
 .date-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
 }
+
 .date-text {
   font-size: 30rpx;
   font-weight: bold;
   color: #333;
 }
+
 .sub-text {
   font-size: 24rpx;
   color: #999;
   margin-top: 8rpx;
 }
+
 .date-middle {
   margin: 0 20rpx;
 }
+
 .days-text {
   font-size: 28rpx;
   color: #ff8c00;
@@ -166,11 +192,13 @@
 .row-tip {
   justify-content: flex-start;
 }
+
 .preorder-tip {
   font-size: 24rpx;
   color: #666;
   margin-right: 20rpx;
 }
+
 .fill-btn {
   background-color: #fff;
   border: 1rpx solid #ff8c00;
@@ -178,15 +206,23 @@
   font-size: 24rpx;
   border-radius: 8rpx;
   padding: 8rpx 16rpx;
+  transition: all 0.2s ease;
+}
+
+.fill-btn:active {
+  background-color: #ff8c00;
+  color: #fff;
 }
 
 /* 第四行：checkbox */
 .row-checkbox {
   justify-content: flex-start;
 }
+
 .send-checkbox {
   margin-right: 10rpx;
 }
+
 .checkbox-label {
   font-size: 24rpx;
   color: #333;
@@ -201,6 +237,12 @@
   padding: 14px 0;
   border-radius: 25px;
   margin: 20px 10px;
+  transition: all 0.2s ease;
+}
+
+.select-car-btn:active {
+  transform: scale(0.98);
+  background-color: #e67a00;
 }
 
 /* 金刚区 - 使用swiper分页 */
@@ -236,19 +278,29 @@
   align-items: center;
   box-sizing: border-box;
   padding: 10rpx 0;
+  transition: all 0.2s ease;
+}
+
+.icon-item:active {
+  transform: scale(0.9);
+  opacity: 0.7;
 }
 
 .icon-img {
   width: 60rpx;
   height: 60rpx;
   margin-bottom: 8rpx;
+  transition: transform 0.2s ease;
+}
+
+.icon-item:active .icon-img {
+  transform: scale(0.95);
 }
 
 .icon-text {
   font-size: 24rpx;
   color: #333;
 }
-
 
 /* 底部内容示例 */
 .bottom-area {
@@ -257,4 +309,51 @@
   font-size: 28rpx;
   color: #666;
   padding: 20rpx;
+}
+
+/* 加载状态 */
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 20rpx;
+}
+
+/* hover效果补充 */
+.tab-item-hover {
+  background-color: rgba(255, 140, 0, 0.1) !important;
+}
+
+.location-hover {
+  background-color: #f0f0f0 !important;
+}
+
+.date-hover {
+  background-color: #f0f0f0 !important;
+}
+
+.btn-hover {
+  background-color: #e67a00 !important;
+}
+
+.icon-item-hover {
+  background-color: rgba(255, 140, 0, 0.1) !important;
+}
+
+/* 安全区域适配 */
+.safe-area-bottom {
+  height: env(safe-area-inset-bottom);
+  background-color: #ffffff;
 }

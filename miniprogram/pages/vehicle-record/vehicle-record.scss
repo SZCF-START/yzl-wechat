@@ -128,6 +128,39 @@
   color: #ff7200;
 }
 
+/* 待补缴金额显示 */
+.pending-payment {
+  font-size: 24rpx;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.payment-amount {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #e74c3c;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1rpx;
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #ef9a9a;
+  animation: paymentPulse 2s ease-in-out infinite;
+}
+
+@keyframes paymentPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
 /* 状态样式 */
 .record-item.status-renting .success-status {
   background-color: rgba(46, 204, 113, 0.1);
@@ -142,6 +175,23 @@
 .record-item.status-completed .success-status {
   background-color: rgba(149, 165, 166, 0.1);
   color: #95a5a6;
+}
+
+/* 待补缴状态样式 */
+.record-item.status-pending-payment .success-status {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  border: 1rpx solid rgba(231, 76, 60, 0.2);
+  animation: statusAlert 3s ease-in-out infinite;
+}
+
+@keyframes statusAlert {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8rpx rgba(231, 76, 60, 0);
+  }
 }
 
 /* 车辆基本信息 */
@@ -183,6 +233,11 @@
   bottom: 0;
   width: 4rpx;
   background: linear-gradient(180deg, #ff7200 0%, #ff9500 100%);
+}
+
+/* 待补缴状态的车辆详情左边框 */
+.record-item.status-pending-payment .vehicle-details::before {
+  background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
 }
 
 /* 信息行通用样式 */
@@ -233,6 +288,11 @@
   font-weight: 600;
   font-family: 'Courier New', monospace;
   letter-spacing: 1rpx;
+}
+
+/* 待补缴状态下的高亮颜色 */
+.record-item.status-pending-payment .info-value.highlight {
+  color: #e74c3c;
 }
 
 .info-value.phone {
@@ -301,6 +361,13 @@
   padding: 6rpx 16rpx;
   border-radius: 20rpx;
   border: 1rpx solid rgba(255, 114, 0, 0.2);
+}
+
+/* 待补缴状态下的天数计数样式 */
+.record-item.status-pending-payment .day-count {
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1rpx solid rgba(231, 76, 60, 0.2);
 }
 
 /* ===== 订单链折叠区域 ===== */
@@ -375,6 +442,25 @@
   border: 1rpx solid #ffcc02;
   font-weight: 500;
   animation: slideDown 0.3s ease-out;
+}
+
+/* 待补缴状态下的补缴标签样式 */
+.record-item.status-pending-payment .payment-badge {
+  background-color: #ffebee;
+  color: #e74c3c;
+  border: 1rpx solid #ef9a9a;
+  animation: paymentBadgePulse 2s ease-in-out infinite;
+}
+
+@keyframes paymentBadgePulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4rpx rgba(231, 76, 60, 0);
+  }
 }
 
 @keyframes slideDown {
@@ -470,6 +556,18 @@
 .order-status-tag.status-payment {
   background-color: #f8d7da;
   color: #721c24;
+  animation: paymentStatusPulse 2s ease-in-out infinite;
+}
+
+@keyframes paymentStatusPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(114, 28, 36, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 3rpx rgba(114, 28, 36, 0);
+  }
 }
 
 .order-status-tag.status-waiting {
@@ -537,9 +635,30 @@
   margin: 8rpx 0;
 }
 
+/* 待补缴状态下的超时行样式 */
+.record-item.status-pending-payment .overtime-row {
+  background-color: #ffebee;
+  border: 1rpx solid #ef9a9a;
+  animation: overtimeAlert 3s ease-in-out infinite;
+}
+
+@keyframes overtimeAlert {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6rpx rgba(231, 76, 60, 0);
+  }
+}
+
 .overtime-text {
   color: #856404;
   font-weight: 600;
+}
+
+/* 待补缴状态下的超时文字样式 */
+.record-item.status-pending-payment .overtime-text {
+  color: #e74c3c;
 }
 
 .overtime-fee {
@@ -559,6 +678,24 @@
   border: 1rpx solid #ffb74d;
 }
 
+/* 待补缴状态下的补缴提示样式 */
+.record-item.status-pending-payment .payment-notice {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border: 1rpx solid #ef9a9a;
+  animation: noticeUrgent 2s ease-in-out infinite;
+}
+
+@keyframes noticeUrgent {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+}
+
 .notice-icon {
   font-size: 24rpx;
 }
@@ -567,6 +704,12 @@
   font-size: 22rpx;
   color: #ef6c00;
   font-weight: 500;
+}
+
+/* 待补缴状态下的提示文字样式 */
+.record-item.status-pending-payment .notice-text {
+  color: #e74c3c;
+  font-weight: 600;
 }
 
 /* ===== 操作按钮区域 ===== */
@@ -663,6 +806,26 @@
   background-color: rgba(255, 114, 0, 0.1);
 }
 
+/* 待补缴状态下的高亮按钮样式 */
+.record-item.status-pending-payment .action-button.highlight {
+  color: #e74c3c;
+  border-color: #e74c3c;
+  animation: paymentButtonPulse 2s ease-in-out infinite;
+}
+
+.record-item.status-pending-payment .action-button.highlight:active {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+@keyframes paymentButtonPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6rpx rgba(231, 76, 60, 0);
+  }
+}
+
 /* 无记录状态 */
 .no-record {
   display: flex;
@@ -750,5 +913,27 @@
   
   .more-dropdown {
     min-width: 180rpx;
+  }
+  
+  .pending-payment {
+    font-size: 22rpx;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2rpx;
+  }
+  
+  .payment-amount {
+    font-size: 24rpx;
+    padding: 2rpx 8rpx;
+  }
+  
+  .record-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12rpx;
+  }
+  
+  .record-header .pending-payment {
+    align-self: flex-end;
   }
 }

@@ -4,10 +4,11 @@ const loginCheck = require('../../behaviors/loginCheck.js');
 Page({
   behaviors: [loginCheck],
   data: {
-    // 出车记录状态
+    // 出车记录状态 - 增加待补缴状态
     statusList: [
       { id: 1, name: "出车中" },
       { id: 2, name: "还车待审核" },
+      { id: 4, name: "待补缴" },  // 新增待补缴状态
       { id: 3, name: "已完成" }
     ],
     activeStatus: 1,
@@ -226,15 +227,47 @@ Page({
     // 添加CSS类名用于控制层级
     processedRecord.cssClasses = processedRecord.isMoreMenuOpen ? 'more-open' : '';
     
+    // 计算待补缴金额
+    processedRecord.pendingPayment = this.calculatePendingPayment(record);
+    
     return processedRecord;
+  },
+
+  // 计算待补缴金额
+  calculatePendingPayment: function(record) {
+    if (!record.orderChainDetails) return 0;
+    
+    let totalPendingAmount = 0;
+    
+    record.orderChainDetails.forEach(chainItem => {
+      // 只有确实标记为"待补缴"或"待支付"状态的订单才计算
+      // 还车审核中的订单虽然有超时费用，但还没确定补缴，不计算
+      if (chainItem.orderStatus && 
+          (chainItem.orderStatus.includes('待补缴') || 
+           chainItem.orderStatus.includes('待支付'))) {
+        
+        // 超时费用
+        if (chainItem.isOvertime && chainItem.overtimeFee) {
+          totalPendingAmount += chainItem.overtimeFee;
+        }
+        
+        // 其他待支付费用
+        if (chainItem.pendingAmount) {
+          totalPendingAmount += chainItem.pendingAmount;
+        }
+      }
+    });
+    
+    return totalPendingAmount;
   },
 
   // 获取状态样式类名
   getStatusClassName: function(status) {
     const statusClassMap = {
-      1: 'status-renting',    // 出车中
-      2: 'status-waiting',    // 还车待审核
-      3: 'status-completed'   // 已完成
+      1: 'status-renting',     // 出车中
+      2: 'status-waiting',     // 还车待审核
+      3: 'status-completed',   // 已完成
+      4: 'status-pending-payment'  // 待补缴
     };
     return statusClassMap[status] || 'status-unknown';
   },
@@ -257,6 +290,14 @@ Page({
         );
         break;
         
+      case 4: // 待补缴
+        // 门店管理员视角：不需要"去补缴"按钮，只需要查看和管理
+        // 可以联系租户或记录补缴情况
+        buttons.push(
+          { text: '联系租户', action: 'contactRenter', highlight: true }
+        );
+        break;
+        
       case 3: // 已完成
         // 无按钮
         break;
@@ -274,6 +315,14 @@ Page({
     // 出车中状态可以修改记录
     if (record.status === 1) {
       items.push({ text: '修改记录', action: 'modifyRecord', showAlways: false });
+    }
+    
+    // 待补缴状态可以查看补缴详情和记录补缴操作
+    if (record.status === 4) {
+      items.push(
+        { text: '补缴详情', action: 'viewPaymentDetails', showAlways: false },
+        { text: '记录补缴', action: 'recordPayment', showAlways: false }
+      );
     }
     
     return items;
@@ -300,7 +349,9 @@ Page({
       });
     }
     
-    if (record.hasPayment) {
+    // 只有在已完成或待补缴状态下才显示补缴标签
+    // 还车待审核状态不显示，因为补缴只有在管理员审核后才会产生
+    if ((record.status === 3 || record.status === 4) && record.hasPayment) {
       badges.push({
         text: '有补缴',
         type: 'payment'
@@ -325,7 +376,7 @@ Page({
     
     // 预计算是否显示补缴提示
     processed.showPaymentNotice = chainItem.orderStatus && 
-      chainItem.orderStatus.indexOf('补缴') > -1;
+      (chainItem.orderStatus.indexOf('补缴') > -1 || chainItem.orderStatus.indexOf('待支付') > -1);
     
     // 格式化数据
     processed.formattedPrice = `¥${chainItem.price}`;
@@ -482,6 +533,14 @@ Page({
     });
   },
 
+  viewPaymentDetails: function(e) {
+    const recordId = e.currentTarget.dataset.id;
+    this.closeAllDropdowns();
+    wx.navigateTo({
+      url: `/pages/payment-details/payment-details?recordId=${recordId}`
+    });
+  },
+
   handleRenewal: function(e) {
     const recordId = e.currentTarget.dataset.id;
     wx.navigateTo({
@@ -500,6 +559,36 @@ Page({
     const recordId = e.currentTarget.dataset.id;
     wx.navigateTo({
       url: `/pages/audit-return/audit-return?recordId=${recordId}`
+    });
+  },
+
+  recordPayment: function(e) {
+    const recordId = e.currentTarget.dataset.id;
+    this.closeAllDropdowns();
+    wx.navigateTo({
+      url: `/pages/record-payment/record-payment?recordId=${recordId}`
+    });
+  },
+
+  contactRenter: function(e) {
+    const recordId = e.currentTarget.dataset.id;
+    // 找到对应的记录
+    const record = this.data.recordList.find(item => item.id === recordId);
+    if (record && record.renterPhone) {
+      this.makePhoneCall({ currentTarget: { dataset: { phone: record.renterPhone } } });
+    } else {
+      wx.showToast({
+        title: '联系方式不可用',
+        icon: 'none',
+        duration: 2000
+      });
+    }
+  },
+
+  handlePayment: function(e) {
+    const recordId = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/payment/payment?recordId=${recordId}`
     });
   },
 
@@ -667,12 +756,12 @@ Page({
         storeName: storeInfo.name,
         hasOrderChain: true,
         renewalCount: 0,
-        hasPayment: false,
+        hasPayment: false, // 还车待审核时不显示补缴标签
         orderChainDetails: [
           {
             orderId: `ORDER_${record3Id}`,
             orderType: "原订单",
-            orderStatus: "还车审核中",
+            orderStatus: "还车审核中", // 还车待审核状态，不是待补缴
             price: 720,
             rentalDays: 3,
             startTime: formatDateTime(record3Start),
@@ -680,8 +769,119 @@ Page({
             actualEndTime: formatDateTime(record3ActualEnd),
             isOvertime: true,
             overtimeHours: 4,
-            overtimeFee: 240,
+            overtimeFee: 240, // 这里有超时费用，但状态还是审核中，还没确定补缴
             createTime: formatCreateTime(new Date(record3Start.getTime() - 24*60*60*1000))
+          }
+        ]
+      });
+    }
+
+    // 待补缴状态
+    if (activeStatus === 4) {
+      // 待补缴记录1 - 有超时费用
+      const record6Id = `RECORD_PENDING_${baseTime}_001`;
+      const record6Start = new Date();
+      record6Start.setDate(record6Start.getDate() - 8);
+      record6Start.setHours(9, 0, 0, 0);
+      const record6PlanEnd = new Date(record6Start);
+      record6PlanEnd.setDate(record6Start.getDate() + 3);
+      record6PlanEnd.setHours(18, 0, 0, 0);
+      const record6ActualEnd = new Date(record6PlanEnd);
+      record6ActualEnd.setHours(23, 0, 0, 0);
+      
+      mockRecords.push({
+        id: record6Id,
+        status: 4,
+        statusText: "待补缴",
+        carModel: carModels[0],
+        carNumber: carNumbers[0],
+        carImage: "../../assets/rsg.png",
+        renterName: renters[0],
+        renterPhone: phones[0],
+        startTime: formatDateTime(record6Start),
+        endTime: formatDateTime(record6ActualEnd),
+        rentalDays: 3,
+        storeId: storeInfo.id,
+        storeName: storeInfo.name,
+        hasOrderChain: true,
+        renewalCount: 0,
+        hasPayment: true,
+        orderChainDetails: [
+          {
+            orderId: `ORDER_${record6Id}`,
+            orderType: "原订单",
+            orderStatus: "待补缴超时费",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDateTime(record6Start),
+            endTime: formatDateTime(record6PlanEnd),
+            actualEndTime: formatDateTime(record6ActualEnd),
+            isOvertime: true,
+            overtimeHours: 5,
+            overtimeFee: 350,
+            createTime: formatCreateTime(new Date(record6Start.getTime() - 24*60*60*1000))
+          }
+        ]
+      });
+
+      // 待补缴记录2 - 有续租和多笔超时费用
+      const record7Id = `RECORD_PENDING_${baseTime}_002`;
+      const record7Start = new Date();
+      record7Start.setDate(record7Start.getDate() - 12);
+      record7Start.setHours(9, 0, 0, 0);
+      const record7OriginalEnd = new Date(record7Start);
+      record7OriginalEnd.setDate(record7Start.getDate() + 3);
+      record7OriginalEnd.setHours(18, 0, 0, 0);
+      const record7RenewalEnd = new Date(record7OriginalEnd);
+      record7RenewalEnd.setDate(record7OriginalEnd.getDate() + 2);
+      record7RenewalEnd.setHours(18, 0, 0, 0);
+      const record7ActualEnd = new Date(record7RenewalEnd);
+      record7ActualEnd.setDate(record7RenewalEnd.getDate() + 1);
+      record7ActualEnd.setHours(10, 0, 0, 0);
+      
+      mockRecords.push({
+        id: record7Id,
+        status: 4,
+        statusText: "待补缴",
+        carModel: carModels[1],
+        carNumber: carNumbers[1],
+        carImage: "../../assets/rsg.png",
+        renterName: renters[1],
+        renterPhone: phones[1],
+        startTime: formatDateTime(record7Start),
+        endTime: formatDateTime(record7ActualEnd),
+        rentalDays: 6,
+        storeId: storeInfo.id,
+        storeName: storeInfo.name,
+        hasOrderChain: true,
+        renewalCount: 1,
+        hasPayment: true,
+        orderChainDetails: [
+          {
+            orderId: `ORDER_${record7Id}`,
+            orderType: "原订单",
+            orderStatus: "已完成",
+            price: 720,
+            rentalDays: 3,
+            startTime: formatDateTime(record7Start),
+            endTime: formatDateTime(record7OriginalEnd),
+            isOvertime: false,
+            overtimeHours: 0,
+            createTime: formatCreateTime(new Date(record7Start.getTime() - 24*60*60*1000))
+          },
+          {
+            orderId: `ORDER_${record7Id}_RENEWAL_1`,
+            orderType: "第1次续租",
+            orderStatus: "待补缴超时费",
+            price: 480,
+            rentalDays: 2,
+            startTime: formatDateTime(record7OriginalEnd),
+            endTime: formatDateTime(record7RenewalEnd),
+            actualEndTime: formatDateTime(record7ActualEnd),
+            isOvertime: true,
+            overtimeHours: 16,
+            overtimeFee: 1120,
+            createTime: formatCreateTime(new Date(record7OriginalEnd.getTime() - 1*60*60*1000))
           }
         ]
       });
@@ -796,8 +996,9 @@ Page({
       list: mockRecords,
       pageNum: pageNum,
       pageSize: 10,
-      totalCount: 15,
+      totalCount: 20,
       totalPage: 2
     };
   }
 });
+      

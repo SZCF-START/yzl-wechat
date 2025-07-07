@@ -30,6 +30,10 @@
         <!-- 记录头部：状态 -->
         <view class="record-header">
           <view class="success-status">{{item.statusText}}</view>
+          <!-- 待补缴金额显示 -->
+          <view class="pending-payment" wx:if="{{item.pendingPayment > 0}}">
+            待补缴：<text class="payment-amount">¥{{item.pendingPayment}}</text>
+          </view>
         </view>
         
         <!-- 车辆基本信息 -->

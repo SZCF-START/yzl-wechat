@@ -1,10 +1,38 @@
 const privacyStatusManager = require('../../utils/privacyStatusManager');
-import config from '../../config/config.js'
+import config from '../../config/config.js';
+
+// 工具函数模块
+const utils = {
+  // 防抖函数
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func.apply(this, args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  },
+
+  // 节流函数
+  throttle(func, limit) {
+    let inThrottle;
+    return function() {
+      const args = arguments;
+      const context = this;
+      if (!inThrottle) {
+        func.apply(context, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    }
+  }
+};
+
 Page({
   data: {
-    // 模拟banner
-    // 这里使用的是一个简单的本地图片 /images/banner.png
-    // 也可以使用swiper轮播图，视情况而定
     // 模拟轮播图数据
     bannerList: [
       { id: 1, imgUrl: '../../assets/swiper/-s-sd.png' },
@@ -36,7 +64,7 @@ Page({
       { id: 3, icon: '../../assets/yh.png', text: '精品车源' },
       { id: 4, icon: '../../assets/yh.png', text: '门店导航' },
       { id: 5, icon: '../../assets/yh.png', text: '会员中心' },
-      { id: 6, icon: '../../assets/yh.png', text: '会员中心2' },
+      { id: 6, icon: '../../assets/yh.png', text: '客服热线' },
     ],
     // 分页后存储的数组，每页4个
     iconPages: [],
@@ -47,21 +75,28 @@ Page({
     //用户是否同意隐私
     isLocationEnabled: false,
     activeTab: 'daily', // 默认显示日租
+    isLoading: false, // 加载状态
+    
+    // 防重复点击
+    lastTapTime: 0,
   },
 
   onLoad(options) {
     console.log("index onLoad");
-    // 这里可以检查地理位置授权、获取默认城市门店等
+    this.setData({ isLoading: true });
+    
+    // 检查地理位置授权、获取默认城市门店等
     this.checkLocationPermission();
     // 拆分金刚区数据，每页4个
     this.initIconPages();
     
+    this.setData({ isLoading: false });
   },
 
   async checkLocationPermission() {
     try {
       const res = await privacyStatusManager.getPrivacyStatus();
-      console.log("5555555555555555",res);
+      console.log("隐私状态检查结果:", res);
       if (res.needAuthorization) {
         await privacyStatusManager.showPrivacyAuthorizationPopup({
           scope: 'userLocation'
@@ -74,19 +109,19 @@ Page({
         this.initUnauthorizedLocation();
       }
     }
-    
   },
 
   setDefaultDateTime() {
-
     const pickupDateTimestampStorage = wx.getStorageSync('pickupDateTimestamp');
     const returnDateTimestampStorage = wx.getStorageSync('returnDateTimestamp');
     const now = new Date();
     console.log("this.data.pickupDateTimestamp" + pickupDateTimestampStorage);
+    
     // 如果 pickupDate 为空，则使用当前时间戳，否则使用已有数据
     let pickupDateTimestamp = pickupDateTimestampStorage ? pickupDateTimestampStorage : now.getTime();
     console.log("pickupDateTimestamp:",pickupDateTimestamp);
     let pickupDate = this.formatDate(new Date(pickupDateTimestamp));
+    
     // 如果 returnDate 为空，则默认为 pickupDate 的后一天
     let returnDateTimestamp = returnDateTimestampStorage ? returnDateTimestampStorage 
     : this.data.activeTab === 'monthly' ? new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000).getTime() : new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).getTime();
@@ -99,11 +134,11 @@ Page({
     let returnTime = returnDateTimestampStorage ? this.formatTime1(returnDateTimestamp, 0) : this.formatTime(returnDateTimestamp, 0);
   
     // 计算租赁天数（至少 1 天）
-    const totalDays = this.calculateDays(pickupDateTimestamp, returnDateTimestamp,pickupTime,returnTime);
+    const totalDays = this.calculateDays(pickupDateTimestamp, returnDateTimestamp, pickupTime, returnTime);
   
     if(totalDays >= 28) {
       this.setData({ activeTab: "monthly" });
-    }else{
+    } else {
       this.setData({ activeTab: "daily" });
     }
 
@@ -150,9 +185,10 @@ Page({
     const weekDay = this.getWeek(newTime);
     return `${weekDay} ${hours}:${minutes}`;
   },
+
   formatTime1(date, hoursToAdd) {
     let newTime = new Date(date + hoursToAdd * 60 * 60 * 1000);
-    let hours = newTime.getHours().toString().padStart(2, '0');;
+    let hours = newTime.getHours().toString().padStart(2, '0');
     let minutes = newTime.getMinutes().toString().padStart(2, '0');
     // 获取星期几
     const weekDay = this.getWeek(newTime);
@@ -181,7 +217,6 @@ Page({
     const weekArr = ['周日','周一','周二','周三','周四','周五','周六'];
     return weekArr[dateObj.getDay()];
   },
-  
 
   onShow() {
     // 当从其他页面返回时，可在这里做数据刷新
@@ -194,10 +229,6 @@ Page({
         });
       });
     }
-    // 使用展开运算符创建新对象
-    // 数据是对象或数组，直接修改内部属性不会触发渲染，需通过 ​​深拷贝​​ 或 ​​新建引用​​ 强制更新
-    // const newStore = { ...store }; 
-    // this.setData({ defaultStore: newStore });
     
     console.log("store555777:",store);
     this.setData({ currentStore: store }, () => {
@@ -207,8 +238,6 @@ Page({
     });
       
     this.setDefaultDateTime();
-    // this.initLocation();
-
   },
 
   // 初始化位置，演示逻辑：不做真实定位，仅设置默认值
@@ -240,12 +269,10 @@ Page({
               }
 
               console.log('获取的城市：', city);
-              // 去掉“市”字（如果有）
+              // 去掉"市"字（如果有）
               city = city.replace(/市$/, '');
               this.setData({
                 currentCity: city,
-                // 可根据城市设定默认门店等
-                // currentStore: this.data.defaultStore,
                 isLocationEnabled: true,
               });
               wx.setStorageSync('currentCity', city);
@@ -253,27 +280,18 @@ Page({
               wx.setStorageSync('isLocationEnabled', true);
 
             } else {
-              wx.showToast({
-                title: '获取城市失败',
-                icon: 'none',
-              });
+              this.showToast('获取城市失败', 'none');
             }
           },
           fail: (err) => {
             console.error('逆地理请求失败：', err);
-            wx.showToast({
-              title: '请求地址信息失败',
-              icon: 'none',
-            });
+            this.showToast('请求地址信息失败', 'none');
           }
         });
       },
       fail: (error) => {
         console.error('获取定位失败：', error);
-        wx.showToast({
-          title: '定位失败，请检查权限',
-          icon: 'none',
-        });
+        this.showToast('定位失败，请检查权限', 'none');
 
         this.setData({
           currentCity: this.data.defaultCity,
@@ -288,7 +306,6 @@ Page({
       currentCity: this.data.defaultCity,
     });
     wx.setStorageSync('currentCity', this.data.defaultCity);
-
   },
 
   // 将 iconList 拆分为每页4个
@@ -300,50 +317,65 @@ Page({
       pages.push(list.slice(i, i + pageSize));
     }
     this.setData({ iconPages: pages });
-    console.log("111",pages);
+    console.log("金刚区分页数据:", pages);
+  },
+
+  // 防重复点击函数
+  preventRepeatedTap(callback, delay = 1000) {
+    const now = Date.now();
+    if (now - this.data.lastTapTime < delay) {
+      return false;
+    }
+    this.setData({ lastTapTime: now });
+    return callback();
   },
 
   // swiper分页切换事件
-  handleIconSwiperChange(e) {
+  handleIconSwiperChange: utils.throttle(function(e) {
     this.setData({ iconCurrentPage: e.detail.current });
-  },
+  }, 100),
 
   // 跳转到城市选择页面
   goCitySelect() {
-    let url = '/pages/citySelect/citySelect';
-
-    let sourceUrl = '/pages/index/index'
-    url += `?source=${sourceUrl}`;
-    if (this.data.isLocationEnabled) {
-      url += `&city=${this.data.currentCity}`;
-      url += `&store=${this.data.currentStore}`;
-    }
-    wx.navigateTo({
-      url: url,
+    this.preventRepeatedTap(() => {
+      let url = '/pages/citySelect/citySelect';
+      let sourceUrl = '/pages/index/index'
+      url += `?source=${sourceUrl}`;
+      if (this.data.isLocationEnabled) {
+        url += `&city=${this.data.currentCity}`;
+        url += `&store=${this.data.currentStore}`;
+      }
+      wx.navigateTo({
+        url: url,
+      });
     });
   },
 
   // 跳转到门店选择页面
   goStoreSelect() {
-    if (!this.data.currentCity) {
-      wx.showToast({ title: '请先选择城市', icon: 'none' });
-      return;
-    }
-    let sourceUrl = '/pages/index/index'
-    wx.navigateTo({
-      url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${encodeURIComponent(sourceUrl)}`,
+    this.preventRepeatedTap(() => {
+      if (!this.data.currentCity) {
+        this.showToast('请先选择城市', 'none');
+        return;
+      }
+      let sourceUrl = '/pages/index/index'
+      wx.navigateTo({
+        url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${encodeURIComponent(sourceUrl)}`,
+      });
     });
   },
 
   // 跳转到时间选择页面
   goTimeSelect() {
-    // 把当前选择的日期和时间传过去
-    const { pickupDateTimestamp, returnDateTimestamp, pickupTime, returnTime } = this.data;
-    const sourceUrl = '/pages/index/index';
-    let newPickupDateTimestamp = this.combineDateTime(pickupDateTimestamp,pickupTime);
-    let newReturnDateTimestamp = this.combineDateTime(returnDateTimestamp,returnTime);
-    wx.navigateTo({
-      url: `/pages/timeSelect/timeSelect?pickupDate=${newPickupDateTimestamp}&returnDate=${newReturnDateTimestamp}&pickupTime=${pickupTime}&returnTime=${returnTime}&source=${encodeURIComponent(sourceUrl)}`,
+    this.preventRepeatedTap(() => {
+      // 把当前选择的日期和时间传过去
+      const { pickupDateTimestamp, returnDateTimestamp, pickupTime, returnTime } = this.data;
+      const sourceUrl = '/pages/index/index';
+      let newPickupDateTimestamp = this.combineDateTime(pickupDateTimestamp, pickupTime);
+      let newReturnDateTimestamp = this.combineDateTime(returnDateTimestamp, returnTime);
+      wx.navigateTo({
+        url: `/pages/timeSelect/timeSelect?pickupDate=${newPickupDateTimestamp}&returnDate=${newReturnDateTimestamp}&pickupTime=${pickupTime}&returnTime=${returnTime}&source=${encodeURIComponent(sourceUrl)}`,
+      });
     });
   },
 
@@ -371,10 +403,7 @@ Page({
 
   // 一键填写示例
   handleFillQuickly() {
-    wx.showToast({
-      title: '一键填写示例',
-      icon: 'none',
-    });
+    this.showToast('一键填写示例', 'none');
   },
 
   // 上门送取checkbox变更
@@ -386,55 +415,110 @@ Page({
 
   // 去选车
   goSelectCar() {
-    if(this.data.currentStore){
-      wx.showToast({
-        title: '跳转到选车页示例',
-        icon: 'none',
-      });
-      const newPickupTimestamp = this.combineDateTime(this.data.pickupDateTimestamp,this.data.pickupTime);
-      const newReturnTimestamp  = this.combineDateTime(this.data.returnDateTimestamp,this.data.returnTime);
-      wx.navigateTo({ 
-        url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}&currentCity=${this.data.currentCity}`,
-      });
-    }else{
-      let sourceUrl = '/pages/index/index'
-      wx.navigateTo({
-        url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${encodeURIComponent(sourceUrl)}`,
-      });
-    }
-    
-  },
-
-  combineDateTime(timestamp, timeStr) {
-    const date = new Date(timestamp);
-    
-    // 提取时间部分（自动过滤周x信息）
-    const [_, timePart] = timeStr.split(' '); // 分割周x和时间
-    const [hours, minutes] = timePart.split(':').map(Number);
-  
-    // 重置时分秒毫秒
-    date.setHours(hours);
-    date.setMinutes(minutes);
-    date.setSeconds(0);
-    date.setMilliseconds(0);
-  
-    return date.getTime();
+    this.preventRepeatedTap(() => {
+      if(this.data.currentStore){
+        const newPickupTimestamp = this.combineDateTime(this.data.pickupDateTimestamp, this.data.pickupTime);
+        const newReturnTimestamp  = this.combineDateTime(this.data.returnDateTimestamp, this.data.returnTime);
+        wx.navigateTo({ 
+          url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}&currentCity=${this.data.currentCity}`,
+        });
+      } else {
+        let sourceUrl = '/pages/index/index'
+        wx.navigateTo({
+          url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${encodeURIComponent(sourceUrl)}`,
+        });
+      }
+    });
   },
 
   // 金刚区点击事件
   handleIconTap(e) {
-    const id = e.currentTarget.dataset.id;
-    wx.showToast({
-      title: `点击图标ID: ${id}`,
-      icon: 'none',
+    this.preventRepeatedTap(() => {
+      const id = e.currentTarget.dataset.id;
+      const iconItem = this.data.iconList.find(item => item.id == id);
+      console.log('点击金刚区图标:', iconItem);
+      
+      // 根据不同图标执行不同操作
+      switch (parseInt(id)) {
+        case 1:
+          this.goActivity();
+          break;
+        case 2:
+          this.goLongRent();
+          break;
+        case 3:
+          this.goPremiumCars();
+          break;
+        case 4:
+          this.goStoreNavigation();
+          break;
+        case 5:
+          this.goMemberCenter();
+          break;
+        case 6:
+          this.callService();
+          break;
+        default:
+          this.showToast(`功能开发中: ${iconItem?.text}`, 'none');
+      }
+    }, 500);
+  },
+
+  // 金刚区功能实现
+  goActivity() {
+    this.showToast('跳转到活动页面', 'none');
+    // wx.navigateTo({
+    //   url: '/pages/activity/activity'
+    // });
+  },
+
+  goLongRent() {
+    this.setData({ activeTab: 'monthly' });
+    this.setDefaultDateTime1();
+    this.showToast('已切换至月租模式', 'success');
+  },
+
+  goPremiumCars() {
+    this.showToast('跳转到精品车源', 'none');
+    // wx.navigateTo({
+    //   url: '/pages/premiumCars/premiumCars'
+    // });
+  },
+
+  goStoreNavigation() {
+    if (!this.data.currentStore) {
+      this.showToast('请先选择门店', 'none');
+      return;
+    }
+    this.showToast('门店导航功能', 'none');
+    // wx.navigateTo({
+    //   url: `/pages/storeDetail/storeDetail?store=${this.data.currentStore}`
+    // });
+  },
+
+  goMemberCenter() {
+    this.showToast('跳转到会员中心', 'none');
+    // wx.switchTab({
+    //   url: '/pages/profile/profile'
+    // });
+  },
+
+  callService() {
+    wx.makePhoneCall({
+      phoneNumber: '400-123-4567',
+      fail: () => {
+        this.showToast('拨打电话失败', 'none');
+      }
     });
   },
-  switchTab(e) {
+
+  // 切换标签 - 使用防抖处理
+  switchTab: utils.debounce(function(e) {
     const type = e.currentTarget.dataset.tab;
-    console.log("type:",e);
+    console.log("切换标签:", type);
     this.setData({ activeTab: type });
     this.setDefaultDateTime1();
-  },
+  }, 300),
   
   setDefaultDateTime1() {
     const now = new Date();
@@ -442,7 +526,7 @@ Page({
     let pickupDateTimestamp = now.getTime();
     let pickupDate = this.formatDate(new Date(pickupDateTimestamp));
     // 如果 returnDate 为空，则默认为 pickupDate 的后一天
-    let returnDateTimestamp =  this.data.activeTab === 'monthly' ? new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000).getTime() : new Date(now.getTime() + 24 * 60 * 60 * 1000).getTime();
+    let returnDateTimestamp = this.data.activeTab === 'monthly' ? new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000).getTime() : new Date(now.getTime() + 24 * 60 * 60 * 1000).getTime();
     let returnDate = this.formatDate(new Date(returnDateTimestamp));
   
     // 处理取车时间：如果为空则使用 formatTime 计算当前时间（不加小时）；如果有值则取其 "HH:mm" 部分，加上 pickupDate 对应的星期
@@ -452,7 +536,7 @@ Page({
     let returnTime = this.formatTime(returnDateTimestamp, 0);
     
     // 计算租赁天数（至少 1 天）
-    const totalDays = this.calculateDays(pickupDateTimestamp, returnDateTimestamp,pickupTime,returnTime);
+    const totalDays = this.calculateDays(pickupDateTimestamp, returnDateTimestamp, pickupTime, returnTime);
 
     // 更新页面数据
     this.setData({
@@ -465,4 +549,49 @@ Page({
       totalDays
     });
   },
+
+  // 通用提示方法
+  showToast(title, icon = 'none') {
+    wx.showToast({
+      title,
+      icon,
+      duration: 2000
+    });
+  },
+
+  // 页面分享
+  onShareAppMessage() {
+    return {
+      title: '便捷租车服务',
+      path: '/pages/index/index',
+      imageUrl: '/assets/share-image.png'
+    };
+  },
+
+  // 分享到朋友圈
+  onShareTimeline() {
+    return {
+      title: '便捷租车服务 - 随时随地，轻松出行'
+    };
+  },
+
+  // 下拉刷新
+  onPullDownRefresh() {
+    console.log('用户下拉刷新');
+    this.setData({ isLoading: true });
+    
+    // 重新获取数据
+    setTimeout(() => {
+      this.checkLocationPermission();
+      this.setDefaultDateTime();
+      this.setData({ isLoading: false });
+      wx.stopPullDownRefresh();
+    }, 1000);
+  },
+
+  // 页面错误处理
+  onError(error) {
+    console.error('页面错误:', error);
+    this.showToast('页面出现错误，请重试', 'none');
+  }
 });

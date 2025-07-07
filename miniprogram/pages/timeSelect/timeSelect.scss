@@ -1,206 +1,295 @@
 /* 整体页面容器 */
 .page-container {
   width: 100%;
-  height: 100vh; /* 使用视口高度 */
+  height: 100vh;
   background-color: #f5f5f5;
   position: relative;
-  overflow: hidden; /* 由内部滚动区域控制 */
+  overflow: hidden;
 }
 
-/* 顶部固定区域 */
 /* 顶部固定区域 */
 .top-fixed {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 130rpx; /* 增加高度以适应内容 */
+  height: 160rpx;
   z-index: 10;
   background-color: #fff;
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
-  padding: 20rpx 0;
+  padding: 20rpx 40rpx;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  box-sizing: border-box;
 }
 
-/* 日期内容整体横向排列 */
-.date-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 单个日期项垂直排列 */
+/* 日期显示项 */
 .date-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  flex: 1;
 }
 
-/* 日期（07月09日） */
+/* 日期文字（07月08日） */
 .date-text {
-  font-size: 32rpx;
-  color: rgb(88, 86, 86);
+  font-size: 36rpx;
+  color: #333;
   font-weight: bold;
+  margin-bottom: 8rpx;
 }
 
-/* 周几和时间整体横向排列 */
-.time-container {
+/* 时间显示 */
+.time-display {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 箭头 */
+.arrow-container {
+  width: 60rpx;
+  height: 60rpx;
   display: flex;
   align-items: center;
-  margin-top: 5rpx;
+  justify-content: center;
 }
 
-/* 周几（周一） */
-.week-text {
-  font-size: 24rpx;
-  color: #999;
-}
-
-/* 分隔符 */
-.time-sep {
-  margin: 0 6rpx;
-  color: #999;
-}
-
-/* 时间（09:00） */
-.time-text {
-  font-size: 24rpx;
-  color: #999;
-}
-
-/* 箭头样式 */
 .arrow-icon {
   width: 40rpx;
   height: 40rpx;
-  margin: 0 20rpx;
 }
 
-/* 中间区域：van-calendar 滚动区域 */
-/*
-  采用绝对定位，占据顶部区域下方到底部区域上方的空间，
-  top 与 bottom 分别设置为 120rpx 与 280rpx（底部固定区域与时间区域总高度）
-*/
+/* 日历滚动区域 */
 .calendar-scroll {
   position: absolute;
-  top: 260rpx;
-  bottom: 310rpx; /* 180rpx (time-area) + 100rpx (bottom-fixed) */
+  top: 160rpx;
+  bottom: 380rpx;
   left: 0;
   right: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
+
 .calendar-container {
   background-color: #fff;
-  /* 如有需要，可添加内边距 */
+  padding: 0 20rpx;
 }
-/* 将日历头部固定在页面顶部，位置与 scroll-view 的 top 对齐 */
-.van-calendar__header {
-  position: fixed;
-  top: 130rpx; /* 与 scroll-view 顶部距离保持一致 */
-  left: 0;
-  right: 0;
-  z-index: 10;
+
+/* 自定义日历样式 */
+.calendar-header {
+  padding: 20rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  border-bottom: 1rpx solid #eee;
+}
+
+.week-header {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+  // background-color: #f8f9fa;
+}
+
+.week-item {
+  flex: 1;
+  text-align: center;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.week-item.weekend {
+  color: #ff6b6b;
+}
+
+.calendar-month {
   background-color: #fff;
+  margin-bottom: 30rpx; /* 增加月份间距为标注文字留出空间 */
 }
 
-/* 为日历内容留出头部高度，避免内容被头部遮挡 */
-.van-calendar__content {
-  margin-top: 80rpx; /* 与 header 高度相同 */
+.month-title {
+  padding: 20rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
 }
 
+.days-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10rpx;
+}
 
+.day-item {
+  width: 14.28%;
+  height: 100rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #333;
+  position: relative;
+  margin: 4rpx 0;
+  border-radius: 12rpx;
+}
 
-/* 时间选择区域：固定在底部区域上方 */
-/* 外层容器：标题40rpx + 滚动区域180rpx = 220rpx */
+.day-item.disabled {
+  color: #ccc;
+}
+
+.day-item.today {
+  color: #ff8c00;
+  font-weight: bold;
+}
+
+.day-item.start-date {
+  background-color: #ff8c00;
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-item.end-date {
+  background-color: #ff8c00;
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-item.start-end-same {
+  background-color: #ff8c00;
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-item.in-range {
+  background-color: rgba(255, 140, 0, 0.2);
+  color: #ff8c00;
+}
+
+.day-item.start-date::after {
+  content: '取车';
+  font-size: 18rpx;
+  color: #fff;
+  margin-top: 2rpx;
+  white-space: nowrap;
+}
+
+.day-item.end-date::after {
+  content: '还车';
+  font-size: 18rpx;
+  color: #fff;
+  margin-top: 2rpx;
+  white-space: nowrap;
+}
+
+.day-item.start-end-same::after {
+  content: '取/还车';
+  font-size: 16rpx;
+  color: #fff;
+  margin-top: 2rpx;
+  white-space: nowrap;
+}
+
+/* 门店营业时间提示 */
+.store-hours {
+  position: fixed;
+  bottom: 360rpx;
+  left: 0;
+  width: 100%;
+  padding: 0 40rpx;
+  background-color: #fff5e6;
+  border-top: 1rpx solid #ffe0b3;
+  z-index: 5;
+}
+
+.store-hours-text {
+  font-size: 26rpx;
+  color: #ff8c00;
+  text-align: left;
+}
+
+/* 时间选择区域 */
 .time-area {
   position: fixed;
   left: 0;
   bottom: 100rpx;
   width: 100%;
-  height: 250rpx;
+  height: 260rpx;
   z-index: 10;
-  display: flex;
-  justify-content: space-around;
   background-color: #fff;
   box-shadow: 0 -2rpx 6rpx rgba(0,0,0,0.05);
+  padding: 20rpx 40rpx;
+  box-sizing: border-box;
 }
 
-/* 每个选择器容器 */
-.picker-block {
-  position: relative;
-  width: 45%;
-  height: 220rpx;
+.time-header {
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
 }
 
-/* 标题区域 */
-.title {
-  height: 40rpx;
-  line-height: 40rpx;
-  font-size: 30rpx;
-  text-align: center;
+.time-title {
+  font-size: 28rpx;
   color: #333;
-  border-bottom: 1rpx solid #eee;
   font-weight: bold;
-}
-
-/* 滚动区域 */
-.picker-scroller {
+  text-align: center;
   flex: 1;
-  width: 100%;
-  height: 180rpx;
 }
 
-/* 每个时间列表项 */
-.picker-item {
-  width: 100%;
+.time-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.time-column {
+  flex: 1;
+  margin: 0 10rpx;
+}
+
+.time-scroll {
+  height: 180rpx;
+  position: relative;
+}
+
+.time-picker {
+  height: 100%;
+}
+
+.time-item {
   height: 60rpx;
   line-height: 60rpx;
   text-align: center;
-  font-size: 26rpx;
+  font-size: 32rpx;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.time-item.selected {
   color: #333;
+  font-weight: bold;
+  font-size: 36rpx;
 }
 
-/* 遮罩层：遮住非选中区域 */
-.mask {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 60rpx;
-  background-color: rgba(255,255,255,0.7);
-  pointer-events: none;
+.time-item.disabled {
+  color: #ccc;
 }
 
-.mask-top {
-  top: 40rpx;  /* 标题下方 */
-}
-
-.mask-bottom {
-  bottom: 0;   /* 底部区域 */
-  height: 90rpx;
-}
-
-/* 高亮线：标识中间选中区域的上下边界 */
-.highlight-line {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 1rpx;
-  background-color: #ccc;
-}
-
-.line-top {
-  top: 100rpx; /* 标题40rpx + 第一行60rpx */
-}
-
-.line-bottom {
-  top: 160rpx; /* 标题40rpx + 两行60rpx */
-}
+/* 移除独立的time-indicator样式，改为在选中项上显示 */
 
 /* 底部固定区域 */
 .bottom-fixed {
@@ -208,37 +297,105 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: auto; /* 明确固定高度 */
+  height: 100rpx;
   background-color: #fff;
   z-index: 10;
   box-shadow: 0 -2rpx 6rpx rgba(0, 0, 0, 0.1);
-  padding: 20rpx;
+  padding: 20rpx 40rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
 }
+
 .duration-text {
-  font-size: 28rpx;
+  font-size: 32rpx;
   color: #333;
+  font-weight: bold;
 }
+
 .btn-group {
   display: flex;
-  flex-shrink: 1; /* 避免撑爆容器 */
-  flex-wrap: wrap;
+  align-items: center;
 }
+
 .clear-btn,
 .confirm-btn {
-  margin-left: 20rpx;
-  padding: 10rpx 20rpx;
+  padding: 12rpx 40rpx; /* 减小上下padding，增加左右padding */
   font-size: 28rpx;
-  border-radius: 8rpx;
+  border-radius: 12rpx;
+  border: none;
+  transition: all 0.3s ease;
+  margin-left: 20rpx;
+  min-width: 100rpx; /* 增加最小宽度 */
+  height: 60rpx; /* 固定高度，不撑满 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .clear-btn {
   background-color: #f5f5f5;
   color: #666;
+  border: 1rpx solid #ddd;
 }
+
+.clear-btn:active {
+  background-color: #e6e6e6;
+  transform: scale(0.98);
+}
+
 .confirm-btn {
   background-color: #ff8c00;
   color: #fff;
+  font-weight: bold;
+  min-width: 120rpx;
+}
+
+.confirm-btn:active {
+  background-color: #e67a00;
+  transform: scale(0.98);
+}
+
+.confirm-btn.disabled {
+  background-color: #ccc;
+  color: #999;
+  opacity: 0.6;
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 20rpx;
+}
+
+/* 安全区域适配 */
+.safe-area-bottom {
+  height: env(safe-area-inset-bottom);
+  background-color: #ffffff;
+}
+
+/* 响应式适配 */
+@media (max-width: 350px) {
+  .date-text {
+    font-size: 32rpx;
+  }
+  
+  .time-display {
+    font-size: 24rpx;
+  }
 }
