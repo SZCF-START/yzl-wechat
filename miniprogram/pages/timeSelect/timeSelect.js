@@ -109,7 +109,6 @@ Page({
     startWeek: '',    // 顶部显示星期
     endWeek: '',
     dateRangeComplete: false, // 是否已完整选择日期区间
-
     // 日历月份数据
     calendarMonths: [],
 
