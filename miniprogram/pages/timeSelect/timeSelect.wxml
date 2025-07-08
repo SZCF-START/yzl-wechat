@@ -77,7 +77,7 @@
     <text class="store-hours-text">取/还车门店营业时间：08:00-20:00</text>
   </view>
 
-  <!-- 时间选择区域 -->
+  <!-- 时间选择区域 - 使用picker-view重新实现 -->
   <view class="time-area">
     <view class="time-header">
       <text class="time-title">取车时间</text>
@@ -87,65 +87,53 @@
     <view class="time-content">
       <!-- 取车时间选择器 -->
       <view class="time-column">
-        <view class="time-scroll">
-          <scroll-view
-            class="time-picker"
-            scroll-y
-            show-scrollbar="false"
-            scroll-with-animation
-            scroll-top="{{startScrollTop}}"
-            bindscroll="onStartTimeScrolling"
-            bindscrollend="onStartScrollTouchEnd"
-            enhanced="{{true}}"
-            bounces="{{false}}"
+        <view class="time-picker-container {{isStartPicking ? 'picking' : ''}}">
+          <picker-view 
+            class="time-picker-view"
+            value="{{startPickerValue}}"
+            bindchange="onStartTimeChange"
+            bindpickstart="onStartPickStart"
+            bindpickend="onStartPickEnd"
+            indicator-style="height: 100rpx; background-color: transparent; border: none;"
+            indicator-class="time-indicator"
           >
-            <!-- 上下预留空白 -->
-            <view style="height:60rpx;"></view>
-            <block wx:for="{{timeList}}" wx:key="index">
+            <picker-view-column>
               <view 
-                class="time-item {{selectedStartIndex === index ? 'selected' : ''}} {{item.disabled ? 'disabled' : ''}}"
-                data-index="{{index}}"
-                data-time="{{item.time || item}}"
-                data-type="start"
-                bindtap="onTimeItemTap"
+                wx:for="{{timeList}}" 
+                wx:key="*this"
+                class="time-item {{index === currentStartTimeIndex ? 'selected-time' : ''}}"
+                wx:for-index="index"
               >
-                {{item.time || item}}
+                {{item}}
               </view>
-            </block>
-            <view style="height:60rpx;"></view>
-          </scroll-view>
+            </picker-view-column>
+          </picker-view>
         </view>
       </view>
 
       <!-- 还车时间选择器 -->
       <view class="time-column">
-        <view class="time-scroll">
-          <scroll-view
-            class="time-picker"
-            scroll-y
-            show-scrollbar="false"
-            scroll-with-animation
-            scroll-top="{{endScrollTop}}"
-            bindscroll="onEndTimeScrolling"
-            bindscrollend="onEndScrollTouchEnd"
-            enhanced="{{true}}"
-            bounces="{{false}}"
+        <view class="time-picker-container {{isEndPicking ? 'picking' : ''}}">
+          <picker-view 
+            class="time-picker-view"
+            value="{{endPickerValue}}"
+            bindchange="onEndTimeChange"
+            bindpickstart="onEndPickStart"
+            bindpickend="onEndPickEnd"
+            indicator-style="height: 100rpx; background-color: transparent; border: none;"
+            indicator-class="time-indicator"
           >
-            <!-- 上下预留空白 -->
-            <view style="height:60rpx;"></view>
-            <block wx:for="{{timeList}}" wx:key="index">
+            <picker-view-column>
               <view 
-                class="time-item {{selectedEndIndex === index ? 'selected' : ''}} {{item.disabled ? 'disabled' : ''}}"
-                data-index="{{index}}"
-                data-time="{{item.time || item}}"
-                data-type="end"
-                bindtap="onTimeItemTap"
+                wx:for="{{timeList}}" 
+                wx:key="*this"
+                class="time-item {{index === currentEndTimeIndex ? 'selected-time' : ''}}"
+                wx:for-index="index"
               >
-                {{item.time || item}}
+                {{item}}
               </view>
-            </block>
-            <view style="height:60rpx;"></view>
-          </scroll-view>
+            </picker-view-column>
+          </picker-view>
         </view>
       </view>
     </view>

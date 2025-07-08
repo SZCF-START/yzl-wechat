@@ -112,27 +112,26 @@ Page({
     // 日历月份数据
     calendarMonths: [],
 
-    // 时间选择相关
+    // 时间选择相关 - 使用picker-view
     timeList: [],
     startTimeRaw: '', // 当前选中的取车时间
     endTimeRaw: '',   // 当前选中的还车时间
     startTimeRaw1: '', 
     endTimeRaw1: '',   
+    
+    // picker-view 相关数据
+    startPickerValue: [0], // 取车时间picker的value
+    endPickerValue: [0],   // 还车时间picker的value
+    isStartPicking: false, // 是否正在选择取车时间
+    isEndPicking: false,   // 是否正在选择还车时间
+
+    // 新增：当前选中的时间索引（用于动态样式）
+    currentStartTimeIndex: 0,
+    currentEndTimeIndex: 0,
 
     // 总时长
     totalDays: 0,
     totalHours: 0,
-
-    // 滚动相关
-    startScrollTop: 0,
-    endScrollTop: 0,
-    lastStartScrollTop: 0,
-    lastEndScrollTop: 0,
-    startScrollTimer: null,
-    endScrollTimer: null,
-    selectedStartIndex: 0,
-    selectedEndIndex: 0,
-    itemHeightPx: 0,
 
     // 页面状态
     sourceUrl: '',
@@ -140,7 +139,11 @@ Page({
     lastTapTime: 0,
     isDateSelected: false, // 是否已选中日期
     dateSelectionMode: 'start', // 日期选择模式：'start', 'end', 'range'
-    tempSelectedDate: null // 临时存储的日期
+    tempSelectedDate: null, // 临时存储的日期
+
+    // 音效相关
+    audioContext: null, // 音频上下文
+    lastPlayTime: 0 // 上次播放音效的时间
   },
 
   onLoad(options) {
@@ -148,12 +151,9 @@ Page({
     this.setData({ isLoading: true });
 
     try {
-      // 计算item高度
-      const systemInfo = wx.getSystemInfoSync();
-      const rpxToPx = systemInfo.windowWidth / 750;
-      const itemHeightPx = Math.floor(60 * rpxToPx);
-      this.setData({ itemHeightPx });
-
+      // 初始化音频上下文
+      this.initAudioContext();
+      
       // 初始化时间列表
       this.initTimeList();
       
@@ -163,15 +163,6 @@ Page({
       // 处理传入参数
       this.initOptionsData(options);
       
-      // 初始化默认选中
-      let defaultIndex = 0;
-      this.setData({
-        startScrollTop: defaultIndex * 60,
-        endScrollTop: defaultIndex * 60,
-        selectedStartIndex: defaultIndex,
-        selectedEndIndex: defaultIndex
-      });
-
     } catch (error) {
       console.error('页面初始化失败:', error);
       this.showErrorToast('页面初始化失败');
@@ -181,32 +172,245 @@ Page({
   },
 
   onReady() {
-    // 延时确保渲染完成后更新滚动位置
+    // 延时确保渲染完成后更新选择器位置和样式
     setTimeout(() => {
-      this.updateScrollPosition();
-      
-      // 如果有传入的时间数据，需要同步滚动位置
+      // 如果有传入的时间数据，需要同步picker-view位置
       if (this.data.startTimeRaw && this.data.endTimeRaw) {
-        const startTimeIndex = this.data.timeList.indexOf(this.data.startTimeRaw);
-        const endTimeIndex = this.data.timeList.indexOf(this.data.endTimeRaw);
+        const startTimeIndex = this.findTimeIndex(this.data.startTimeRaw);
+        const endTimeIndex = this.findTimeIndex(this.data.endTimeRaw);
         
-        if (startTimeIndex !== -1) {
-          const startScrollTop = startTimeIndex * this.data.itemHeightPx;
-          this.setData({ 
-            startScrollTop: startScrollTop,
-            selectedStartIndex: startTimeIndex
-          });
-        }
+        this.setData({
+          startPickerValue: [startTimeIndex],
+          endPickerValue: [endTimeIndex],
+          currentStartTimeIndex: startTimeIndex,
+          currentEndTimeIndex: endTimeIndex
+        });
         
-        if (endTimeIndex !== -1) {
-          const endScrollTop = endTimeIndex * this.data.itemHeightPx;
-          this.setData({ 
-            endScrollTop: endScrollTop,
-            selectedEndIndex: endTimeIndex 
-          });
-        }
+        // 更新时间列表的选中状态
+        this.updateTimeListStyles();
       }
     }, 200);
+  },
+
+  // 更新时间列表的选中样式
+  updateTimeListStyles() {
+    const updatedTimeList = this.data.timeList.map((time, index) => {
+      let timeClass = '';
+      
+      // 检查是否为当前选中的取车时间
+      if (index === this.data.currentStartTimeIndex) {
+        timeClass += ' start-selected';
+      }
+      
+      // 检查是否为当前选中的还车时间
+      if (index === this.data.currentEndTimeIndex) {
+        timeClass += ' end-selected';
+      }
+      
+      // 如果同时是取车和还车时间（同一时间）
+      if (index === this.data.currentStartTimeIndex && index === this.data.currentEndTimeIndex) {
+        timeClass = ' both-selected';
+      }
+      
+      return {
+        time: time,
+        class: timeClass.trim()
+      };
+    });
+    
+    this.setData({
+      timeListWithStyles: updatedTimeList
+    });
+  },
+
+  // 初始化音频上下文
+  initAudioContext() {
+    try {
+      this.data.audioContext = wx.createInnerAudioContext();
+      // 预加载刻钟声音文件，你需要将音频文件放在项目中
+      // 这里使用系统提供的简单音效作为示例
+      this.data.audioContext.src = '/assets/tick.mp3'; // 请替换为实际的音频文件路径
+      this.data.audioContext.autoplay = false;
+      this.data.audioContext.loop = false;
+      this.data.audioContext.volume = 0.3; // 设置音量
+      
+      // 如果没有音频文件，可以使用振动替代
+      this.data.audioContext.onError(() => {
+        console.log('音频文件加载失败，将使用振动替代');
+      });
+    } catch (error) {
+      console.log('音频上下文初始化失败:', error);
+    }
+  },
+
+  // 播放刻钟声音或振动
+  playTickSound() {
+    const now = Date.now();
+    // 限制音效播放频率，避免过于频繁
+    if (now - this.data.lastPlayTime < 50) return;
+    
+    try {
+      if (this.data.audioContext) {
+        this.data.audioContext.stop();
+        this.data.audioContext.play();
+      } else {
+        // 如果音频不可用，使用轻微振动
+        wx.vibrateShort({
+          type: 'light'
+        });
+      }
+    } catch (error) {
+      // 降级到振动
+      wx.vibrateShort({
+        type: 'light'
+      });
+    }
+    
+    this.data.lastPlayTime = now;
+  },
+
+  // 查找时间在列表中的索引
+  findTimeIndex(timeStr) {
+    const index = this.data.timeList.indexOf(timeStr);
+    return index >= 0 ? index : 0;
+  },
+
+  // 取车时间picker开始选择
+  onStartPickStart(e) {
+    console.log('开始选择取车时间');
+    this.setData({ isStartPicking: true });
+  },
+
+  // 取车时间picker结束选择
+  onStartPickEnd(e) {
+    console.log('结束选择取车时间');
+    this.setData({ isStartPicking: false });
+  },
+
+  // 还车时间picker开始选择
+  onEndPickStart(e) {
+    console.log('开始选择还车时间');
+    this.setData({ isEndPicking: true });
+  },
+
+  // 还车时间picker结束选择
+  onEndPickEnd(e) {
+    console.log('结束选择还车时间');
+    this.setData({ isEndPicking: false });
+  },
+
+  // 取车时间选择变化
+  onStartTimeChange(e) {
+    const index = e.detail.value[0];
+    const timeStr = this.data.timeList[index];
+    
+    console.log('取车时间变化:', timeStr, '索引:', index);
+    
+    // 播放刻钟声音
+    this.playTickSound();
+    
+    // 检查时间限制
+    const finalTime = this.checkTimeRestriction(timeStr, 'start');
+    const finalIndex = this.data.timeList.indexOf(finalTime);
+    
+    // 更新当前选中的时间索引
+    this.setData({
+      startPickerValue: [finalIndex >= 0 ? finalIndex : index],
+      startTimeRaw: finalTime,
+      startTimeRaw1: finalTime,
+      currentStartTimeIndex: finalIndex >= 0 ? finalIndex : index
+    });
+    
+    // 更新时间列表样式
+    this.updateTimeListStyles();
+    
+    // 重新计算时长
+    this.computeDuration();
+  },
+
+  // 还车时间选择变化
+  onEndTimeChange(e) {
+    const index = e.detail.value[0];
+    const timeStr = this.data.timeList[index];
+    
+    console.log('还车时间变化:', timeStr, '索引:', index);
+    
+    // 播放刻钟声音
+    this.playTickSound();
+    
+    // 检查时间限制
+    const finalTime = this.checkTimeRestriction(timeStr, 'end');
+    const finalIndex = this.data.timeList.indexOf(finalTime);
+    
+    // 更新当前选中的时间索引
+    this.setData({
+      endPickerValue: [finalIndex >= 0 ? finalIndex : index],
+      endTimeRaw: finalTime,
+      endTimeRaw1: finalTime,
+      currentEndTimeIndex: finalIndex >= 0 ? finalIndex : index
+    });
+    
+    // 更新时间列表样式
+    this.updateTimeListStyles();
+    
+    // 重新计算时长
+    this.computeDuration();
+  },
+
+  // 检查时间限制（同一天情况下的处理）
+  checkTimeRestriction(timeStr, type) {
+    // 如果是同一天选择
+    if (utils.isSameDay(this.data.startDateVal, this.data.endDateVal)) {
+      const date = new Date(this.data.startDateVal);
+      const now = new Date();
+      
+      // 如果是今天，需要检查当前时间限制
+      if (this.isSameDate(date, now)) {
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        
+        // 处理分钟进位到下一个半小时
+        if (minutes >= 30) {
+          hours += 1;
+          minutes = 0;
+        } else {
+          minutes = 30;
+        }
+        
+        if (hours >= 24) hours = 0;
+        
+        const currentTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        
+        // 如果选择的时间早于当前时间，调整为当前时间
+        if (timeStr < currentTime) {
+          return currentTime;
+        }
+      }
+      
+      // 如果是还车时间，需要确保比取车时间晚
+      if (type === 'end' && this.data.startTimeRaw1) {
+        if (timeStr <= this.data.startTimeRaw1) {
+          // 还车时间至少比取车时间晚30分钟
+          const [startHours, startMinutes] = this.data.startTimeRaw1.split(':').map(Number);
+          let endHours = startHours;
+          let endMinutes = startMinutes + 30;
+          
+          if (endMinutes >= 60) {
+            endHours += 1;
+            endMinutes = 0;
+          }
+          
+          if (endHours >= 24) {
+            endHours = 23;
+            endMinutes = 30;
+          }
+          
+          return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+        }
+      }
+    }
+    
+    return timeStr;
   },
 
   // 初始化传入参数
@@ -236,8 +440,8 @@ Page({
       const returnTimeStr = utils.formatTime(returnDate);
       
       // 查找时间在列表中的索引
-      const pickupTimeIndex = this.data.timeList.indexOf(pickupTimeStr);
-      const returnTimeIndex = this.data.timeList.indexOf(returnTimeStr);
+      const pickupTimeIndex = this.findTimeIndex(pickupTimeStr);
+      const returnTimeIndex = this.findTimeIndex(returnTimeStr);
       
       this.setData({
         startDateVal: pickupDateOnly,
@@ -246,8 +450,10 @@ Page({
         endTimeRaw: returnTimeStr,
         startTimeRaw1: pickupTimeStr,
         endTimeRaw1: returnTimeStr,
-        selectedStartIndex: pickupTimeIndex !== -1 ? pickupTimeIndex : 0,
-        selectedEndIndex: returnTimeIndex !== -1 ? returnTimeIndex : 0,
+        startPickerValue: [pickupTimeIndex],
+        endPickerValue: [returnTimeIndex],
+        currentStartTimeIndex: pickupTimeIndex,
+        currentEndTimeIndex: returnTimeIndex,
         dateRangeComplete: true,
         isDateSelected: true
       });
@@ -263,7 +469,11 @@ Page({
         startDateVal: pickupDateOnly,
         endDateVal: returnDateOnly,
         startTimeRaw: pickupTimeStr,
-        endTimeRaw: returnTimeStr
+        endTimeRaw: returnTimeStr,
+        startPickerValue: [pickupTimeIndex],
+        endPickerValue: [returnTimeIndex],
+        currentStartTimeIndex: pickupTimeIndex,
+        currentEndTimeIndex: returnTimeIndex
       });
       
     } else {
@@ -273,7 +483,11 @@ Page({
         endDateVal: null,
         dateRangeComplete: false,
         isDateSelected: false,
-        dateSelectionMode: 'start'
+        dateSelectionMode: 'start',
+        startPickerValue: [0],
+        endPickerValue: [0],
+        currentStartTimeIndex: 0,
+        currentEndTimeIndex: 0
       });
     }
   },
@@ -501,10 +715,12 @@ Page({
         
         // 原来的取车时间变成还车时间
         if (originalStartTime) {
+          const endTimeIndex = this.findTimeIndex(originalStartTime);
           this.setData({
             endTimeRaw: originalStartTime,
             endTimeRaw1: originalStartTime,
-            selectedEndIndex: this.data.timeList.indexOf(originalStartTime)
+            endPickerValue: [endTimeIndex],
+            currentEndTimeIndex: endTimeIndex
           });
         } else {
           this.setDefaultTimeForDate(originalStartDate, 'end');
@@ -516,14 +732,9 @@ Page({
       this.updateDateDisplayOnly();
     }
     
+    // 更新时间列表样式
+    this.updateTimeListStyles();
     this.computeDuration();
-    
-    // 如果选择完成，自动调整时间选择器
-    if (this.data.dateRangeComplete) {
-      setTimeout(() => {
-        this.updateTimeScrollPosition();
-      }, 150);
-    }
     
     console.log('选择完成后的状态:', {
       startDateVal: this.data.startDateVal,
@@ -566,36 +777,22 @@ Page({
       }
     }
     
-    const timeIndex = this.data.timeList.indexOf(defaultTime);
+    const timeIndex = this.findTimeIndex(defaultTime);
     
     if (type === 'start') {
       this.setData({
         startTimeRaw: defaultTime,
         startTimeRaw1: defaultTime,
-        selectedStartIndex: timeIndex !== -1 ? timeIndex : 0
+        startPickerValue: [timeIndex],
+        currentStartTimeIndex: timeIndex
       });
     } else {
       this.setData({
         endTimeRaw: defaultTime,
         endTimeRaw1: defaultTime,
-        selectedEndIndex: timeIndex !== -1 ? timeIndex : 0
+        endPickerValue: [timeIndex],
+        currentEndTimeIndex: timeIndex
       });
-    }
-  },
-
-  // 更新时间选择器滚动位置
-  updateTimeScrollPosition() {
-    const startTimeIndex = this.data.selectedStartIndex;
-    const endTimeIndex = this.data.selectedEndIndex;
-    
-    if (startTimeIndex !== -1) {
-      const startScrollTop = startTimeIndex * this.data.itemHeightPx;
-      this.setData({ startScrollTop: startScrollTop });
-    }
-    
-    if (endTimeIndex !== -1) {
-      const endScrollTop = endTimeIndex * this.data.itemHeightPx;
-      this.setData({ endScrollTop: endScrollTop });
     }
   },
 
@@ -611,27 +808,9 @@ Page({
     }
     console.log("生成时间列表:", times);
     this.setData({ timeList: times });
-  },
-
-  // 更新滚动位置
-  updateScrollPosition() {
-    const startTimeIndex = this.data.timeList.indexOf(this.data.startTimeRaw);
-    if (startTimeIndex !== -1) {
-      const scrollTop = startTimeIndex * this.data.itemHeightPx;
-      this.setData({ 
-        startScrollTop: scrollTop,
-        selectedStartIndex: startTimeIndex
-      });
-    }
     
-    const endTimeIndex = this.data.timeList.indexOf(this.data.endTimeRaw);
-    if (endTimeIndex !== -1) {
-      const scrollTop = endTimeIndex * this.data.itemHeightPx;
-      this.setData({ 
-        endScrollTop: scrollTop,
-        selectedEndIndex: endTimeIndex 
-      });
-    }
+    // 初始化时间列表样式
+    this.updateTimeListStyles();
   },
 
   // 更新顶部日期显示和星期信息（包含传入的时间）
@@ -698,188 +877,6 @@ Page({
     }
     this.setData({ lastTapTime: now });
     return callback();
-  },
-
-  // 时间项点击事件
-  onTimeItemTap(e) {
-    const { index, time, type } = e.currentTarget.dataset;
-    const scrollTop = index * this.data.itemHeightPx;
-    
-    if (type === 'start') {
-      this.setData({
-        startScrollTop: scrollTop,
-        selectedStartIndex: index,
-        startTimeRaw: time,
-        startTimeRaw1: time
-      });
-    } else {
-      this.setData({
-        endScrollTop: scrollTop,
-        selectedEndIndex: index,
-        endTimeRaw: time,
-        endTimeRaw1: time
-      });
-    }
-    
-    this.computeDuration();
-  },
-
-  // 取车时间滚动监听 - 使用节流优化
-  onStartTimeScrolling: utils.throttle(function(e) {
-    const current = e.detail.scrollTop;
-    // 每次滚动时先清除之前的定时器
-    if (this.data.startScrollTimer) {
-      clearTimeout(this.data.startScrollTimer);
-    }
-    // 记录当前滚动位置
-    this.setData({
-      lastStartScrollTop: current
-    });
-    
-    // 实时更新选中状态
-    const index = Math.round(current / this.data.itemHeightPx);
-    this.setData({ selectedStartIndex: index });
-    
-    // 延时判断滚动是否停止
-    this.data.startScrollTimer = setTimeout(() => {
-      // 如果延时后上次记录的位置和当前相同，则认为停止滚动
-      if (this.data.lastStartScrollTop === current) {
-        const snapped = this.getSnappedScrollTop(current, "start");
-        this.setData({ startScrollTop: snapped });
-        let index = snapped / this.data.itemHeightPx;
-        let time = this.data.timeList[index];
-        console.log("取车时间滚动停止，吸附到：", time);
-        this.setData({ 
-          startTimeRaw: time,
-          startTimeRaw1: time,
-          selectedStartIndex: index
-        });
-        this.computeDuration();
-      }
-    }, 100);
-  }, 50),
-
-  // 还车时间滚动监听 - 使用节流优化
-  onEndTimeScrolling: utils.throttle(function(e) {
-    const current = e.detail.scrollTop;
-    if (this.data.endScrollTimer) {
-      clearTimeout(this.data.endScrollTimer);
-    }
-    this.setData({
-      lastEndScrollTop: current
-    });
-    
-    // 实时更新选中状态
-    const index = Math.round(current / this.data.itemHeightPx);
-    this.setData({ selectedEndIndex: index });
-    
-    this.data.endScrollTimer = setTimeout(() => {
-      if (this.data.lastEndScrollTop === current) {
-        const snapped = this.getSnappedScrollTop(current, "end");
-        this.setData({ endScrollTop: snapped });
-        let index = snapped / this.data.itemHeightPx;
-        let time = this.data.timeList[index];
-        console.log("还车时间滚动停止，吸附到：", time);
-        this.setData({ 
-          endTimeRaw: time,
-          endTimeRaw1: time,
-          selectedEndIndex: index
-        });
-        this.computeDuration();
-      }
-    }, 100);
-  }, 50),
-
-  // 吸附函数
-  adsorb(snapped, type) {
-    if (type === "startScrollTop") {
-      this.setData({ startScrollTop: snapped });
-    } else { 
-      this.setData({ endScrollTop: snapped });
-    }
-
-    let index = snapped / this.data.itemHeightPx;
-    let time = this.data.timeList[index];
-    console.log("时间吸附到：", time);
-    
-    if (type === "startScrollTop") {
-      this.setData({ 
-        startTimeRaw: time,
-        startTimeRaw1: time,
-        selectedStartIndex: index
-      });
-    } else {
-      this.setData({ 
-        endTimeRaw: time,
-        endTimeRaw1: time,
-        selectedEndIndex: index
-      });
-    }
-    this.computeDuration();
-  },
-
-  // 触摸结束时也触发吸附
-  onStartScrollTouchEnd(e) {
-    const current = e.detail.scrollTop;
-    const snapped = this.getSnappedScrollTop(current, "start");
-    this.setData({ 
-      startScrollTop: snapped,
-      selectedStartIndex: snapped / this.data.itemHeightPx
-    });
-  },
-
-  onEndScrollTouchEnd(e) {
-    const current = e.detail.scrollTop;
-    const snapped = this.getSnappedScrollTop(current, "end");
-    this.setData({ 
-      endScrollTop: snapped,
-      selectedEndIndex: snapped / this.data.itemHeightPx
-    });
-  },
-
-  // 自动吸附算法：计算最接近的 item 位置
-  getSnappedScrollTop(scrollTop, type) {
-    const itemHeight = this.data.itemHeightPx;
-    let index = Math.floor(scrollTop / itemHeight);
-    let sameDay = type === 'start' ? 
-      utils.isSameDayOrToday(this.data.startDateVal, this.data.endDateVal) : 
-      utils.isSameDay(this.data.startDateVal, this.data.endDateVal);
-    
-    if (sameDay) {
-      let selectTime = this.data.timeList[index];
-      // 获取当前时间并计算最近的半小时时间
-      const now = new Date();
-      let hours = now.getHours();
-      let minutes = now.getMinutes();
-      
-      // 处理分钟进位
-      if (minutes >= 30) {
-        hours += 1;
-        minutes = 0;
-      } else {
-        minutes = 30;
-      }
-      // 处理小时溢出
-      if (hours >= 24) hours = 0;
-      
-      // 格式化成 HH:mm 字符串
-      const currentTime = 
-        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      
-      // 比较时间字符串
-      if (selectTime < currentTime) {
-        selectTime = currentTime;
-      }
-      let finalIndex = this.data.timeList.indexOf(selectTime);
-      index = finalIndex !== -1 ? finalIndex : index;
-    }
-    
-    const remainder = scrollTop - index * itemHeight;
-    // 如果余数大于或等于半个item高度，则吸附到下一个item
-    if (remainder >= itemHeight / 2) {
-      index++;
-    }
-    return index * itemHeight;
   },
 
   // 计算总时长，结合日期与时间
@@ -965,14 +962,17 @@ Page({
         isDateSelected: false,
         dateSelectionMode: 'start',
         tempSelectedDate: null,
-        selectedStartIndex: 0,
-        selectedEndIndex: 0,
-        startScrollTop: 0,
-        endScrollTop: 0
+        startPickerValue: [0],
+        endPickerValue: [0],
+        currentStartTimeIndex: 0,
+        currentEndTimeIndex: 0
       });
       
       // 更新日历显示
       this.updateCalendarDisplay();
+      
+      // 更新时间列表样式
+      this.updateTimeListStyles();
       
       this.showToast('已清空选择', 'success');
     });
@@ -1031,7 +1031,7 @@ Page({
       newReturnDateTimestamp 
     });
     
-    // 验证时间戳
+    // 验证时间
     console.log("验证时间:", {
       pickup: new Date(newPickupDateTimestamp),
       return: new Date(newReturnDateTimestamp)
@@ -1094,12 +1094,9 @@ Page({
 
   // 页面卸载清理
   onUnload() {
-    // 清理定时器
-    if (this.data.startScrollTimer) {
-      clearTimeout(this.data.startScrollTimer);
-    }
-    if (this.data.endScrollTimer) {
-      clearTimeout(this.data.endScrollTimer);
+    // 清理音频上下文
+    if (this.data.audioContext) {
+      this.data.audioContext.destroy();
     }
     console.log('timeSelect页面清理完成');
   }
