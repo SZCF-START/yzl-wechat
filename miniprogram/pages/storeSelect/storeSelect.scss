@@ -228,6 +228,7 @@ page {
   transition: all 0.2s ease;
   border: 2px solid transparent;
   box-sizing: border-box;
+  position: relative;
 }
 
 /* 最后一个门店卡片额外底部间距 */
@@ -235,14 +236,22 @@ page {
   margin-bottom: clamp(30px, 8vw, 60px);
 }
 
+/* 所有门店卡片的通用交互样式 */
 .store-card:active {
   transform: scale(0.98);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
-.store-card.selected {
+/* 只有常用门店区域的门店才显示选中状态 */
+.store-card.favorite-store.selected {
   border: 2px solid #ffa400;
   box-shadow: 0 2px 12px rgba(255, 164, 0, 0.15);
+}
+
+/* 其他区域的门店不显示选中状态，即使有selected类 */
+.store-card.other-store.selected {
+  border: 2px solid transparent;
+  box-shadow: none;
 }
 
 .store-header {

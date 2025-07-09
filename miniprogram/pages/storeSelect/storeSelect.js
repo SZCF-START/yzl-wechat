@@ -225,47 +225,69 @@ Page({
     });
   },
 
-  // 保存常用门店 - 修改排序逻辑：最新选中在第二个，旧的在第一个
+  // 保存常用门店 - 正确的排序逻辑：最新选中在第二个，之前的在第一个
   saveFavoriteStore(storeData) {
     const currentCity = this.data.currentCity;
     const favoriteStoresKey = `favoriteStores_${currentCity}`;
     let favoriteStores = wx.getStorageSync(favoriteStoresKey) || [];
     
-    // 移除已存在的相同门店
+    // 移除已存在的相同门店（避免重复）
     favoriteStores = favoriteStores.filter(store => store.name !== storeData.name);
     
-    // 如果已有门店，新门店插入到第二个位置（索引1）
-    if (favoriteStores.length > 0) {
-      favoriteStores.splice(1, 0, storeData);
+    // 根据当前数组长度决定插入位置
+    if (favoriteStores.length === 0) {
+      // 第一次选择：[A]
+      favoriteStores.push(storeData);
+    } else if (favoriteStores.length === 1) {
+      // 第二次选择：[A, B] - A在第一个，B（最新）在第二个
+      favoriteStores.push(storeData);
     } else {
-      // 如果没有门店，直接添加
+      // 第三次及以后：[B, C] - 移除最老的A，B移到第一个，C（最新）在第二个
       favoriteStores.push(storeData);
     }
     
     // 只保留最新的两个门店
     if (favoriteStores.length > 2) {
-      favoriteStores = favoriteStores.slice(0, 2);
+      favoriteStores = favoriteStores.slice(-2); // 保留最后两个
     }
     
     // 保存到存储
     wx.setStorageSync(favoriteStoresKey, favoriteStores);
     
-    console.log(`保存${currentCity}的常用门店（最新在第二个）:`, favoriteStores);
+    console.log(`保存${currentCity}的常用门店排序说明:`);
+    console.log(`- 索引0（第一个）: ${favoriteStores[0]?.name || '无'} - 倒数第二个选择的门店`);
+    console.log(`- 索引1（第二个）: ${favoriteStores[1]?.name || '无'} - 最新选择的门店`);
+    console.log('完整数组:', favoriteStores);
     
     // 更新页面数据
     this.setData({
       favoriteStores: favoriteStores
     });
+    
+    // 如果是从其他区域选择的门店，需要重新处理区域列表
+    if (this.data.areaList.length > 0) {
+      // 重新获取原始区域列表（不包含常用门店）
+      let originalAreaList = this.data.areaList;
+      if (originalAreaList[0].name === '常用门店') {
+        originalAreaList = originalAreaList.slice(1);
+      }
+      
+      // 重新处理区域列表
+      const processedAreaList = this.processAreaListWithFavorites(originalAreaList);
+      this.setData({
+        areaList: processedAreaList
+      });
+    }
   },
 
-  // 滚动到选中的门店位置 - 只在常用门店中选中
+  // 滚动到选中的门店位置 - 只在常用门店中显示选中状态
   scrollToSelectedStore() {
     if (!this.data.selectedStore) return;
-  
+
     const areaList = this.data.areaList;
     let targetAreaIndex = 0;
     let foundInFavorites = false;
-  
+
     // 只检查常用门店
     if (areaList.length > 0 && areaList[0].name === '常用门店') {
       const favoriteArea = areaList[0];
@@ -275,15 +297,16 @@ Page({
         foundInFavorites = true;
       }
     }
-  
+
+    // 如果不在常用门店中，不清除选中状态，但是也不滚动
     if (!foundInFavorites) {
       return;
     }
-  
+
     this.setData({
       selectedAreaIndex: targetAreaIndex
     });
-  
+
     setTimeout(() => {
       const targetOffset = this.data.areaOffsets[targetAreaIndex];
       if (targetOffset !== undefined) {
@@ -589,10 +612,16 @@ Page({
     });
   },
 
+  // 门店卡片点击事件 - 恢复所有门店的选择功能
   onCardTap(e) {
-    console.log("选择门店:", e.currentTarget.dataset.store.name);
     const storeData = e.currentTarget.dataset.store;
+    const areaName = e.currentTarget.dataset.area;
     const storeName = storeData.name;
+    
+    console.log("点击门店:", storeName, "区域:", areaName);
+    
+    // 所有门店都可以选择，不做限制
+    console.log("选择门店:", storeName);
     
     // 更新页面选中状态
     this.setData({

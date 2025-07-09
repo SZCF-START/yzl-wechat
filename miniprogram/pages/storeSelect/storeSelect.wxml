@@ -70,33 +70,36 @@
       show-scrollbar="{{false}}"
     >
       <view class="store-list-content">
-        <block wx:for="{{areaList}}" wx:key="name">
-          <view class="area-section" id="area-{{index}}">
+        <block wx:for="{{areaList}}" wx:key="name" wx:for-item="area" wx:for-index="areaIndex">
+          <view class="area-section" id="area-{{areaIndex}}">
             <view class="area-title">
-              {{item.name}}
+              {{area.name}}
             </view>
-            <block wx:for="{{item.stores}}" wx:key="name">
-              <view class="store-card {{selectedStore === item.name ? 'selected' : ''}}" data-store="{{item}}" bindtap="onCardTap">
+            <block wx:for="{{area.stores}}" wx:key="name" wx:for-item="store">
+              <view class="store-card {{selectedStore === store.name && area.name === '常用门店' ? 'selected' : ''}} {{area.name === '常用门店' ? 'favorite-store' : 'other-store'}}" 
+                    data-store="{{store}}" 
+                    data-area="{{area.name}}"
+                    bindtap="onCardTap">
                 <view class="store-header">
                   <view class="store-name-wrapper">
-                    <text class="store-name">{{item.name}}</text>
+                    <text class="store-name">{{store.name}}</text>
                     <text class="store-arrow">></text>
                   </view>
                   <view class="tag-list">
-                    <block wx:for="{{item.tags}}" wx:key="label">
-                      <text class="tag {{'tag-' + item.type}}">{{item.label}}</text>
+                    <block wx:for="{{store.tags}}" wx:key="label" wx:for-item="tag">
+                      <text class="tag {{'tag-' + tag.type}}">{{tag.label}}</text>
                     </block>
                   </view>
                 </view>
 
-                <view class="store-addr">地址：{{item.address}}</view>
-                <view class="store-time">营业时间：{{item.openTime}} - {{item.closeTime}}</view>
+                <view class="store-addr">地址：{{store.address}}</view>
+                <view class="store-time">营业时间：{{store.openTime}} - {{store.closeTime}}</view>
 
                 <view class="store-actions">
-                  <button class="action-btn" open-type="makePhoneCall" data-phone="{{item.phone}}" catchtap="onPhoneTap">
+                  <button class="action-btn" open-type="makePhoneCall" data-phone="{{store.phone}}" catchtap="onPhoneTap">
                     <text class="icon">📞</text> 电话
                   </button>
-                  <button class="action-btn" catchtap="onGuideTap" data-lat="{{item.latitude}}" data-lng="{{item.longitude}}" data-name="{{item.name}}" data-address="{{item.address}}">
+                  <button class="action-btn" catchtap="onGuideTap" data-lat="{{store.latitude}}" data-lng="{{store.longitude}}" data-name="{{store.name}}" data-address="{{store.address}}">
                     <text class="icon">📍</text> 门店指引
                   </button>
                 </view>
