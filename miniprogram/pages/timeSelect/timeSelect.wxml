@@ -1,0 +1,177 @@
+<view class="page-container">
+  <!-- 加载状态 -->
+  <view class="loading-overlay" wx:if="{{isLoading}}">
+    <view>
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+
+  <!-- 顶部固定区域：显示取还车日期与时间 -->
+  <view class="top-fixed">
+    <!-- 取车日期 -->
+    <view class="date-item">
+      <text class="date-text">{{ startDateDisplay || "取车日期" }}</text>
+      <text class="time-display">{{ startWeek || "请选择" }}{{ startTimeRaw || "" }}</text>
+    </view>
+    
+    <!-- 箭头 -->
+    <view class="arrow-container">
+      <image 
+        class="arrow-icon" 
+        src="/images/arrow.png" 
+        mode="widthFix"
+        lazy-load="{{true}}"
+        show-menu-by-longpress="{{false}}"
+      />
+    </view>
+    
+    <!-- 还车日期 -->
+    <view class="date-item">
+      <text class="date-text">{{ endDateDisplay || "还车日期" }}</text>
+      <text class="time-display">{{ endWeek || "请选择" }}{{ endTimeRaw || "" }}</text>
+    </view>
+  </view>
+
+  <!-- 日历滚动区域 -->
+  <scroll-view 
+    class="calendar-scroll" 
+    scroll-y="true"
+    enhanced="{{true}}"
+    show-scrollbar="{{false}}"
+    enable-back-to-top="{{true}}"
+  >
+    <view class="calendar-container">
+      <!-- 使用自定义日历替代van-calendar -->
+      <view class="week-header">
+        <text class="week-item weekend">日</text>
+        <text class="week-item">一</text>
+        <text class="week-item">二</text>
+        <text class="week-item">三</text>
+        <text class="week-item">四</text>
+        <text class="week-item">五</text>
+        <text class="week-item weekend">六</text>
+      </view>
+      
+      <!-- 当前月份 -->
+      <view class="calendar-month" wx:for="{{calendarMonths}}" wx:key="month">
+        <view class="month-title">{{item.title}}</view>
+        <view class="days-grid">
+          <view 
+            wx:for="{{item.days}}" 
+            wx:key="date"
+            wx:for-item="day"
+            class="day-item {{day.class}}"
+            data-date="{{day.timestamp}}"
+            bindtap="onDateTap"
+          >
+            <text class="day-number">{{day.day}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 门店营业时间提示 -->
+  <view class="store-hours">
+    <text class="store-hours-text">取/还车门店营业时间：08:00-20:00</text>
+  </view>
+
+  <!-- 时间选择区域 - 使用picker-view重新实现 -->
+  <view class="time-area">
+    <view class="time-header">
+      <text class="time-title">取车时间</text>
+      <text class="time-title">还车时间</text>
+    </view>
+    
+    <view class="time-content">
+      <!-- 取车时间选择器 -->
+      <view class="time-column">
+        <view class="time-picker-container {{isStartPicking ? 'picking' : ''}}">
+          <picker-view 
+            class="time-picker-view"
+            value="{{startPickerValue}}"
+            bindchange="onStartTimeChange"
+            bindpickstart="onStartPickStart"
+            bindpickend="onStartPickEnd"
+            indicator-style="height: 100rpx; background-color: transparent; border: none;"
+            indicator-class="time-indicator"
+          >
+            <picker-view-column>
+              <view 
+                wx:for="{{timeList}}" 
+                wx:key="*this"
+                class="time-item {{index === currentStartTimeIndex ? 'selected-time' : ''}}"
+                wx:for-index="index"
+              >
+                {{item}}
+              </view>
+            </picker-view-column>
+          </picker-view>
+        </view>
+      </view>
+
+      <!-- 还车时间选择器 -->
+      <view class="time-column">
+        <view class="time-picker-container {{isEndPicking ? 'picking' : ''}}">
+          <picker-view 
+            class="time-picker-view"
+            value="{{endPickerValue}}"
+            bindchange="onEndTimeChange"
+            bindpickstart="onEndPickStart"
+            bindpickend="onEndPickEnd"
+            indicator-style="height: 100rpx; background-color: transparent; border: none;"
+            indicator-class="time-indicator"
+          >
+            <picker-view-column>
+              <view 
+                wx:for="{{timeList}}" 
+                wx:key="*this"
+                class="time-item {{index === currentEndTimeIndex ? 'selected-time' : ''}}"
+                wx:for-index="index"
+              >
+                {{item}}
+              </view>
+            </picker-view-column>
+          </picker-view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部固定区域 -->
+  <view class="bottom-fixed">
+    <view class="duration-text">
+      <block wx:if="{{ totalDays || totalHours }}">
+        <text>共{{totalDays}}天</text>
+      </block>
+      <block wx:else>
+        <text>请选择日期</text>
+      </block>
+    </view>
+    
+    <view class="btn-group">
+      <button 
+        class="clear-btn" 
+        bindtap="onClear"
+        hover-class="clear-btn-hover"
+        hover-stay-time="150"
+      >
+        清空
+      </button>
+      
+      <button 
+        class="confirm-btn {{ !dateRangeComplete ? 'disabled' : '' }}" 
+        bindtap="onConfirm" 
+        disabled="{{ !dateRangeComplete }}"
+        hover-class="confirm-btn-hover"
+        hover-stay-time="150"
+      >
+        确定
+      </button>
+    </view>
+  </view>
+
+  <!-- 底部安全区域适配 -->
+  <view class="safe-area-bottom"></view>
+</view>

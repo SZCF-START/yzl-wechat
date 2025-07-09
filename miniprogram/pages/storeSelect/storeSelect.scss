@@ -1,0 +1,504 @@
+/* 自适应所有屏幕的门店选择页面样式 */
+
+/* 页面容器 - 禁用滚动 */
+page {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* 头部区域 - 自适应高度 */
+.header1 {
+  flex-shrink: 0;
+  background: #ffffff;
+  z-index: 1000;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.header {
+  width: 100%;
+  background: #ffffff;
+  padding: 4vw 2.5vw;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  width: 100%;
+  gap: 3vw;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #f5f5f5;
+  border-radius: 25px;
+  padding: 2vw 3vw;
+  min-height: 40px;
+  box-sizing: border-box;
+}
+
+.city-select {
+  display: flex;
+  align-items: center;
+  margin-right: 3vw;
+  flex-shrink: 0;
+}
+
+.city-text {
+  font-size: clamp(12px, 3.5vw, 16px);
+  color: #333;
+  font-weight: bold;
+  margin-right: 1vw;
+  white-space: nowrap;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background-color: #ddd;
+  margin-right: 3vw;
+  flex-shrink: 0;
+}
+
+.search-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.search-icon {
+  width: clamp(14px, 4vw, 18px);
+  height: clamp(14px, 4vw, 18px);
+  margin-right: 2vw;
+  flex-shrink: 0;
+}
+
+.search-placeholder {
+  font-size: clamp(11px, 3vw, 14px);
+  color: #aaa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-btn {
+  color: #ff9900;
+  font-size: clamp(12px, 3.5vw, 16px);
+  flex-shrink: 0;
+  padding: 2vw;
+  white-space: nowrap;
+}
+
+/* 地图容器 - 自适应高度 */
+.map-container {
+  height: clamp(200px, 25vh, 350px);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.map-overlay {
+  position: absolute;
+  bottom: 2vw;
+  right: 2vw;
+  z-index: 10;
+}
+
+.view-map-btn {
+  background-color: #f90;
+  border-radius: 8px;
+  padding: 2vw 4vw;
+  font-size: clamp(12px, 3.5vw, 16px);
+  color: white;
+  white-space: nowrap;
+}
+
+/* 门店区域 - 自适应剩余空间 */
+.store-section {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  width: 100%;
+}
+
+/* 左侧区域列表 - 自适应宽度 */
+.area-list {
+  width: clamp(120px, 25vw, 180px);
+  height: 100%;
+  background: #f5f5f5;
+  flex-shrink: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.area-item {
+  padding: 4vw 3vw;
+  font-size: clamp(11px, 3.5vw, 15px);
+  color: #333;
+  display: flex;
+  align-items: center;
+  min-height: clamp(40px, 8vw, 60px);
+  box-sizing: border-box;
+  transition: background-color 0.2s;
+  word-break: break-all;
+  line-height: 1.2;
+}
+
+.area-item:active {
+  background-color: #e0e0e0;
+}
+
+.area-item.active {
+  background: #fff;
+  border-left: clamp(3px, 1vw, 6px) solid #ffa400;
+  font-weight: bold;
+  color: #ffa400;
+}
+
+/* 右侧门店列表 - 自适应宽度 */
+.store-list {
+  flex: 1;
+  height: 100%;
+  background: #fff;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-width: 0;
+}
+
+/* 门店列表内容容器 - 修复底部显示不全问题 */
+.store-list-content {
+  /* 基础底部间距 */
+  padding-bottom: clamp(60px, 15vw, 120px);
+  /* 兼容旧版本iOS */
+  padding-bottom: calc(clamp(60px, 15vw, 120px) + constant(safe-area-inset-bottom));
+  /* 现代浏览器安全区域 */
+  padding-bottom: calc(clamp(60px, 15vw, 120px) + env(safe-area-inset-bottom));
+  /* 确保最小高度 */
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.area-section {
+  margin-bottom: clamp(20px, 5vw, 40px);
+}
+
+/* 最后一个区域额外间距 */
+.area-section:last-child {
+  margin-bottom: clamp(40px, 10vw, 80px);
+}
+
+.area-title {
+  font-size: clamp(13px, 4vw, 18px);
+  font-weight: bold;
+  margin-bottom: clamp(10px, 3vw, 20px);
+  background: #f5f5f5;
+  padding: clamp(10px, 3vw, 20px);
+  border-radius: 8px;
+  /* 移除粘性定位，让区域标题随内容正常滚动 */
+}
+
+.store-card {
+  padding: clamp(15px, 4vw, 30px) clamp(10px, 3vw, 20px);
+  background: #fff;
+  margin: 0 clamp(10px, 3vw, 20px) clamp(10px, 3vw, 20px) clamp(10px, 3vw, 20px);
+  border-radius: clamp(6px, 2vw, 12px);
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* 最后一个门店卡片额外底部间距 */
+.area-section:last-child .store-card:last-of-type {
+  margin-bottom: clamp(30px, 8vw, 60px);
+}
+
+/* 所有门店卡片的通用交互样式 */
+.store-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 只有常用门店区域的门店才显示选中状态 */
+.store-card.favorite-store.selected {
+  border: 2px solid #ffa400;
+  box-shadow: 0 2px 12px rgba(255, 164, 0, 0.15);
+}
+
+/* 其他区域的门店不显示选中状态，即使有selected类 */
+.store-card.other-store.selected {
+  border: 2px solid transparent;
+  box-shadow: none;
+}
+
+.store-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: clamp(8px, 2vw, 16px);
+}
+
+.store-name-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: clamp(6px, 2vw, 12px);
+  width: 100%;
+  gap: clamp(6px, 1vw, 8px);
+}
+
+.store-name {
+  font-size: clamp(14px, 4.5vw, 20px);
+  font-weight: bold;
+  color: #222;
+  flex-shrink: 0;
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+.store-arrow {
+  font-size: clamp(14px, 4.5vw, 20px);
+  color: #999;
+  flex-shrink: 0;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(4px, 1vw, 8px);
+  width: 100%;
+}
+
+.tag {
+  padding: clamp(2px, 1vw, 4px) clamp(6px, 2vw, 12px);
+  font-size: clamp(9px, 2.5vw, 12px);
+  border-radius: 4px;
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.tag-default {
+  background-color: #f2f2f2;
+  color: #666;
+}
+
+.tag-highlight {
+  background-color: #fff7e6;
+  color: #ff8800;
+  border: 1px solid #ffcc99;
+}
+
+.tag-danger {
+  background-color: #ffe7e7;
+  color: #d9001b;
+  border: 1px solid #ffb3b3;
+}
+
+.store-addr,
+.store-time {
+  font-size: clamp(10px, 3vw, 14px);
+  color: #888;
+  margin-top: clamp(6px, 2vw, 12px);
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.store-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: clamp(12px, 3vw, 24px);
+  gap: clamp(10px, 3vw, 20px);
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: clamp(10px, 3vw, 14px);
+  border-radius: 6px;
+  background-color: #f8f9fa;
+  color: #444;
+  border: 1px solid #e9ecef;
+  padding: clamp(8px, 2vw, 12px) 0;
+  min-height: clamp(36px, 7vw, 48px);
+  max-height: clamp(36px, 7vw, 48px);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.action-btn:active {
+  background-color: #e9ecef;
+  transform: scale(0.96);
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.icon {
+  margin-right: clamp(4px, 1vw, 8px);
+  font-size: clamp(8px, 2.5vw, 12px);
+}
+
+.card-divider {
+  height: 1px;
+  background-color: #f0f0f0;
+  margin: clamp(10px, 3vw, 20px);
+}
+
+/* 搜索蒙层 - 自适应 */
+.mask-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ffffff;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  padding: clamp(10px, 3vw, 20px);
+  border-bottom: 1px solid #f0f0f0;
+  background: #ffffff;
+  flex-shrink: 0;
+  gap: clamp(10px, 3vw, 20px);
+}
+
+.search-input {
+  flex: 1;
+  height: clamp(30px, 8vw, 60px);
+  background-color: #f5f5f5;
+  border-radius: 25px;
+  padding: 0 clamp(10px, 3vw, 20px);
+  font-size: clamp(12px, 3.5vw, 16px);
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.cancel-btn {
+  font-size: clamp(12px, 3.5vw, 16px);
+  color: #333;
+  padding: clamp(5px, 2vw, 10px);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.search-results {
+  flex: 1;
+  padding: clamp(10px, 3vw, 20px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 响应式断点优化 */
+/* 小屏设备额外优化 */
+@media screen and (max-width: 320px) {
+  .search-box {
+    padding: 8px 12px;
+  }
+  
+  .store-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .action-btn {
+    min-height: 32px;
+    max-height: 32px;
+  }
+  
+  /* 小屏设备增加底部间距 */
+  .store-list-content {
+    padding-bottom: clamp(80px, 20vw, 150px);
+    padding-bottom: calc(clamp(80px, 20vw, 150px) + constant(safe-area-inset-bottom));
+    padding-bottom: calc(clamp(80px, 20vw, 150px) + env(safe-area-inset-bottom));
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .container {
+    max-width: 768px;
+    margin: 0 auto;
+  }
+  
+  .area-list {
+    width: 200px;
+  }
+  
+  .header {
+    padding: 20px 30px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+  
+  .area-list {
+    width: 220px;
+  }
+}
+
+/* 横屏适配 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .map-container {
+    height: 150px;
+  }
+  
+  .header {
+    padding: 10px 20px;
+  }
+  
+  .store-card {
+    padding: 15px 10px;
+  }
+  
+  /* 横屏时增加底部间距 */
+  .store-list-content {
+    padding-bottom: clamp(50px, 12vw, 100px);
+    padding-bottom: calc(clamp(50px, 12vw, 100px) + constant(safe-area-inset-bottom));
+    padding-bottom: calc(clamp(50px, 12vw, 100px) + env(safe-area-inset-bottom));
+  }
+}
+
+/* 高DPI屏幕优化 */
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+  .card-divider {
+    height: 0.5px;
+  }
+  
+  .divider {
+    width: 0.5px;
+  }
+}

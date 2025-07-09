@@ -1,0 +1,169 @@
+<view class="review-container">
+  <!-- 审核状态头部 -->
+  <view class="status-header">
+    <view class="status-icon {{reviewInfo.status}}">
+      <text class="status-symbol">{{reviewInfo.statusSymbol}}</text>
+    </view>
+    <view class="status-content">
+      <text class="status-title">{{reviewInfo.statusTitle}}</text>
+      <text class="status-desc">{{reviewInfo.statusDesc}}</text>
+    </view>
+  </view>
+
+  <!-- 审核进度 -->
+  <view class="progress-section">
+    <view class="info-header">
+      <text class="info-title">审核进度</text>
+    </view>
+    <view class="progress-timeline">
+      <view class="timeline-item {{item.completed ? 'completed' : ''}}" 
+            wx:for="{{progressSteps}}" wx:key="index">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <text class="timeline-title">{{item.title}}</text>
+          <text class="timeline-time" wx:if="{{item.time}}">{{item.time}}</text>
+          <text class="timeline-desc" wx:if="{{item.desc}}">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单基本信息 -->
+  <view class="order-basic-info">
+    <view class="info-header">
+      <text class="info-title">订单信息</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">订单编号：</text>
+      <text class="info-value">{{reviewInfo.orderNo}}</text>
+      <text class="copy-btn" bindtap="copyOrderNo">复制</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">门店名称：</text>
+      <text class="info-value">{{reviewInfo.storeName}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">车型名称：</text>
+      <text class="info-value">{{reviewInfo.carModel}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">提交时间：</text>
+      <text class="info-value">{{reviewInfo.submitTime}}</text>
+    </view>
+  </view>
+
+  <!-- 仪表盘数据对比 -->
+  <view class="dashboard-compare">
+    <view class="info-header">
+      <text class="info-title">仪表盘数据对比</text>
+    </view>
+    <view class="compare-row">
+      <view class="compare-item">
+        <text class="compare-label">出车时</text>
+        <text class="compare-value">{{reviewInfo.initialHours}}小时</text>
+      </view>
+      <view class="compare-arrow">→</view>
+      <view class="compare-item">
+        <text class="compare-label">还车时</text>
+        <text class="compare-value highlight">{{reviewInfo.returnHours}}小时</text>
+      </view>
+    </view>
+    <view class="work-hours-info">
+      <text class="work-hours-text">总工作时长：{{reviewInfo.totalWorkHours}}小时</text>
+    </view>
+  </view>
+
+  <!-- 超时情况 -->
+  <view class="overtime-section" wx:if="{{reviewInfo.overtimeDays > 0}}">
+    <view class="info-header">
+      <text class="info-title">超时情况</text>
+    </view>
+    <view class="overtime-detail">
+      <view class="overtime-item">
+        <text class="overtime-label">超时天数：</text>
+        <text class="overtime-value">{{reviewInfo.overtimeDays}}天</text>
+      </view>
+      <view class="overtime-item">
+        <text class="overtime-label">计费方式：</text>
+        <text class="overtime-value">{{reviewInfo.priceTypeName}}</text>
+      </view>
+      <view class="overtime-item">
+        <text class="overtime-label">超时费用：</text>
+        <text class="overtime-value highlight">¥{{reviewInfo.overtimeFee}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 上传的照片 -->
+  <view class="photos-section">
+    <view class="info-header">
+      <text class="info-title">上传照片</text>
+    </view>
+    
+    <!-- 仪表盘照片 -->
+    <view class="photo-group">
+      <text class="photo-group-title">仪表盘照片</text>
+      <view class="photo-preview" bindtap="previewImage" 
+            data-urls="{{[reviewInfo.dashboardImage]}}" data-current="{{reviewInfo.dashboardImage}}">
+        <image class="preview-image" src="{{reviewInfo.dashboardImage}}" mode="aspectFill"></image>
+      </view>
+    </view>
+    
+    <!-- 车辆照片 -->
+    <view class="photo-group" wx:if="{{reviewInfo.vehicleImages.length > 0}}">
+      <text class="photo-group-title">车辆照片（{{reviewInfo.vehicleImages.length}}张）</text>
+      <view class="photo-grid">
+        <view class="photo-preview" wx:for="{{reviewInfo.vehicleImages}}" wx:key="index"
+              bindtap="previewImage" data-urls="{{reviewInfo.vehicleImages}}" data-current="{{item}}">
+          <image class="preview-image" src="{{item}}" mode="aspectFill"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 审核结果 -->
+  <view class="review-result" wx:if="{{reviewInfo.status === 'approved' || reviewInfo.status === 'rejected'}}">
+    <view class="info-header">
+      <text class="info-title">审核结果</text>
+    </view>
+    <view class="result-content">
+      <text class="result-status {{reviewInfo.status}}">{{reviewInfo.resultText}}</text>
+      <text class="result-time">审核时间：{{reviewInfo.reviewTime}}</text>
+      <view class="result-reason" wx:if="{{reviewInfo.reviewReason}}">
+        <text class="reason-label">审核说明：</text>
+        <text class="reason-text">{{reviewInfo.reviewReason}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系信息 -->
+  <view class="contact-section">
+    <view class="info-header">
+      <text class="info-title">联系门店</text>
+    </view>
+    <view class="contact-item" bindtap="makePhoneCall" data-phone="{{reviewInfo.managerPhone}}">
+      <view class="contact-info">
+        <text class="contact-name">{{reviewInfo.managerName}}</text>
+        <text class="contact-phone">{{reviewInfo.managerPhone}}</text>
+      </view>
+      <text class="contact-action">拨打电话</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section">
+    <button class="action-btn secondary" bindtap="backToHome">返回首页</button>
+    <button class="action-btn primary" bindtap="refreshStatus" 
+            wx:if="{{reviewInfo.status === 'pending'}}">刷新状态</button>
+    <button class="action-btn primary" bindtap="viewOrder" 
+            wx:if="{{reviewInfo.status === 'approved'}}">查看订单</button>
+  </view>
+</view>
+
+<!-- 加载中遮罩 -->
+<view class="loading-mask" wx:if="{{isLoading}}">
+  <view class="loading-content">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">{{loadingText}}</text>
+  </view>
+</view>

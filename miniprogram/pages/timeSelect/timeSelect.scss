@@ -1,0 +1,586 @@
+/* 整体页面容器 */
+.page-container {
+  width: 100%;
+  height: 100vh;
+  background-color: #f5f5f5;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 顶部固定区域 */
+.top-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 160rpx;
+  z-index: 10;
+  background-color: #fff;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  padding: 20rpx 40rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* 日期显示项 */
+.date-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+/* 日期文字（07月08日） */
+.date-text {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+
+/* 时间显示 */
+.time-display {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 箭头 */
+.arrow-container {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+/* 日历滚动区域 */
+.calendar-scroll {
+  position: absolute;
+  top: 160rpx;
+  bottom: 580rpx; /* 调整以适应新的布局高度 */
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.calendar-container {
+  background-color: #fff;
+  padding: 0 20rpx;
+}
+
+/* 自定义日历样式 */
+.calendar-header {
+  padding: 20rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  border-bottom: 1rpx solid #eee;
+}
+
+.week-header {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+}
+
+.week-item {
+  flex: 1;
+  text-align: center;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.week-item.weekend {
+  color: #ff6b6b;
+}
+
+.calendar-month {
+  background-color: #fff;
+  margin-bottom: 30rpx; /* 增加月份间距为标注文字留出空间 */
+}
+
+.month-title {
+  padding: 20rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.days-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10rpx;
+}
+
+.day-item {
+  width: 14.28%;
+  height: 100rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #333;
+  position: relative;
+  margin: 4rpx 0;
+  border-radius: 12rpx;
+}
+
+.day-item.disabled {
+  color: #ccc;
+}
+
+.day-item.today {
+  color: #ff8c00;
+  font-weight: bold;
+}
+
+.day-item.start-date {
+  background-color: #ff8c00;
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-item.end-date {
+  background-color: #ff8c00;
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-item.start-end-same {
+  background-color: #ff8c00;
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-item.in-range {
+  background-color: rgba(255, 140, 0, 0.2);
+  color: #ff8c00;
+}
+
+.day-item.start-date::after {
+  content: '取车';
+  font-size: 18rpx;
+  color: #fff;
+  margin-top: 2rpx;
+  white-space: nowrap;
+}
+
+.day-item.end-date::after {
+  content: '还车';
+  font-size: 18rpx;
+  color: #fff;
+  margin-top: 2rpx;
+  white-space: nowrap;
+}
+
+.day-item.start-end-same::after {
+  content: '取/还车';
+  font-size: 16rpx;
+  color: #fff;
+  margin-top: 2rpx;
+  white-space: nowrap;
+}
+
+/* 门店营业时间提示 */
+.store-hours {
+  position: fixed;
+  bottom: 540rpx; /* 调整位置以适应新的时间选择区域高度 */
+  left: 0;
+  width: 100%;
+  padding: 15rpx 40rpx;
+  background-color: #fff5e6;
+  border-top: 1rpx solid #ffe0b3;
+  z-index: 5;
+}
+
+.store-hours-text {
+  font-size: 28rpx;
+  color: #ff8c00;
+  text-align: left;
+}
+
+/* 时间选择区域 - 使用picker-view */
+.time-area {
+  position: fixed;
+  left: 0;
+  bottom: 160rpx;
+  width: 100%;
+  height: 400rpx;
+  z-index: 10;
+  background-color: #fff;
+  box-shadow: 0 -2rpx 6rpx rgba(0,0,0,0.05);
+  padding: 30rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.time-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+
+.time-title {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  flex: 1;
+}
+
+.time-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 40rpx;
+  position: relative;
+}
+
+/* 共用分割线 - 横跨整个时间选择区域 */
+.time-content::before,
+.time-content::after {
+  content: '';
+  position: absolute;
+  left: -40rpx;
+  right: -40rpx;
+  height: 2rpx;
+  background-color: #eee;
+  z-index: 1;
+}
+
+.time-content::before {
+  top: 100rpx; /* 第一条分割线位置 */
+}
+
+.time-content::after {
+  bottom: 100rpx; /* 第二条分割线位置 */
+}
+
+.time-column {
+  flex: 1;
+  position: relative;
+}
+
+/* picker-view 容器样式 - 移除背景色 */
+.time-picker-container {
+  height: 300rpx;
+  position: relative;
+  border-radius: 0;
+  overflow: hidden;
+  background-color: transparent; /* 移除背景色 */
+}
+
+/* picker-view 本体样式 */
+.time-picker-view {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+}
+
+/* picker-view-column 样式 */
+picker-view-column {
+  height: 100%;
+  text-align: center;
+}
+
+/* picker-view 内的时间项样式 */
+.time-item {
+  height: 100rpx;
+  line-height: 100rpx;
+  text-align: center;
+  font-size: 32rpx;
+  color: #666; /* 改为更深的灰色，原来是 #ccc */
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-weight: 400;
+}
+
+/* 动态选中的时间项样式 - 这是最重要的修改 */
+.time-item.selected-time {
+  color: #333 !important;
+  font-weight: bold !important;
+  font-size: 44rpx !important;
+}
+
+/* 移除之前的静态样式，因为我们现在使用动态类 */
+/* 
+picker-view-column .time-item:nth-child(2) {
+  color: #333;
+  font-weight: bold;
+  font-size: 44rpx;
+  position: relative;
+}
+*/
+
+/* 上方时间项渐变效果 */
+picker-view-column .time-item:nth-child(1) {
+  opacity: 0.8; /* 提高透明度，原来是 0.6 */
+  transform: scale(0.9);
+  color: #888; /* 改为更深的灰色，原来是 #999 */
+  font-size: 28rpx;
+}
+
+/* 下方时间项渐变效果 */
+picker-view-column .time-item:nth-child(3) {
+  opacity: 0.8; /* 提高透明度，原来是 0.6 */
+  transform: scale(0.9);
+  color: #888; /* 改为更深的灰色，原来是 #999 */
+  font-size: 28rpx;
+}
+
+.time-item.disabled {
+  color: #ddd !important;
+  opacity: 0.3;
+}
+
+/* picker-view 选中指示器样式 - 完全透明 */
+.time-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100rpx;
+  background-color: transparent;
+  border: none; /* 移除边框 */
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 移除渐变遮罩效果 */
+.time-picker-container::before,
+.time-picker-container::after {
+  display: none;
+}
+
+/* 移除不需要的选中时间项装饰效果 */
+
+/* 底部固定区域 - 增加高度 */
+.bottom-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 160rpx; /* 增加底部区域高度 */
+  background-color: #fff;
+  z-index: 10;
+  box-shadow: 0 -2rpx 6rpx rgba(0, 0, 0, 0.1);
+  padding: 30rpx 40rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.duration-text {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.btn-group {
+  display: flex;
+  align-items: center;
+}
+
+.clear-btn,
+.confirm-btn {
+  padding: 20rpx 50rpx; /* 增加按钮内边距 */
+  font-size: 32rpx; /* 增加字体大小 */
+  border-radius: 16rpx; /* 增加圆角 */
+  border: none;
+  transition: all 0.3s ease;
+  margin-left: 24rpx;
+  min-width: 120rpx;
+  height: 80rpx; /* 增加按钮高度 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-btn {
+  background-color: #f5f5f5;
+  color: #666;
+  border: 1rpx solid #ddd;
+}
+
+.clear-btn:active,
+.clear-btn-hover {
+  background-color: #e6e6e6;
+  transform: scale(0.98);
+}
+
+.confirm-btn {
+  background-color: #ff8c00;
+  color: #fff;
+  font-weight: bold;
+  min-width: 140rpx;
+}
+
+.confirm-btn:active,
+.confirm-btn-hover {
+  background-color: #e67a00;
+  transform: scale(0.98);
+}
+
+.confirm-btn.disabled {
+  background-color: #ccc;
+  color: #999;
+  opacity: 0.6;
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #ff8c00;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 20rpx;
+}
+
+/* 安全区域适配 */
+.safe-area-bottom {
+  height: env(safe-area-inset-bottom);
+  background-color: #ffffff;
+}
+
+/* picker-view 特殊效果 */
+/* 当正在选择时的效果 - 移除背景色 */
+.time-picker-container.picking {
+  /* 移除背景色 */
+}
+
+.time-picker-container.picking .time-indicator {
+  // background-color: rgba(255, 140, 0, 0.2);
+  // border-color: #ff8c00;
+  // box-shadow: 0 0 20rpx rgba(255, 140, 0, 0.3);
+}
+
+/* 移除选择时的背景色效果 */
+
+/* 响应式适配 */
+@media (max-width: 350px) {
+  .date-text {
+    font-size: 32rpx;
+  }
+  
+  .time-display {
+    font-size: 24rpx;
+  }
+  
+  .time-item {
+    font-size: 28rpx;
+  }
+  
+  .time-item.selected-time {
+    font-size: 36rpx !important;
+  }
+  
+  .time-picker-container {
+    height: 160rpx;
+  }
+  
+  .time-area {
+    height: 240rpx;
+  }
+}
+
+/* 为不同状态的时间项添加样式 */
+.time-item.current-time {
+  color: #ff8c00;
+  font-weight: 500;
+}
+
+.time-item.past-time {
+  color: #ccc;
+  opacity: 0.6;
+}
+
+/* picker-view 滚动时的视觉反馈 */
+.time-picker-view picker-view-column {
+  transition: opacity 0.2s ease;
+}
+
+.time-picker-container.picking picker-view-column {
+  // opacity: 0.9;
+}
+
+/* 添加选中指示器的动画 */
+@keyframes indicator-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10rpx rgba(255, 140, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0);
+  }
+}
+
+.time-picker-container.picking .time-indicator {
+  // animation: indicator-pulse 1.5s infinite;
+}
+
+/* 确保选中时间项在所有情况下都有正确的样式优先级 */
+picker-view-column .time-item.selected-time {
+  color: #333 !important;
+  font-weight: bold !important;
+  font-size: 44rpx !important;
+}
+
+/* 当选中项滚动时保持样式 */
+.time-picker-view picker-view-column .time-item.selected-time {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}

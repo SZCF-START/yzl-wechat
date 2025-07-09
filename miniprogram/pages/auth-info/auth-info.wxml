@@ -1,0 +1,38 @@
+<!-- pages/auth/info.wxml -->
+<view class="auth-info-page">
+  
+
+  <view class="info-container">
+    <view class="status-section">
+      <image src="../../assets/verified-icon.png" class="verified-icon"></image>
+      <text class="status-text">已通过实名认证</text>
+    </view>
+
+    <view class="info-list">
+      <view class="info-item">
+        <text class="label">真实姓名</text>
+        <text class="value">{{realName}}</text>
+      </view>
+      
+      <view class="info-item">
+        <text class="label">身份证号</text>
+        <text class="value">{{idCardNumber}}</text>
+      </view>
+      
+      <view class="info-item">
+        <text class="label">手机号码</text>
+        <text class="value">{{phoneNumber}}</text>
+      </view>
+      
+      <view class="info-item">
+        <text class="label">认证时间</text>
+        <text class="value">{{certificationTime}}</text>
+      </view>
+    </view>
+
+    <view class="tips">
+      <text class="tips-title">温馨提示：</text>
+      <text class="tips-content">您的实名信息已通过认证，如需修改请联系客服</text>
+    </view>
+  </view>
+</view>

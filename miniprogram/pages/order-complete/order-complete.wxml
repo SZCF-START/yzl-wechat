@@ -1,0 +1,178 @@
+<!-- order-complete.wxml - 优化UI结构，参考payment-after-review风格 -->
+<view class="complete-container">
+  
+  <!-- 成功头部 -->
+  <view class="success-header">
+    <view class="success-icon">
+      <text class="checkmark">✓</text>
+    </view>
+    <text class="success-title">订单已完成</text>
+    <text class="success-subtitle">感谢您的使用，祝您工作顺利！</text>
+  </view>
+
+  <!-- 订单摘要信息 -->
+  <view class="info-card order-summary-card">
+    <view class="card-header">
+      <text class="card-title">订单摘要</text>
+    </view>
+    <view class="card-content">
+      <view class="info-row">
+        <text class="info-label">订单编号</text>
+        <text class="info-value">{{orderInfo.id}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">门店名称</text>
+        <text class="info-value">{{orderInfo.storeName}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">车型名称</text>
+        <text class="info-value">{{orderInfo.carModel}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">租赁时间</text>
+        <text class="info-value">{{orderInfo.startTime}} —— {{orderInfo.endTime}}</text>
+      </view>
+      <view class="info-row highlight-row">
+        <text class="info-label">租赁天数</text>
+        <text class="info-value highlight">{{orderInfo.rentalDays}}天</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 费用明细 -->
+  <view class="info-card cost-detail-card">
+    <view class="card-header">
+      <text class="card-title">费用明细</text>
+    </view>
+    <view class="card-content">
+      <view class="cost-item">
+        <text class="cost-label">租赁费用</text>
+        <text class="cost-value">¥{{costDetail.rentalCost}}</text>
+      </view>
+      <view class="cost-item" wx:if="{{costDetail.overtimeCost > 0}}">
+        <text class="cost-label">超时费用</text>
+        <text class="cost-value overtime">¥{{costDetail.overtimeCost}}</text>
+      </view>
+      <view class="cost-divider"></view>
+      <view class="cost-item total-row">
+        <text class="cost-label">总计费用</text>
+        <text class="cost-value total">¥{{costDetail.totalCost}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 工作时长统计 -->
+  <view class="info-card work-stats-card">
+    <view class="card-header">
+      <text class="card-title">工作统计</text>
+    </view>
+    <view class="stats-display">
+      <view class="stat-item">
+        <text class="stat-value">{{workStats.totalHours}}</text>
+        <text class="stat-label">总工作小时</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value">{{workStats.averageDaily}}</text>
+        <text class="stat-label">日均工作小时</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value efficiency-{{workStats.efficiencyClass}}">{{workStats.efficiency}}</text>
+        <text class="stat-label">工作效率</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系信息 -->
+  <view class="info-card contact-info-card">
+    <view class="card-header">
+      <text class="card-title">服务联系</text>
+    </view>
+    <view class="card-content">
+      <view class="contact-item">
+        <text class="contact-label">门店经理</text>
+        <view class="contact-info">
+          <text class="contact-name">{{orderInfo.managerName}}</text>
+          <text class="phone-link" bindtap="makePhoneCall" data-phone="{{orderInfo.managerPhone}}">
+            {{orderInfo.managerPhone}}
+          </text>
+        </view>
+      </view>
+      <view class="contact-item">
+        <text class="contact-label">客服热线</text>
+        <view class="contact-info">
+          <text class="phone-link" bindtap="makePhoneCall" data-phone="400-888-0000">
+            400-888-0000
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 评价和建议 -->
+  <view class="info-card feedback-card" wx:if="{{!feedback.submitted}}">
+    <view class="card-header">
+      <text class="card-title">服务评价</text>
+    </view>
+    <view class="card-content">
+      <view class="rating-section">
+        <text class="rating-label">请为本次服务打分</text>
+        <view class="stars-container">
+          <text class="star {{item <= feedback.rating ? 'active' : ''}}" 
+                wx:for="{{starArray}}" 
+                wx:key="item"
+                bindtap="setRating" 
+                data-rating="{{item}}">★</text>
+        </view>
+      </view>
+      
+      <view class="feedback-input-section">
+        <text class="input-label">意见和建议（选填）</text>
+        <textarea class="feedback-textarea" 
+                  placeholder="请输入您的意见和建议" 
+                  value="{{feedback.content}}"
+                  bindinput="onFeedbackInput"
+                  maxlength="200"></textarea>
+      </view>
+    </view>
+  </view>
+
+  <!-- 评价已提交提示 -->
+  <view class="info-card feedback-submitted-card" wx:if="{{feedback.submitted}}">
+    <view class="submitted-content">
+      <view class="submitted-icon">✓</view>
+      <text class="submitted-title">评价已提交</text>
+      <text class="submitted-desc">感谢您的宝贵意见！</text>
+    </view>
+  </view>
+
+</view>
+
+<!-- 底部操作区域 -->
+<view class="bottom-actions">
+  <view class="action-buttons">
+    <button class="action-btn secondary" 
+            bindtap="submitFeedback" 
+            wx:if="{{!feedback.submitted && (feedback.rating > 0 || feedback.content)}}">
+      提交评价
+    </button>
+    <button class="action-btn primary" bindtap="backToHome">
+      返回首页
+    </button>
+  </view>
+</view>
+
+<!-- 成功提示弹窗 -->
+<view class="modal-overlay" wx:if="{{uiState.showSuccessModal}}" bindtap="hideSuccessModal">
+  <view class="modal-container" catchtap="stopPropagation">
+    <view class="modal-header">
+      <view class="modal-success-icon">
+        <text class="checkmark">✓</text>
+      </view>
+      <text class="modal-title">评价提交成功</text>
+      <text class="modal-subtitle">感谢您的宝贵意见！</text>
+    </view>
+    <button class="modal-btn" bindtap="hideSuccessModal">确定</button>
+  </view>
+</view>

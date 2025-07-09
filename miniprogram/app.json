@@ -1,0 +1,99 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/notice/notice",
+    "pages/classify/classify",
+    "pages/order/order",
+    "pages/my/my",
+    "pages/login/login",
+    "pages/auth/auth",
+    "pages/manage/manage",
+    "pages/equipment/record",
+    "pages/equipment/manage",
+    "pages/deposit/review",
+    "pages/privacy-policy/privacy-policy",
+    "pages/service-agreement/service-agreement",
+    "pages/settings/settings",
+    "pages/profile/profile",
+    "pages/editNickname/editNickname",
+    "pages/membership/membership",
+    "mp_ecard_sdk/index/index",
+    "mp_ecard_sdk/protocol/service/index",
+    "mp_ecard_sdk/protocol/privacy/index",
+    "mp_ecard_sdk/protocol/userAccredit/index",
+    "mp_ecard_sdk/protocol/eid/index",
+    "pages/timeSelect/timeSelect",
+    "pages/citySelect/citySelect",
+    "pages/storeSelect/storeSelect",
+    "pages/mapGuide/mapGuide",
+    "pages/carSelect/carSelect",
+    "pages/orderConfirm/orderConfirm",
+    "pages/pickup/pickup",
+    "pages/pickup-success/pickup-success",
+    "pages/return-car/return-car",
+    "pages/return-review/return-review",
+    "pages/payment-after-review/payment-after-review",
+    "pages/order-complete/order-complete",
+    "pages/renewal-car/renewal-car",
+    "pages/renewal-success/renewal-success",
+    "pages/auth-info/auth-info",
+    "pages/vehicle-record/vehicle-record",
+    "pages/audit-return/audit-return"
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "将获取你的具体位置信息用于为您推荐附近租车网点" 
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "window": {
+    "navigationBarTitleText": "测试11",
+    "navigationBarBackgroundColor": "#F9C80E",
+    "enablePullDownRefresh": true,
+    "backgroundColor": "#efefef",
+    "backgroundTextStyle":"dark",
+    "navigationBarTextStyle":"black"
+  },
+  "tabBar": {
+    "selectedColor": "#F9C80E",
+    "color": "#666",
+    "borderStyle":"black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "/assets/tabBar/front.png",
+        "selectedIconPath": "assets/tabBar/front-activate.png"
+      },
+
+
+      {
+        "pagePath": "pages/order/order",
+        "text": "订单",
+        "iconPath": "/assets/tabBar/order.png",
+        "selectedIconPath": "/assets/tabBar/order-activate.png"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "/assets/tabBar/mine.png",
+        "selectedIconPath": "/assets/tabBar/mine-activate.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "usingComponents": {
+    "custom-checkbox": "/components/custom-checkbox/custom-checkbox",
+    "van-image": "@vant/weapp/image/index",
+    "van-loading": "@vant/weapp/loading/index",
+    "van-button": "@vant/weapp/button/index",
+    "custom01": "/components/custom01/custom01",
+    "van-calendar": "@vant/weapp/calendar/index",
+    "van-popup": "@vant/weapp/popup/index",
+    "van-picker": "@vant/weapp/picker/index"
+  },
+ "__usePrivacyCheck__": true
+}

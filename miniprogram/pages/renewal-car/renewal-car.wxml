@@ -1,0 +1,415 @@
+<!-- renewal-car.wxml - 按照订单页面模式修改的续租页面模板 -->
+<view class="renew-container">
+  
+  <!-- 原订单信息卡片 - 按照订单页面样式 -->
+  <view class="order-card">
+    <view class="info-header">
+      <text class="info-title">原订单信息</text>
+      <text class="order-status completed">已完成</text>
+    </view>
+    
+    <!-- 车辆信息 -->
+    <view class="car-info">
+      <view class="car-name">{{originalOrderInfo.carModel}}</view>
+      <image class="car-image" src="{{originalOrderInfo.carImage}}" mode="aspectFit"></image>
+    </view>
+    
+    <!-- 门店信息 -->
+    <view class="store-info">
+      <view class="store-point orange"></view>
+      <view class="store-name">{{originalOrderInfo.pickupStore}}</view>
+    </view>
+    <view class="store-info">
+      <view class="store-point green"></view>
+      <view class="store-name">{{originalOrderInfo.returnStore}}</view>
+    </view>
+    
+    <!-- 租赁时间 -->
+    <view class="rental-time">
+      <view class="time-info">{{originalStartTimeText}}</view>
+      <view class="time-info">—</view>
+      <view class="day-count">{{originalOrderInfo.totalRentalDays}}天</view>
+      <view class="time-info">—</view>
+      <view class="time-info">{{originalEndTimeText}}</view>
+    </view>
+    
+    <!-- 订单链折叠区域 - 如果有订单链则显示 -->
+    <view class="order-chain-section" wx:if="{{showOrderChain}}">
+      <!-- 折叠头部 -->
+      <view class="chain-header" bindtap="toggleOrderChain">
+        <view class="chain-info">
+          <text class="chain-icon">🔗</text>
+          <text class="chain-title">订单链详情 ({{chainSummary.totalOrders}}个订单)</text>
+          <!-- 使用预计算的标签 -->
+          <view wx:for="{{chainSummary.badges}}" wx:key="type" class="{{item.type}}-badge">
+            {{item.text}}
+          </view>
+        </view>
+        <view class="chain-arrow {{isChainExpanded ? 'expanded' : ''}}">
+          ▼
+        </view>
+      </view>
+      
+      <!-- 折叠内容 -->
+      <view class="chain-content" wx:if="{{isChainExpanded}}">
+        
+        <!-- 订单链条列表 -->
+        <view wx:for="{{processedChainDetails}}" wx:key="orderId" wx:for-item="chainItem" class="chain-item">
+          
+          <!-- 订单类型和状态 -->
+          <view class="chain-item-header">
+            <view class="order-type-tag {{chainItem.typeClassName}}">
+              {{chainItem.orderType}}
+            </view>
+            <view class="order-status-tag {{chainItem.statusClassName}}">
+              {{chainItem.orderStatus}}
+            </view>
+          </view>
+          
+          <!-- 订单详细信息 -->
+          <view class="chain-item-body">
+            <view class="detail-row">
+              <text class="detail-label">订单编号:</text>
+              <text class="detail-value">{{chainItem.orderId}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">订单价格:</text>
+              <text class="detail-value price-value">{{chainItem.formattedPrice}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">生效时间:</text>
+              <text class="detail-value">{{chainItem.formattedEffectiveTime}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">租期天数:</text>
+              <text class="detail-value">{{chainItem.rentalDays}}天</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">创建时间:</text>
+              <text class="detail-value">{{chainItem.formattedCreateTime}}</text>
+            </view>
+            
+            <!-- 超时信息 -->
+            <block wx:if="{{chainItem.showOvertimeInfo}}">
+              <view class="detail-row overtime-row">
+                <text class="detail-label">超时情况:</text>
+                <text class="detail-value overtime-text">超时{{chainItem.overtimeHours}}小时</text>
+              </view>
+              <view class="detail-row" wx:if="{{chainItem.actualEndTime}}">
+                <text class="detail-label">实际还车:</text>
+                <text class="detail-value">{{chainItem.actualEndTime}}</text>
+              </view>
+              <view class="detail-row" wx:if="{{chainItem.formattedOvertimeFee}}">
+                <text class="detail-label">超时费用:</text>
+                <text class="detail-value overtime-fee">{{chainItem.formattedOvertimeFee}}</text>
+              </view>
+              <!-- 补缴订单标识 -->
+              <view class="payment-notice" wx:if="{{chainItem.showPaymentNotice}}">
+                <text class="notice-icon">💰</text>
+                <text class="notice-text">此订单需要补缴超时费用</text>
+              </view>
+            </block>
+          </view>
+        </view>
+        
+        <!-- 出车记录信息 -->
+        <view class="vehicle-record">
+          <view class="record-header">
+            <text class="record-icon">🚗</text>
+            <text class="record-title">出车记录信息</text>
+          </view>
+          <view class="record-content">
+            <view class="record-row">
+              <text class="record-label">记录编号:</text>
+              <text class="record-value">{{originalOrderInfo.vehicleRecordId}}</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">车辆编号:</text>
+              <text class="record-value">{{originalOrderInfo.carNumber}}</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">总租期:</text>
+              <text class="record-value">{{originalOrderInfo.totalRentalDays}}天</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">续租次数:</text>
+              <text class="record-value">{{originalOrderInfo.renewalCount}}次</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">取车时间:</text>
+              <text class="record-value">{{originalStartTimeText}}</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">还车时间:</text>
+              <text class="record-value">{{originalEndTimeText}}</text>
+            </view>
+            <view class="record-row" wx:if="{{originalOrderInfo.hasPayment}}">
+              <text class="record-label">补缴状态:</text>
+              <text class="record-value payment-status">存在超时补缴费用</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 基本订单信息 -->
+    <view class="basic-info">
+      <view class="info-row">
+        <text class="info-label">订单编号:</text>
+        <text class="info-value">{{originalOrderInfo.orderId}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">管理员:</text>
+        <text class="info-value">{{originalOrderInfo.managerName}}</text>
+        <text class="phone-link" bindtap="makePhoneCall" data-phone="{{originalOrderInfo.managerPhone}}">{{originalOrderInfo.managerPhone}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">出车记录:</text>
+        <text class="info-value">{{originalOrderInfo.vehicleRecordId}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 会员购买卡片 -->
+  <view class="member-card" wx:if="{{showMemberCard}}">
+    <view class="info-header">
+      <text class="info-title">会员特权</text>
+    </view>
+    <view class="member-content">
+      <view class="member-benefits">
+        <view class="benefit-item">
+          <text class="benefit-icon">🎉</text>
+          <text class="benefit-text">续租享受{{membershipInfo.discountText}}优惠</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">⚡</text>
+          <text class="benefit-text">专属客服优先服务</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">🔧</text>
+          <text class="benefit-text">免费设备检测服务</text>
+        </view>
+      </view>
+      <view class="member-purchase">
+        <view class="purchase-option">
+          <checkbox-group bindchange="onPurchaseMembershipChange">
+            <label class="checkbox-label">
+              <checkbox value="purchase" checked="{{purchaseMembership}}" color="#ff7200"/>
+              <text class="purchase-text">购买会员</text>
+              <text class="member-price">¥{{membershipInfo.price}}</text>
+            </label>
+          </checkbox-group>
+        </view>
+        <view class="member-tip">
+          <text class="tip-text">本次续租立即享受会员价格</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 续租设置 -->
+  <view class="renew-section">
+    <view class="info-header">
+      <text class="info-title">新续租订单设置</text>
+    </view>
+    
+    <!-- 新订单信息预览 -->
+    <view class="new-order-preview">
+      <view class="preview-row">
+        <text class="preview-label">新订单编号:</text>
+        <text class="preview-value">{{renewalOrderInfo.orderId}}</text>
+      </view>
+      <view class="preview-row">
+        <text class="preview-label">关联原订单:</text>
+        <text class="preview-value">{{renewalOrderInfo.parentOrderId}}</text>
+      </view>
+      <view class="preview-row">
+        <text class="preview-label">续租层级:</text>
+        <text class="preview-value">第{{renewalOrderInfo.renewalLevel}}次续租</text>
+      </view>
+      <view class="preview-row">
+        <text class="preview-label">出车记录:</text>
+        <text class="preview-value">{{originalOrderInfo.vehicleRecordId}} (共享)</text>
+      </view>
+    </view>
+    
+    <view class="renew-input-row">
+      <text class="input-label">续租天数:</text>
+      <input 
+        class="day-input" 
+        type="number" 
+        placeholder="请输入续租天数"
+        value="{{renewDays}}"
+        bindinput="onRenewDaysChange"
+        bindblur="onRenewDaysBlur"
+        min="1"
+      />
+      <text class="input-unit">天</text>
+    </view>
+    <view class="input-tip">*最少续租1天，续租订单将在原订单结束后自动生效</view>
+    <view class="error-tip" wx:if="{{daysErrorTip}}">
+      <text class="error-text">{{daysErrorTip}}</text>
+    </view>
+    
+    <!-- 新租期显示 -->
+    <view class="new-period" wx:if="{{showNewPeriod}}">
+      <view class="period-header">
+        <text class="period-title">新续租订单租期</text>
+        <text class="period-status">待生效</text>
+      </view>
+      <view class="period-display">
+        <text class="period-text">{{newStartTime}} —— {{newEndTime}}</text>
+        <text class="period-days">(续租{{renewDays}}天)</text>
+      </view>
+      <view class="period-note">
+        <text class="note-text">注：续租订单将在{{originalEndTimeText}}原订单结束后立即生效</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 支付明细 -->
+  <view class="payment-detail" wx:if="{{showPaymentDetail}}">
+    <view class="info-header">
+      <text class="info-title">支付明细 (新续租订单)</text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">续租天数:</text>
+      <text class="detail-value">{{renewDays}}天</text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">续租单价:</text>
+      <text class="detail-value">
+        ¥{{currentRenewPrice}}/天
+        <text class="original-price" wx:if="{{(isMember || purchaseMembership) && currentRenewPrice != renewPrice}}">
+          原价¥{{renewPrice}}
+        </text>
+      </text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">续租小计:</text>
+      <text class="detail-value">¥{{renewSubtotal}}</text>
+    </view>
+    
+    <!-- 会员费用 -->
+    <view class="detail-row" wx:if="{{purchaseMembership && membershipFee > 0}}">
+      <text class="detail-label">会员费用:</text>
+      <text class="detail-value member-fee">¥{{membershipFee}}</text>
+    </view>
+    
+    <view class="detail-row subtotal-row">
+      <text class="detail-label">服务费前小计:</text>
+      <text class="detail-value">¥{{serviceSubtotal}}</text>
+    </view>
+    
+    <!-- 系统服务费 -->
+    <view class="detail-row">
+      <text class="detail-label">系统服务费({{serviceRatePercent}}%):</text>
+      <text class="detail-value service-fee">¥{{serviceFee}}</text>
+    </view>
+    
+    <view class="detail-row total-row">
+      <text class="detail-label">总计:</text>
+      <text class="detail-value total-price">¥{{totalAmount}}</text>
+    </view>
+    
+    <!-- 订单创建说明 -->
+    <view class="payment-note">
+      <view class="note-header">📋 订单创建说明</view>
+      <view class="note-content">
+        <text class="note-item">• 支付成功后将立即创建新的续租订单</text>
+        <text class="note-item">• 续租订单状态为"待生效"，在原订单结束后自动生效</text>
+        <text class="note-item">• 新订单与原订单共享同一出车记录，车辆无需重新取车</text>
+        <text class="note-item">• 续租订单可以继续进行续租或还车操作</text>
+        <text class="note-item">• 新订单将添加到原订单的订单链中，可在订单列表查看</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部支付区域 -->
+  <view class="payment-section">
+    <view class="payment-left">
+      <text class="payment-label">创建续租订单并支付:</text>
+      <text class="payment-amount">¥{{totalAmount || '0.00'}}</text>
+    </view>
+    <button class="payment-btn" bindtap="submitPayment" disabled="{{!canPay}}">
+      {{paymentButtonText}}
+    </button>
+  </view>
+</view>
+
+<!-- 支付确认弹窗 -->
+<view class="modal-mask" wx:if="{{showPaymentModal}}" bindtap="hidePaymentModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">确认创建续租订单</text>
+      <text class="modal-close" bindtap="hidePaymentModal">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="confirm-detail">
+        <view class="confirm-section">
+          <text class="section-title">续租订单信息</text>
+          <view class="confirm-row">
+            <text class="confirm-label">新订单编号:</text>
+            <text class="confirm-value">{{renewalOrderInfo.orderId}}</text>
+          </view>
+          <view class="confirm-row">
+            <text class="confirm-label">关联原订单:</text>
+            <text class="confirm-value">{{renewalOrderInfo.parentOrderId}}</text>
+          </view>
+          <view class="confirm-row">
+            <text class="confirm-label">续租层级:</text>
+            <text class="confirm-value">第{{renewalOrderInfo.renewalLevel}}次续租</text>
+          </view>
+          <view class="confirm-row">
+            <text class="confirm-label">订单状态:</text>
+            <text class="confirm-value">待生效 (原订单结束后自动生效)</text>
+          </view>
+          <view class="confirm-row">
+            <text class="confirm-label">出车记录:</text>
+            <text class="confirm-value">{{originalOrderInfo.vehicleRecordId}} (共享)</text>
+          </view>
+        </view>
+        
+        <view class="confirm-section">
+          <text class="section-title">租期信息</text>
+          <view class="confirm-row">
+            <text class="confirm-label">续租天数:</text>
+            <text class="confirm-value">{{renewDays}}天</text>
+          </view>
+          <view class="confirm-row">
+            <text class="confirm-label">续租期间:</text>
+            <text class="confirm-value">{{newStartTime}} —— {{newEndTime}}</text>
+          </view>
+        </view>
+        
+        <view class="confirm-section">
+          <text class="section-title">费用明细</text>
+          <view class="confirm-row">
+            <text class="confirm-label">续租单价:</text>
+            <text class="confirm-value">¥{{currentRenewPrice}}/天</text>
+          </view>
+          <view class="confirm-row">
+            <text class="confirm-label">续租小计:</text>
+            <text class="confirm-value">¥{{renewSubtotal}}</text>
+          </view>
+          <view class="confirm-row" wx:if="{{purchaseMembership && membershipFee > 0}}">
+            <text class="confirm-label">会员费用:</text>
+            <text class="confirm-value">¥{{membershipFee}}</text>
+          </view>
+          <view class="confirm-row">
+            <text class="confirm-label">系统服务费:</text>
+            <text class="confirm-value">¥{{serviceFee}}</text>
+          </view>
+          <view class="confirm-row total-confirm">
+            <text class="confirm-label">支付金额:</text>
+            <text class="confirm-value highlight">¥{{totalAmount}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="modal-buttons">
+        <button class="cancel-btn" bindtap="hidePaymentModal">取消</button>
+        <button class="confirm-btn" bindtap="confirmPayment">确认创建并支付</button>
+      </view>
+    </view>
+  </view>
+</view>

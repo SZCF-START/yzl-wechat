@@ -1,0 +1,90 @@
+<view class="settings-container">
+  <!-- 个人信息 (整个区域可点击跳转) -->
+  <navigator url="/pages/profile/profile" class="user-info">
+    <image class="avatar" src="{{userInfo.avatar}}" />
+    <view class="user-details">
+      <text class="nickname">{{ userInfo.nickname }}</text>
+      <text class="member-name">会员名：{{ userInfo.memberName }}</text>
+    </view>
+    <image class="arrow-icon" src="../../assets/arrowicon.png" />
+  </navigator>
+
+  <!-- 选项列表 -->
+  <view class="settings-list">
+    <navigator url="/pages/address/address" class="settings-item address-item">
+      <!-- 第一行：标题和设置按钮 -->
+      <view class="address-header">
+        <text class="address-title">我的收货地址</text>
+        <view class="set-address">
+          <text>设置收货地址</text>
+          <image class="arrow-icon-inline" src="../../assets/arrowicon.png" />
+        </view>
+      </view>
+      <!-- 第二行：地址值（前面可能有默认标签） -->
+      <view class="address-value">
+        <text wx:if="{{isDefaultAddress}}" class="default-tag">默认</text>
+        <text class="address-text">{{ address }}</text>
+      </view>
+    </navigator>
+
+    <!-- 账户与安全 -->
+    <navigator url="/pages/security/security" class="settings-item">
+      <text>账户与安全</text>
+      <view class="right-section">
+        <text class="right-text">手机号/密码</text>
+        <image class="arrow-icon-inline" src="../../assets/arrowicon.png" />
+      </view>
+    </navigator>
+    <!-- 发票管理 -->
+    <!-- <navigator url="/pages/invoice/invoice" class="settings-item">
+      <text>发票管理</text>
+      <view class="right-section">
+        <image class="arrow-icon-inline" src="../../assets/arrowicon.png" />
+      </view>
+    </navigator> -->
+
+    <!-- 常用发票抬头 -->
+    <!-- <navigator url="/pages/invoiceTitle/invoiceTitle" class="settings-item">
+      <text>常用发票抬头</text>
+      <view class="right-section">
+        <image class="arrow-icon-inline" src="../../assets/arrowicon.png" />
+      </view>
+    </navigator> -->
+
+    <!-- 服务协议 -->
+    <navigator url="/pages/serviceAgreement/serviceAgreement" class="settings-item">
+      <text>服务协议</text>
+      <view class="right-section">
+        <image class="arrow-icon-inline" src="../../assets/arrowicon.png" />
+      </view>
+    </navigator>
+
+    <!-- 隐私政策 -->
+    <navigator url="/pages/privacyPolicy/privacyPolicy" class="settings-item">
+      <text>隐私政策</text>
+      <view class="right-section">
+        <image class="arrow-icon-inline" src="../../assets/arrowicon.png" />
+      </view>
+    </navigator>
+
+    <!-- 个性化推荐设置 -->
+    <!-- <navigator url="/pages/recommendSettings/recommendSettings" class="settings-item">
+      <text>个性化推荐设置</text>
+      <view class="right-section">
+        <image class="arrow-icon-inline" src="../../assets/arrowicon.png" />
+      </view>
+    </navigator> -->
+
+    <!-- 版本号 -->
+    <navigator url="/pages/version/version" class="settings-item">
+      <text>版本号</text>
+      <view class="right-section">
+        <text class="right-text">0.0.1</text>
+        <image class="arrow-icon-inline" src="../../assets/arrowicon.png" />
+      </view>
+    </navigator>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-btn" bindtap="logout">退出登录</view>
+</view>

@@ -1,0 +1,53 @@
+/* 页面布局 */
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 应用 Logo */
+.logo {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 40px;
+  margin-top: 60px;
+}
+
+/* 快捷登录按钮 */
+.login-btn {
+  width: 80%;
+  height: 45px;
+  background-color: #F9C80E;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 45px;
+  border: none;
+  border-radius: 5px;
+  margin-top: 40px;
+}
+
+/* 用户协议和隐私政策 */
+.agreement {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666666;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox {
+  margin-right: 5px;
+}
+
+.link {
+  color: #F9C80E;
+  // text-decoration: underline;
+  margin: 0 2px;
+  cursor: pointer;
+}

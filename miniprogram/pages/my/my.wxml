@@ -1,0 +1,87 @@
+<view class="user-center-page">
+  <!-- 顶部用户信息 -->
+  <block wx:if="{{isLoggedIn}}">
+    <!-- 已登录状态 -->
+    <view class="user-header">
+      <view class="user-avatar-section">
+        <image src="{{avatarUrl}}" class="user-avatar"></image>
+        <view class="user-info">
+          <text class="username">{{username}}</text>
+          <view class="user-status-container" bindtap="goToMembership">
+            <text class="user-status-text">普通用户</text>
+            <image src="../../assets/arrowicon.png" class="user-status-arrow"></image>
+          </view>
+        </view>
+      </view>
+
+      <!-- 右上角图标 -->
+      <view class="header-icons">
+        <image 
+          src="../../assets/kf.png" 
+          class="icon" 
+          bindtap="contactCustomerService">
+        </image>
+        <image 
+          src="../../assets/sz.png" 
+          class="icon" 
+          bindtap="openSettings">
+        </image>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <!-- 未登录状态 -->
+    <view class="user-header">
+      <view class="user-avatar-section">
+        <image src="../../assets/yh.png" class="user-avatar"></image>
+        <view class="user-info">
+          <text class="username">用户昵称</text>
+          <text class="login-register" bindtap="goToLogin">点击登录或注册</text>
+        </view>
+      </view>
+      <!-- 右上角图标 -->
+      <view class="header-icons">
+        <image 
+          src="../../assets/kf.png" 
+          class="icon" 
+          bindtap="contactCustomerService">
+        </image>
+        <image 
+          src="../../assets/sz.png" 
+          class="icon" 
+          bindtap="openSettings">
+        </image>
+      </view>
+    </view>
+  </block>
+
+  <!-- 快捷功能区域 -->
+  <view class="quick-access">
+    <block wx:for="{{tags}}" wx:key="id">
+      <view class="access-item" bindtap="navigateToPage" data-url="{{item.url}}">
+        <image class="access-icon" src="{{item.icon}}"></image>
+        <text class="access-text">{{item.name}}</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 菜单 -->
+  <view class="menu-section">
+    <view class="menu-item" bindtap="handleMenuClick" data-type="orders">
+      <image src="../../assets/menu/orders.png" class="menu-icon"></image>
+      <text class="menu-title">我的订单</text>
+      <image src="../../assets/arrowicon.png" class="menu-arrow"></image>
+    </view>
+    <!-- <view class="menu-item" bindtap="handleMenuClick" data-type="coupons">
+      <image src="../../assets/menu/coupons.png" class="menu-icon"></image>
+      <text class="menu-title">我的优惠券</text>
+      <image src="../../assets/arrowicon.png" class="menu-arrow"></image>
+    </view> -->
+    <view class="menu-item" bindtap="handleMenuClick" data-type="settings">
+      <image src="../../assets/menu/settings.png" class="menu-icon"></image>
+      <text class="menu-title">设置</text>
+      <image src="../../assets/arrowicon.png" class="menu-arrow"></image>
+    </view>
+  </view>
+</view>

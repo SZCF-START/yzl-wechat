@@ -1,0 +1,16 @@
+<view class="container">
+  <input 
+    class="nickname-input"
+    value="{{nickname}}"
+    bindinput="onInputChange"
+    placeholder="请输入昵称"
+    maxlength="12"
+  />
+
+  <view class="info-row">
+    <text class="rule-text">昵称为2-12个中英文组成</text>
+    <text class="char-count">{{nickname.length}}/12</text>
+  </view>
+
+  <button class="save-btn" bindtap="saveNickname" disabled="{{isDisabled}}">保存</button>
+</view>

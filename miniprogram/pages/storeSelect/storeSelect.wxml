@@ -1,0 +1,129 @@
+<navigation-bar title="选择门店" background-color="{{nbBackgroundColor}}" back="{{true}}" customBack="{{true}}" bind:back="onBack" />
+
+<view class="container">
+  <!-- 固定顶部搜索区域 -->
+  <view class="header1">
+    <view class="header">
+      <view class="search-wrapper">
+        <!-- 城市选择 + 搜索框部分 -->
+        <view class="search-box">
+          <view class="city-select" bindtap="onCityTap">
+            <text class="city-text">{{ currentCity }} ▾</text>
+          </view>
+          <view class="divider"></view>
+          <!-- 搜索框 -->
+          <view class="search-bar" bindtap="onSearchTap">
+            <image class="search-icon" src="/assets/search.png" />
+            <text class="search-placeholder">输入景点、地址寻找附近门店</text>
+          </view>
+        </view>
+
+        <!-- 地图按钮 -->
+        <view class="map-btn" bindtap="onMapTap">地图</view>
+      </view>
+    </view>
+
+    <!-- 地图 -->
+    <view class="map-container">
+      <map
+        id="storeMap"
+        latitude="{{latitude}}"
+        longitude="{{longitude}}"
+        scale="14"
+        show-location
+        markers="{{markers}}"
+        style="width: 100%; height: 100%;">
+      </map>
+
+      <!-- 覆盖在地图上的按钮 - 添加条件显示 -->
+      <cover-view class="map-overlay" wx:if="{{!showSearchMask}}">
+        <cover-view class="view-map-btn" bindtap="onViewBigMap">看大地图</cover-view>
+      </cover-view>
+    </view>
+  </view>
+
+  <!-- 门店列表 -->
+  <view class="store-section">
+    <!-- 左侧区域列表 -->
+    <scroll-view scroll-y class="area-list" scroll-with-animation="{{false}}">
+      <view class="area1">
+        <block wx:for="{{areaList}}" wx:key="name">
+          <view
+            class="area-item {{selectedAreaIndex === index ? 'active' : ''}}"
+            data-index="{{index}}"
+            bindtap="onAreaTap"
+          >{{item.name}}</view>
+        </block>
+      </view>
+    </scroll-view>
+
+    <!-- 右侧门店列表 -->
+    <scroll-view 
+      id="storeScrollView"
+      scroll-y 
+      class="store-list" 
+      bindscroll="onStoreScroll" 
+      scroll-with-animation
+      scroll-top="{{scrollTop}}"
+      enhanced="{{true}}"
+      bounces="{{false}}"
+      show-scrollbar="{{false}}"
+    >
+      <view class="store-list-content">
+        <block wx:for="{{areaList}}" wx:key="name" wx:for-item="area" wx:for-index="areaIndex">
+          <view class="area-section" id="area-{{areaIndex}}">
+            <view class="area-title">
+              {{area.name}}
+            </view>
+            <block wx:for="{{area.stores}}" wx:key="name" wx:for-item="store">
+              <view class="store-card {{selectedStore === store.name && area.name === '常用门店' ? 'selected' : ''}} {{area.name === '常用门店' ? 'favorite-store' : 'other-store'}}" 
+                    data-store="{{store}}" 
+                    data-area="{{area.name}}"
+                    bindtap="onCardTap">
+                <view class="store-header">
+                  <view class="store-name-wrapper">
+                    <text class="store-name">{{store.name}}</text>
+                    <text class="store-arrow">></text>
+                  </view>
+                  <view class="tag-list">
+                    <block wx:for="{{store.tags}}" wx:key="label" wx:for-item="tag">
+                      <text class="tag {{'tag-' + tag.type}}">{{tag.label}}</text>
+                    </block>
+                  </view>
+                </view>
+
+                <view class="store-addr">地址：{{store.address}}</view>
+                <view class="store-time">营业时间：{{store.openTime}} - {{store.closeTime}}</view>
+
+                <view class="store-actions">
+                  <button class="action-btn" open-type="makePhoneCall" data-phone="{{store.phone}}" catchtap="onPhoneTap">
+                    <text class="icon">📞</text> 电话
+                  </button>
+                  <button class="action-btn" catchtap="onGuideTap" data-lat="{{store.latitude}}" data-lng="{{store.longitude}}" data-name="{{store.name}}" data-address="{{store.address}}">
+                    <text class="icon">📍</text> 门店指引
+                  </button>
+                </view>
+              </view>
+
+              <!-- 分隔线 -->
+              <view class="card-divider"></view>
+            </block>
+          </view>
+        </block>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 搜索蒙层 - 移到最后确保最高层级 -->
+  <view wx:if="{{showSearchMask}}" class="mask-layer">
+    <navigation-bar title="选择门店" background-color="{{nbBackgroundColor}}" back="{{true}}" bind:back="onCancelSearch" />
+    <view class="search-header">
+      <input class="search-input" placeholder="请输入门店名、地址" auto-focus />
+      <text class="cancel-btn" bindtap="onCancelSearch">取消</text>
+    </view>
+    <!-- 搜索结果区域 -->
+    <view class="search-results">
+      <!-- 这里可以添加搜索结果内容 -->
+    </view>
+  </view>
+</view>

@@ -1,0 +1,52 @@
+<view class="success-container">
+  <view class="success-content">
+    <!-- 成功图标 -->
+    <view class="success-icon">
+      <text class="success-checkmark">✓</text>
+    </view>
+    
+    <!-- 成功标题 -->
+    <view class="success-title">出车成功！</view>
+    
+    <!-- 成功描述 -->
+    <view class="success-desc">
+      恭喜您成功完成取车，祝您使用愉快！
+    </view>
+    
+    <!-- 订单信息 -->
+    <view class="order-summary">
+      <view class="summary-item">
+        <text class="summary-label">车辆编号：</text>
+        <text class="summary-value">{{orderSummary.vehicleName}}</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-label">取车时间：</text>
+        <text class="summary-value">{{orderSummary.pickupTime}}</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-label">预计还车：</text>
+        <text class="summary-value">{{orderSummary.returnTime}}</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-label">工作小时：</text>
+        <text class="summary-value">{{orderSummary.dashboardHours}}小时</text>
+      </view>
+    </view>
+    
+    <!-- 温馨提示 -->
+    <view class="tips-section">
+      <view class="tips-title">温馨提示</view>
+      <view class="tips-content">
+        <view class="tip-item">• 请按时归还车辆，避免产生额外费用</view>
+        <view class="tip-item">• 使用过程中如遇问题，请及时联系门店</view>
+        <view class="tip-item">• 还车时请保持车辆清洁，油量充足</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 底部按钮 -->
+  <view class="bottom-actions">
+    <view class="action-btn secondary" bindtap="backToOrders">查看订单</view>
+    <view class="action-btn primary" bindtap="goToHome">返回首页</view>
+  </view>
+</view>

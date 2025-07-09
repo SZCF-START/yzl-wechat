@@ -1,0 +1,341 @@
+<!-- payment-after-review.wxml - 采用续租页面样式和订单链支持 -->
+<view class="payment-container">
+  
+  <!-- 订单信息卡片 - 采用续租页面样式 -->
+  <view class="order-card">
+    <view class="info-header">
+      <text class="info-title">订单信息</text>
+      <text class="order-status completed">{{orderInfo.statusText || '已完成'}}</text>
+    </view>
+    
+    <!-- 车辆信息 -->
+    <view class="car-info">
+      <view class="car-name">{{orderInfo.carModel}}</view>
+      <image class="car-image" src="{{orderInfo.carImage || '../../assets/rsg.png'}}" mode="aspectFit"></image>
+    </view>
+    
+    <!-- 门店信息 -->
+    <view class="store-info">
+      <view class="store-point orange"></view>
+      <view class="store-name">{{orderInfo.storeName}}</view>
+    </view>
+    <view class="store-info">
+      <view class="store-point green"></view>
+      <view class="store-name">{{orderInfo.returnStore || orderInfo.storeName}}</view>
+    </view>
+    
+    <!-- 租赁时间 -->
+    <view class="rental-time">
+      <view class="time-info">{{orderInfo.startTime}}</view>
+      <view class="time-info">—</view>
+      <view class="day-count">{{orderInfo.hasOrderChain ? orderInfo.totalRentalDays : orderInfo.rentalDays}}天</view>
+      <view class="time-info">—</view>
+      <view class="time-info">{{orderInfo.endTime}}</view>
+    </view>
+    
+    <!-- 订单链折叠区域 - 始终显示 -->
+    <view class="order-chain-section">
+      <!-- 折叠头部 -->
+      <view class="chain-header" catchtap="toggleOrderChain">
+        <view class="chain-info">
+          <text class="chain-icon">🔗</text>
+          <text class="chain-title">订单链详情 ({{chainSummary.totalOrders}}个订单)</text>
+          <!-- 使用预计算的标签 -->
+          <view wx:for="{{chainSummary.badges}}" wx:key="type" class="{{item.type}}-badge">
+            {{item.text}}
+          </view>
+        </view>
+        <view class="chain-arrow {{uiState.isChainExpanded ? 'expanded' : ''}}">
+          ▼
+        </view>
+      </view>
+      
+      <!-- 折叠内容 -->
+      <view class="chain-content" wx:if="{{uiState.isChainExpanded}}">
+        
+        <!-- 订单链条列表 -->
+        <view wx:for="{{processedChainDetails}}" wx:key="orderId" wx:for-item="chainItem" class="chain-item">
+          
+          <!-- 订单类型和状态 -->
+          <view class="chain-item-header">
+            <view class="order-type-tag {{chainItem.typeClassName}}">
+              {{chainItem.orderType}}
+            </view>
+            <view class="order-status-tag {{chainItem.statusClassName}}">
+              {{chainItem.orderStatus}}
+            </view>
+          </view>
+          
+          <!-- 订单详细信息 -->
+          <view class="chain-item-body">
+            <view class="detail-row">
+              <text class="detail-label">订单编号:</text>
+              <text class="detail-value">{{chainItem.orderId}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">订单价格:</text>
+              <text class="detail-value price-value">{{chainItem.formattedPrice}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">生效时间:</text>
+              <text class="detail-value">{{chainItem.formattedEffectiveTime}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">租期天数:</text>
+              <text class="detail-value">{{chainItem.rentalDays}}天</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">创建时间:</text>
+              <text class="detail-value">{{chainItem.formattedCreateTime}}</text>
+            </view>
+            
+            <!-- 超时信息 -->
+            <block wx:if="{{chainItem.showOvertimeInfo}}">
+              <view class="detail-row overtime-row">
+                <text class="detail-label">超时情况:</text>
+                <text class="detail-value overtime-text">超时{{chainItem.overtimeHours}}小时</text>
+              </view>
+              <view class="detail-row" wx:if="{{chainItem.actualEndTime}}">
+                <text class="detail-label">实际还车:</text>
+                <text class="detail-value">{{chainItem.actualEndTime}}</text>
+              </view>
+              <view class="detail-row" wx:if="{{chainItem.formattedOvertimeFee}}">
+                <text class="detail-label">超时费用:</text>
+                <text class="detail-value overtime-fee">{{chainItem.formattedOvertimeFee}}</text>
+              </view>
+              <!-- 补缴订单标识 -->
+              <view class="payment-notice" wx:if="{{chainItem.showPaymentNotice}}">
+                <text class="notice-icon">💰</text>
+                <text class="notice-text">此订单需要补缴超时费用</text>
+              </view>
+            </block>
+          </view>
+        </view>
+        
+        <!-- 出车记录信息 -->
+        <view class="vehicle-record">
+          <view class="record-header">
+            <text class="record-icon">🚗</text>
+            <text class="record-title">出车记录信息</text>
+          </view>
+          <view class="record-content">
+            <view class="record-row">
+              <text class="record-label">记录编号:</text>
+              <text class="record-value">{{orderInfo.vehicleRecordId}}</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">车辆编号:</text>
+              <text class="record-value">{{orderInfo.carNumber}}</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">总租期:</text>
+              <text class="record-value">{{orderInfo.hasOrderChain ? orderInfo.totalRentalDays : orderInfo.rentalDays}}天</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">续租次数:</text>
+              <text class="record-value">{{orderInfo.renewalCount || 0}}次</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">取车时间:</text>
+              <text class="record-value">{{orderInfo.startTime}}</text>
+            </view>
+            <view class="record-row">
+              <text class="record-label">还车时间:</text>
+              <text class="record-value">{{orderInfo.endTime}}</text>
+            </view>
+            <view class="record-row" wx:if="{{orderInfo.hasPayment}}">
+              <text class="record-label">补缴状态:</text>
+              <text class="record-value payment-status">存在超时补缴费用</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 基本订单信息 -->
+    <view class="basic-info">
+      <view class="info-row">
+        <text class="info-label">订单编号:</text>
+        <text class="info-value">{{orderInfo.id}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">管理员:</text>
+        <text class="info-value">{{orderInfo.managerName}}</text>
+        <text class="phone-link" bindtap="makePhoneCall" data-phone="{{orderInfo.managerPhone}}">{{orderInfo.managerPhone}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">出车记录:</text>
+        <text class="info-value">{{orderInfo.vehicleRecordId}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 仪表盘数据对比 -->
+  <view class="dashboard-comparison">
+    <!-- 出车时数据 -->
+    <view class="info-card dashboard-card">
+      <view class="card-header">
+        <text class="card-title">出车时仪表盘数据</text>
+      </view>
+      <view class="dashboard-display initial">
+        <text class="dashboard-value">{{orderInfo.initialHours}}</text>
+        <text class="dashboard-unit">小时</text>
+      </view>
+    </view>
+
+    <!-- 用户还车数据 -->
+    <view class="info-card dashboard-card">
+      <view class="card-header">
+        <text class="card-title">用户还车时数据</text>
+      </view>
+      <view class="dashboard-display user">
+        <text class="dashboard-value">{{returnData.userReturnHours}}</text>
+        <text class="dashboard-unit">小时</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 管理员审核数据 -->
+  <view class="info-card review-card">
+    <view class="card-header">
+      <text class="card-title">管理员审核后修改的数据</text>
+    </view>
+    <view class="card-content">
+      <view class="review-item">
+        <text class="review-label">修改后仪表盘数据</text>
+        <text class="review-value highlight">{{returnData.adminReturnHours}}小时</text>
+      </view>
+      <view class="review-item">
+        <text class="review-label">实际还车时间</text>
+        <text class="review-value">{{returnData.actualReturnTime}}</text>
+      </view>
+      <view class="review-item">
+        <text class="review-label">仪表盘照片</text>
+      </view>
+      <view class="dashboard-image-container">
+        <image class="dashboard-image" src="{{returnData.dashboardImage}}" mode="aspectFill" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 超时计算结果 -->
+  <view class="info-card overtime-card">
+    <view class="card-header">
+      <text class="card-title">超时计算结果</text>
+      <view class="question-btn" bindtap="showOvertimeDetail">
+        <text class="question-icon">?</text>
+      </view>
+    </view>
+    <view class="overtime-result">
+      <text class="overtime-text">
+        最终超时了 <text class="overtime-days">{{overtimeCalculation.finalOvertimeDays}}天</text>
+      </text>
+    </view>
+  </view>
+
+  <!-- 支付状态 -->
+  <view class="info-card payment-status-card">
+    <view class="card-header">
+      <text class="card-title">支付状态</text>
+    </view>
+    <view class="card-content">
+      <view class="payment-status-row">
+        <text class="status-label">已支付超时天数</text>
+        <text class="status-value">{{overtimeCalculation.paidOvertimeDays}}天</text>
+      </view>
+      <view class="payment-status-row highlight-row">
+        <text class="status-label">剩余需支付天数</text>
+        <text class="status-value highlight">{{overtimeCalculation.remainingOvertimeDays}}天</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 计费方式选择 -->
+  <view class="info-card price-selection-card" wx:if="{{overtimeCalculation.remainingOvertimeDays > 0}}">
+    <view class="card-header">
+      <text class="card-title">选择计费方式</text>
+    </view>
+    <view class="price-options">
+      <view class="price-option {{priceOptions.selectedType === 'overtime' ? 'selected' : ''}}" 
+            bindtap="selectPriceType" data-type="overtime">
+        <view class="option-header">
+          <text class="option-title">超时单价</text>
+          <view class="option-radio {{priceOptions.selectedType === 'overtime' ? 'checked' : ''}}"></view>
+        </view>
+        <view class="option-price">¥{{priceOptions.overtimePrice}}/天</view>
+        <view class="option-total">总计：¥{{priceOptions.overtimeTotalPrice}}</view>
+      </view>
+      
+      <view class="price-option {{priceOptions.selectedType === 'renewal' ? 'selected' : ''}}" 
+            bindtap="selectPriceType" data-type="renewal">
+        <view class="option-header">
+          <text class="option-title">续租单价</text>
+          <view class="option-radio {{priceOptions.selectedType === 'renewal' ? 'checked' : ''}}"></view>
+        </view>
+        <view class="option-price">¥{{priceOptions.renewalPrice}}/天</view>
+        <view class="option-total">总计：¥{{priceOptions.renewalTotalPrice}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 无需支付提示 -->
+  <view class="info-card no-payment-card" wx:if="{{overtimeCalculation.remainingOvertimeDays <= 0}}">
+    <view class="no-payment-content">
+      <view class="no-payment-icon">✓</view>
+      <text class="no-payment-title">无需额外支付</text>
+      <text class="no-payment-desc">已支付金额已覆盖所有超时费用</text>
+    </view>
+  </view>
+
+</view>
+
+<!-- 底部操作区域 -->
+<view class="bottom-actions">
+  <!-- 需要支付时显示价格和按钮 -->
+  <view class="payment-action-row" wx:if="{{overtimeCalculation.remainingOvertimeDays > 0}}">
+    <view class="payment-info-left">
+      <text class="payment-label">需要支付</text>
+      <text class="payment-amount">¥{{priceOptions.finalPaymentAmount}}</text>
+    </view>
+    <button class="action-btn primary" 
+            bindtap="submitPayment" 
+            disabled="{{!uiState.canPayment || uiState.paymentProcessing}}">
+      <text wx:if="{{uiState.paymentProcessing}}">支付中...</text>
+      <text wx:else>立即支付</text>
+    </button>
+  </view>
+  
+  <!-- 无需支付时显示完成按钮 -->
+  <button class="action-btn completed full-width" bindtap="goToComplete" wx:else>
+    订单已完成
+  </button>
+</view>
+
+<!-- 超时详情弹窗 -->
+<view class="modal-overlay" wx:if="{{uiState.showOvertimeModal}}" bindtap="hideOvertimeDetail">
+  <view class="modal-container" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">超时计算详情</text>
+      <view class="modal-close" bindtap="hideOvertimeDetail">
+        <text class="close-icon">×</text>
+      </view>
+    </view>
+    
+    <view class="modal-content">
+      <view class="detail-section">
+        <view class="detail-title">租期时间计算</view>
+        <text class="detail-text">{{overtimeCalculation.timeOvertimeDetail}}</text>
+      </view>
+      
+      <view class="detail-section">
+        <view class="detail-title">工作小时数计算</view>
+        <text class="detail-text">{{overtimeCalculation.hoursOvertimeDetail}}</text>
+      </view>
+      
+      <view class="detail-section">
+        <view class="detail-title">最终超时原因</view>
+        <text class="detail-text highlight">{{overtimeCalculation.finalOvertimeReason}}</text>
+      </view>
+    </view>
+  </view>
+</view>

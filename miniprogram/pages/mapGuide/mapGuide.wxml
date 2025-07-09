@@ -1,0 +1,71 @@
+<view class="map-page">
+  <!-- 搜索框区域 -->
+  <view class="header">
+    <view class="search-wrapper">
+      <!-- 城市选择 + 搜索框部分 -->
+      <view class="search-box">
+        <view class="city-select" bindtap="onCityTap">
+          <text class="city-text">{{ currentCity }} ▾</text>
+        </view>
+        <view class="divider"></view>
+        <!-- 搜索框 -->
+        <view class="search-bar" bindtap="onSearchTap">
+          <image class="search-icon" src="/assets/search.png" />
+          <text class="search-placeholder">输入景点、地址寻找附近门店</text>
+        </view>
+      </view>
+
+      <!-- 列表按钮 -->
+      <view class="map-btn" bindtap="onListTap">列表</view>
+    </view>
+  </view>
+
+  <!-- 搜索蒙层 -->
+  <view wx:if="{{showSearchMask}}" class="mask-layer">
+    <view class="search-header">
+      <input class="search-input" placeholder="请输入门店名、地址" />
+      <text class="cancel-btn" bindtap="onCancelSearch">取消</text>
+    </view>
+  </view>
+
+  <!-- 地图区域 -->
+  <map class="map"
+       id="storeMap"
+       longitude="{{longitude}}"
+       latitude="{{latitude}}"
+       markers="{{markers}}"
+       show-location="true"
+       scale="14">
+  </map>
+
+  <!-- 悬浮门店信息卡片 -->
+  <view class="store-popup">
+    <view class="store-header">
+      <view class="store-title">{{selectedStore.name}}</view>
+      <view class="store-tags" wx:if="{{selectedStore.tag}}">
+        <text class="store-tag">{{selectedStore.tag}}</text>
+      </view>
+      <view class="store-icons">
+        <button class="icon-btn" open-type="makePhoneCall" data-phone="{{selectedStore.phone}}" bindtap="onCall">
+          <image src="/images/icon-phone.png" class="icon-img" />
+        </button>
+        <button class="icon-btn" bindtap="onGuide">
+          <image src="/images/icon-location.png" class="icon-img" />
+        </button>
+      </view>
+    </view>
+
+    <view class="store-body">
+      <view class="store-addr">📍{{selectedStore.address}}</view>
+      <view class="store-time">🕒 {{selectedStore.openTime}} - {{selectedStore.closeTime}}</view>
+    </view>
+
+    
+
+    <view class="rent-btn" bindtap="onRent">租车</view>
+  </view>
+
+
+  <!-- 定位按钮 -->
+  <button class="location-btn" bindtap="onLocate">定位</button>
+</view>

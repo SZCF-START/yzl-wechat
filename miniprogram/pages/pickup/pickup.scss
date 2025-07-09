@@ -1,0 +1,601 @@
+/* 取车页面容器 */
+.pickup-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding-bottom: 140rpx;
+}
+
+/* 加载状态样式 */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.1);
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255,255,255,0.8);
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #ff7200;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 30rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+/* 信息区块通用样式 */
+.order-info-header,
+.vehicle-selection,
+.dashboard-input,
+.image-upload {
+  background-color: #fff;
+  margin: 24rpx 20rpx;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.08);
+  border: 1rpx solid rgba(255,255,255,0.8);
+  backdrop-filter: blur(10rpx);
+  transition: all 0.3s ease;
+}
+
+.order-info-header:hover,
+.vehicle-selection:hover,
+.dashboard-input:hover,
+.image-upload:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 25rpx rgba(0,0,0,0.12);
+}
+
+/* 信息标题 */
+.info-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+  border-bottom: 2rpx solid #f8f9fa;
+  padding-bottom: 16rpx;
+  position: relative;
+}
+
+.info-header::before {
+  content: '';
+  position: absolute;
+  bottom: -1rpx;
+  left: 0;
+  width: 60rpx;
+  height: 2rpx;
+  background: linear-gradient(90deg, #ff7200, #ff9500);
+  border-radius: 1rpx;
+}
+
+.section-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 25rpx;
+  padding: 0 30rpx;
+  position: relative;
+}
+
+.section-title1 {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #2c3e50;
+  position: relative;
+}
+
+/* 订单信息区域样式 */
+.store-info .info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18rpx;
+  font-size: 28rpx;
+  padding: 8rpx 0;
+  border-radius: 8rpx;
+  transition: background-color 0.2s ease;
+}
+
+.store-info .info-row:hover {
+  background-color: #f8f9fa;
+  padding: 8rpx 12rpx;
+}
+
+.store-info .info-row:last-child {
+  margin-bottom: 0;
+}
+
+.store-info .label {
+  color: #7f8c8d;
+  min-width: 180rpx;
+  font-weight: 500;
+}
+
+.store-info .value {
+  color: #2c3e50;
+  font-weight: 400;
+}
+
+.store-info .value.highlight {
+  color: #ff7200;
+  font-weight: 600;
+  font-size: 30rpx;
+}
+
+.store-info .phone {
+  color: #ff7200;
+  margin-left: 20rpx;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.store-info .days {
+  color: #ff7200;
+  font-weight: 600;
+  margin-left: 10rpx;
+  font-size: 30rpx;
+}
+
+/* 车辆选择区域 */
+.vehicle-selection {
+  padding: 30rpx 0 10rpx;
+}
+
+.vehicle-list {
+  padding: 0 30rpx;
+}
+
+.vehicle-card {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #f8f9fa, #fff);
+  border-radius: 16rpx;
+  padding: 25rpx;
+  margin-bottom: 20rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.vehicle-card.selected {
+  border-color: #ff7200;
+  background: linear-gradient(135deg, #fff5f0, #fff8f5);
+  box-shadow: 0 4rpx 20rpx rgba(255, 114, 0, 0.15);
+  transform: translateY(-2rpx);
+}
+
+.vehicle-image-container {
+  position: relative;
+  margin-right: 25rpx;
+}
+
+.vehicle-image {
+  width: 140rpx;
+  height: 100rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);
+}
+
+.vehicle-year {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  background: linear-gradient(135deg, #ff7200, #ff9500);
+  color: #fff;
+  font-size: 20rpx;
+  padding: 4rpx 8rpx;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 6rpx rgba(255, 114, 0, 0.3);
+}
+
+.vehicle-info {
+  flex: 1;
+  margin-right: 20rpx;
+}
+
+.vehicle-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15rpx;
+}
+
+.vehicle-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+}
+
+.detail-label {
+  color: #7f8c8d;
+  min-width: 120rpx;
+  font-weight: 500;
+}
+
+.detail-value {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.status-available {
+  color: #4CD964;
+  font-weight: 600;
+}
+
+.view-details-btn {
+  position: absolute;
+  right: 80rpx;
+  bottom: 25rpx;
+  background: linear-gradient(135deg, #fff, #f8f9fa);
+  border: 1rpx solid #e9ecef;
+  border-radius: 20rpx;
+  padding: 8rpx 16rpx;
+  font-size: 22rpx;
+  color: #7f8c8d;
+  transition: all 0.3s ease;
+  box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.05);
+}
+
+.view-details-btn:active {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  transform: translateY(1rpx);
+}
+
+.selection-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  border: 2rpx solid #e9ecef;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+
+.checkbox.checked {
+  border-color: #ff7200;
+  background: linear-gradient(135deg, #ff7200, #ff9500);
+  box-shadow: 0 2rpx 8rpx rgba(255, 114, 0, 0.3);
+}
+
+.checkmark {
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+/* 加载更多车辆 */
+.load-more-vehicles {
+  text-align: center;
+  padding: 30rpx 0;
+  color: #ff7200;
+  font-size: 28rpx;
+  font-weight: 600;
+  border-top: 1rpx solid #f0f0f0;
+  margin-top: 20rpx;
+  transition: all 0.3s ease;
+}
+
+.load-more-vehicles:active {
+  transform: scale(0.98);
+}
+
+/* 仪表盘数据输入样式 */
+/* 仪表盘数据输入样式 */
+.selected-vehicle-info {
+  background: linear-gradient(135deg, #fff5f0, #fff8f5);
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 20rpx;
+  border: 1rpx solid #ff7200;
+}
+
+.vehicle-hint {
+  display: block;
+  font-size: 26rpx;
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.vehicle-hours {
+  display: block;
+  font-size: 24rpx;
+  color: #ff7200;
+  font-weight: 500;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #f8f9fa, #fff);
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  margin-bottom: 16rpx;
+  border: 2rpx solid #e9ecef;
+  transition: all 0.3s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+}
+
+.input-container:focus-within {
+  border-color: #ff7200;
+  box-shadow: 0 0 0 4rpx rgba(255, 114, 0, 0.1);
+}
+
+.input-label {
+  color: #7f8c8d;
+  min-width: 180rpx;
+  font-weight: 500;
+  font-size: 28rpx;
+}
+
+.dashboard-input-field {
+  flex: 1;
+  height: 88rpx;
+  font-size: 30rpx;
+  background-color: transparent;
+  padding: 0 20rpx;
+  border: none;
+  outline: none;
+  color: #2c3e50;
+}
+
+.input-unit {
+  color: #7f8c8d;
+  font-weight: 500;
+  font-size: 28rpx;
+}
+
+.input-tip {
+  font-size: 24rpx;
+  color: #ff7200;
+  padding-left: 20rpx;
+  font-style: italic;
+}
+
+/* 图片上传区域 */
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.image-item {
+  position: relative;
+  width: 200rpx;
+  height: 200rpx;
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1);
+}
+
+.delete-image {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: linear-gradient(135deg, #ff4444, #ff6666);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(255, 68, 68, 0.3);
+  transition: all 0.3s ease;
+}
+
+.delete-image:active {
+  transform: scale(0.9);
+}
+
+.upload-placeholder {
+  width: 200rpx;
+  height: 200rpx;
+  border: 2rpx dashed #ff7200;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fff5f0, #fff8f5);
+  transition: all 0.3s ease;
+}
+
+.upload-placeholder:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, #fff0e6, #fff5f0);
+}
+
+.upload-icon {
+  font-size: 60rpx;
+  color: #ff7200;
+  margin-bottom: 10rpx;
+  font-weight: 300;
+}
+
+.upload-text {
+  font-size: 24rpx;
+  color: #ff7200;
+  font-weight: 500;
+}
+
+.upload-tip {
+  font-size: 24rpx;
+  color: #7f8c8d;
+  margin-top: 15rpx;
+  text-align: center;
+  font-style: italic;
+}
+
+/* 底部支付区域 - 参考renewal-car样式 */
+.fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #fff, #f8f9fa);
+  padding: 24rpx 32rpx;
+  box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.1);
+  backdrop-filter: blur(10rpx);
+  border-top: 1rpx solid rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pickup-btn {
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, #ff7200, #ff9500);
+  color: #fff;
+  border: none;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 16rpx rgba(255, 114, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pickup-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.pickup-btn.active:hover::before {
+  left: 100%;
+}
+
+.pickup-btn.active:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 20rpx rgba(255, 114, 0, 0.4);
+}
+
+.pickup-btn.active:active {
+  transform: translateY(0);
+  box-shadow: 0 2rpx 8rpx rgba(255, 114, 0, 0.3);
+}
+
+.pickup-btn.disabled {
+  background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+  color: #ecf0f1;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.pickup-btn.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.pickup-btn.disabled::before {
+  display: none;
+}
+
+/* 响应式优化 */
+@media screen and (max-width: 750rpx) {
+  .vehicle-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .vehicle-image-container {
+    margin-right: 0;
+    margin-bottom: 15rpx;
+    align-self: center;
+  }
+  
+  .view-details-btn {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin-top: 15rpx;
+    align-self: flex-end;
+  }
+  
+  .selection-checkbox {
+    position: absolute;
+    top: 25rpx;
+    right: 25rpx;
+  }
+  
+  .fixed-bottom {
+    padding: 20rpx 24rpx;
+  }
+}
+
+/* 滚动条优化 */
+::-webkit-scrollbar {
+  width: 6rpx;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6rpx;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #ff7200, #ff9500);
+  border-radius: 6rpx;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #e65100, #ff7200);
+}

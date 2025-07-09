@@ -1,0 +1,160 @@
+<view class="page-container">
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view>
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+
+  <!-- 顶部轮播图 -->
+  <swiper
+    class="swiper"
+    autoplay="true"
+    indicator-dots="true"
+    indicator-color="rgba(255, 255, 255, 0.5)"
+    indicator-active-color="#ff8c00"
+    interval="3000"
+    duration="500"
+    circular="true"
+    easing-function="easeInOutCubic"
+  >
+    <block wx:for="{{bannerList}}" wx:key="id">
+      <swiper-item>
+        <image
+          src="{{item.imgUrl}}"
+          mode="aspectFill"
+          class="swiper-image"
+          lazy-load="{{true}}"
+          show-menu-by-longpress="{{false}}"
+        />
+      </swiper-item>
+    </block>
+  </swiper>
+
+  <!-- 租车卡片（叠放在Banner上） -->
+  <view class="rent-card">
+    <!-- 租赁类型标签区：日租 / 月租 -->
+    <view class="rent-card-header">
+      <view class="tab-container">
+        <text 
+          class="tab-item {{activeTab === 'daily' ? 'active' : ''}}" 
+          data-tab="daily" 
+          bindtap="switchTab"
+          hover-class="tab-item-hover"
+          hover-stay-time="150"
+        >日租</text>
+        <text 
+          class="tab-item {{activeTab === 'monthly' ? 'active' : ''}}" 
+          data-tab="monthly" 
+          bindtap="switchTab"
+          hover-class="tab-item-hover"
+          hover-stay-time="150"
+        >月租</text>
+      </view>
+    </view>
+
+    <!-- 第一行：城市 & 门店标题 + 异地还车提示 -->
+    <!-- 城市和门店在同一行 -->
+    <view class="row row-city-store">
+      <!-- 城市区域 -->
+      <view 
+        class="city-block" 
+        bindtap="goCitySelect"
+        hover-class="location-hover"
+        hover-stay-time="150"
+      >
+        <text class="upper-label">城市选择</text>
+        <view class="city-value">
+          <text class="{{!currentCity ? 'placeholder-text' : ''}}">{{ currentCity || "请选择城市" }}</text>
+          <text class="subscript">v</text>
+        </view>
+      </view>
+      <!-- 门店区域 -->
+      <view 
+        class="store-block" 
+        bindtap="goStoreSelect"
+        hover-class="location-hover"
+        hover-stay-time="150"
+      >
+        <text class="upper-label">门店选择</text>
+        <view class="store-value">
+          <text class="{{!currentStore ? 'placeholder-text' : ''}}">{{ currentStore || "请选择门店" }}</text>
+          <text class="subscript">v</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 第二行：日期区间选择 -->
+    <view 
+      class="row row-date" 
+      bindtap="goTimeSelect"
+      hover-class="date-hover"
+      hover-stay-time="150"
+    >
+      <view class="date-item">
+        <text class="date-text">{{ pickupDate }}</text>
+        <text class="sub-text">{{ pickupTime }}</text>
+      </view>
+      <view class="date-middle">
+        <text class="days-text">{{ totalDays }}天</text>
+      </view>
+      <view class="date-item">
+        <text class="date-text">{{ returnDate }}</text>
+        <text class="sub-text">{{ returnTime }}</text>
+      </view>
+    </view>
+
+    <!-- 第五行：去选车按钮 -->
+    <view 
+      class="select-car-btn" 
+      bindtap="goSelectCar"
+      hover-class="btn-hover"
+      hover-stay-time="150"
+    >
+      {{currentStore ? '去选车' : '选择门店'}}
+    </view>
+    
+  </view>
+
+  <!-- 金刚区：使用swiper分页，每页显示4个图标 -->
+  <swiper
+    class="icon-swiper"
+    indicator-dots="{{iconPages.length > 1}}"
+    indicator-color="rgba(0, 0, 0, 0.2)"
+    indicator-active-color="#ff8c00"
+    autoplay="{{autoPlayValue}}"
+    current="{{iconCurrentPage}}"
+    bindchange="handleIconSwiperChange"
+    duration="300"
+    easing-function="easeInOutCubic"
+  >
+    <block wx:for="{{iconPages}}" wx:key="pageIndex" wx:for-index="pageIndex">
+      <swiper-item>
+        <!-- 根据当前页是否不足4个，添加left-align类 -->
+        <view class="icon-page {{item.length < 4 ? 'left-align' : ''}}">
+          <block wx:for="{{item}}" wx:key="id" wx:for-item="iconItem">
+            <view 
+              class="icon-item" 
+              bindtap="handleIconTap" 
+              data-id="{{iconItem.id}}"
+              hover-class="icon-item-hover"
+              hover-stay-time="150"
+            >
+              <image 
+                src="{{iconItem.icon}}" 
+                class="icon-img"
+                lazy-load="{{true}}"
+                show-menu-by-longpress="{{false}}"
+              />
+              <text class="icon-text">{{iconItem.text}}</text>
+            </view>
+          </block>
+        </view>
+      </swiper-item>
+    </block>
+  </swiper>
+
+  <!-- 底部安全区域适配 -->
+  <view class="safe-area-bottom"></view>
+</view>

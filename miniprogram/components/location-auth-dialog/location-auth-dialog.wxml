@@ -1,0 +1,47 @@
+<view wx:if="{{showDialog}}" class="auth-dialog-mask">
+  <view class="auth-dialog {{shakeClass}}">
+    
+    <!-- 小程序图标 + 名称（写死在 data 中） -->
+    <view class="app-info">
+      <image class="app-icon" src="{{appIcon}}"></image>
+      <text class="app-name">{{appName}}</text>
+    </view>
+    
+    <view class="title">获取你的位置信息</view>
+    <view class="desc">
+      将获取你具体位置信息，用于获取您所在定位，为您推荐附近租车网点。
+    </view>
+
+    <view class="privacy-section">
+      <checkbox-group>
+        <checkbox 
+          class="checkbox-item" 
+          value="agree" 
+          checked="{{privacyChecked}}" 
+          bindchange="onPrivacyChange"
+        >
+          <text>我已阅读并同意</text>
+        </checkbox>
+      </checkbox-group>
+      <!-- 点击这里可以跳转到隐私协议详情页或其他方式展示 -->
+      <text class="privacy-link" bindtap="onOpenPrivacy">
+        《一嗨租车小程序隐私政策》
+      </text>
+    </view>
+
+    <view class="btn-group">
+      <button 
+        class="btn refuse-btn" 
+        bindtap="onRefuseTap"
+      >
+        拒绝
+      </button>
+      <button 
+        class="btn allow-btn" 
+        bindtap="onAllowTap"
+      >
+        允许
+      </button>
+    </view>
+  </view>
+</view>
