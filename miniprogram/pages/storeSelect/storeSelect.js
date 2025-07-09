@@ -6,384 +6,322 @@ Page({
   data: {
     currentCity: '长沙',
     currentStore: '',
+    selectedStore: '', // 当前选中的门店
     cityList: ['长沙', '北京', '广州'],
     latitude: 28.2282,
     longitude: 112.9388,
-    markers: [
-      
-    ],
+    markers: [],
     selectedAreaIndex: 0,
     areaOffsets: [],
-    areaList: [
-      {
-        name: '天心区',
-        stores: [
-          {
-            name: '长沙先锋店',
-            address: '芙蓉南路中信凯旋蓝岸花园16.17栋103室',
-            openTime: '08:00',
-            closeTime: '20:00',
-            supportSelfReturn: true,
-            beeBox: true,
-            orderableTomorrow: true,
-            tags: [
-              { label: "高铁站", type: "default" },
-              { label: "库存紧张", type: "danger" },
-              { label: "可下全天订单", type: "highlight" }
-            ]
-          },
-          {
-            name: '长沙长盛岚庭店',
-            address: '竹塘西路378号长盛岚庭小区东二栋门面',
-            openTime: '08:00',
-            closeTime: '20:00',
-            supportSelfReturn: true,
-            beeBox: true,
-            orderableTomorrow: true
-          }
-        ]
-      },
-      {
-        name: '芙蓉区',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点',
-            address: '芙蓉中路白沙广场停车场',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点',
-            address: '书院南路与南二环交汇处',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区1',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点1',
-            address: '芙蓉中路白沙广场停车场1',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点1',
-            address: '书院南路与南二环交汇处1',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区2',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点2',
-            address: '芙蓉中路白沙广场停车场2',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点2',
-            address: '书院南路与南二环交汇处2',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区3',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点3',
-            address: '芙蓉中路白沙广场停车场3',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点3',
-            address: '书院南路与南二环交汇处3',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区4',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点4',
-            address: '芙蓉中路白沙广场停车场4',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点4',
-            address: '书院南路与南二环交汇处4',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区5',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点5',
-            address: '芙蓉中路白沙广场停车场5',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点5',
-            address: '书院南路与南二环交汇处5',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区6',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点6',
-            address: '芙蓉中路白沙广场停车场6',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点6',
-            address: '书院南路与南二环交汇处6',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区7',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点7',
-            address: '芙蓉中路白沙广场停车场7',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点7',
-            address: '书院南路与南二环交汇处7',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区8',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点8',
-            address: '芙蓉中路白沙广场停车场8',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点8',
-            address: '书院南路与南二环交汇处8',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区9',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点9',
-            address: '芙蓉中路白沙广场停车场9',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点9',
-            address: '书院南路与南二环交汇处9',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区10',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点10',
-            address: '芙蓉中路白沙广场停车场10',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点10',
-            address: '书院南路与南二环交汇处10',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区11',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点11',
-            address: '芙蓉中路白沙广场停车场11',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点11',
-            address: '书院南路与南二环交汇处11',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区12',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点12',
-            address: '芙蓉中路白沙广场停车场12',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点12',
-            address: '书院南路与南二环交汇处12',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      },
-      {
-        name: '芙蓉区13',
-        stores: [
-          {
-            name: '贺龙体育馆便捷点13',
-            address: '芙蓉中路白沙广场停车场13',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          },
-          {
-            name: '新开铺送车点13',
-            address: '书院南路与南二环交汇处13',
-            openTime: '09:00',
-            closeTime: '19:00',
-            supportSelfReturn: false,
-            beeBox: false,
-            orderableTomorrow: false
-          }
-        ]
-      }
-    ],
+    scrollTop: 0,
+    showSearchMask: false,
+    areaList: [], // 改为空数组，从API获取
+    favoriteStores: [], // 常用门店列表
     scrollIntoId: "",
     nbBackgroundColor: "#efefef",
-    sourceUrl: ''
+    sourceUrl: '',
+    isScrolling: false, // 添加滚动状态标识
+    lastClickTime: 0 // 添加点击时间记录
   },
 
   onLoad(options) {
+    console.log('页面参数:', options);
+    
+    // 从存储中获取用户之前的选择
+    const storedCity = wx.getStorageSync('currentCity') || options.city || '长沙';
+    const storedStore = wx.getStorageSync('selectedStore') || '';
+    
     this.setData({ 
-      currentCity: options.city,
-      sourceUrl: decodeURIComponent(options.source) ,
-      currentStore: options.store
+      currentCity: storedCity,
+      sourceUrl: decodeURIComponent(options.source || ''),
+      currentStore: storedStore,
+      selectedStore: storedStore
     });
-    this.initMap()
+    
+    // 加载常用门店
+    this.loadFavoriteStores();
+    
+    // 初始化页面数据
+    this.initPageData();
+  },
+
+  // 初始化页面数据
+  initPageData() {
+    this.initMap();
+    this.loadStoreList();
+  },
+
+  // 加载门店列表数据
+  loadStoreList() {
+    // TODO: 替换为真实的API调用
+    this.getStoreListFromAPI();
+  },
+
+  // 模拟API调用获取门店列表
+  getStoreListFromAPI() {
+    wx.showLoading({
+      title: '加载中...',
+      mask: true
+    });
+
+    // 模拟API请求
+    setTimeout(() => {
+      const mockApiResponse = {
+        code: 200,
+        message: 'success',
+        data: {
+          areaList: [
+            {
+              name: '天心区',
+              stores: [
+                {
+                  id: 1,
+                  name: '长沙先锋店',
+                  address: '芙蓉南路中信凯旋蓝岸花园16.17栋103室',
+                  latitude: 28.2282,
+                  longitude: 112.9388,
+                  phone: '0731-88888888',
+                  openTime: '08:00',
+                  closeTime: '20:00',
+                  supportSelfReturn: true,
+                  beeBox: true,
+                  orderableTomorrow: true,
+                  tags: [
+                    { label: "高铁站", type: "default" },
+                    { label: "库存紧张", type: "danger" },
+                    { label: "可下全天订单", type: "highlight" }
+                  ]
+                },
+                {
+                  id: 2,
+                  name: '长沙长盛岚庭店',
+                  address: '竹塘西路378号长盛岚庭小区东二栋门面',
+                  latitude: 28.2200,
+                  longitude: 112.9300,
+                  phone: '0731-99999999',
+                  openTime: '08:00',
+                  closeTime: '20:00',
+                  supportSelfReturn: true,
+                  beeBox: true,
+                  orderableTomorrow: true,
+                  tags: [
+                    { label: "地铁站", type: "default" },
+                    { label: "可下全天订单", type: "highlight" }
+                  ]
+                }
+              ]
+            },
+            {
+              name: '芙蓉区',
+              stores: [
+                {
+                  id: 3,
+                  name: '贺龙体育馆便捷点',
+                  address: '芙蓉中路白沙广场停车场',
+                  latitude: 28.2180,
+                  longitude: 112.9420,
+                  phone: '0731-77777777',
+                  openTime: '09:00',
+                  closeTime: '19:00',
+                  supportSelfReturn: false,
+                  beeBox: false,
+                  orderableTomorrow: false,
+                  tags: [
+                    { label: "体育馆", type: "default" }
+                  ]
+                },
+                {
+                  id: 4,
+                  name: '新开铺送车点',
+                  address: '书院南路与南二环交汇处',
+                  latitude: 28.2100,
+                  longitude: 112.9350,
+                  phone: '0731-66666666',
+                  openTime: '09:00',
+                  closeTime: '19:00',
+                  supportSelfReturn: false,
+                  beeBox: false,
+                  orderableTomorrow: false,
+                  tags: [
+                    { label: "送车点", type: "default" }
+                  ]
+                }
+              ]
+            },
+            {
+              name: '岳麓区',
+              stores: [
+                {
+                  id: 5,
+                  name: '岳麓山店',
+                  address: '岳麓大道123号',
+                  latitude: 28.2150,
+                  longitude: 112.9250,
+                  phone: '0731-55555555',
+                  openTime: '08:30',
+                  closeTime: '19:30',
+                  supportSelfReturn: true,
+                  beeBox: true,
+                  orderableTomorrow: true,
+                  tags: [
+                    { label: "景区", type: "default" },
+                    { label: "热门", type: "highlight" }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      };
+
+      wx.hideLoading();
+
+      if (mockApiResponse.code === 200) {
+        // 处理数据，添加常用门店区域
+        const processedAreaList = this.processAreaListWithFavorites(mockApiResponse.data.areaList);
+        
+        this.setData({
+          areaList: processedAreaList
+        }, () => {
+          // 数据加载完成后初始化位置和选中状态
+          this.initAreaPositions();
+          this.scrollToSelectedStore();
+        });
+      } else {
+        wx.showToast({
+          title: mockApiResponse.message || '加载失败',
+          icon: 'none'
+        });
+      }
+    }, 1000); // 模拟网络延迟
+  },
+
+  // 处理区域列表，添加常用门店
+  processAreaListWithFavorites(originalAreaList) {
+    const favoriteStores = this.data.favoriteStores;
+    
+    // 如果有常用门店，添加到列表最前面
+    if (favoriteStores.length > 0) {
+      const favoriteArea = {
+        name: '常用门店',
+        stores: favoriteStores
+      };
+      return [favoriteArea, ...originalAreaList];
+    }
+    
+    return originalAreaList;
+  },
+
+  // 加载常用门店
+  loadFavoriteStores() {
+    const currentCity = this.data.currentCity;
+    const favoriteStoresKey = `favoriteStores_${currentCity}`;
+    const favoriteStores = wx.getStorageSync(favoriteStoresKey) || [];
+    
+    console.log(`加载${currentCity}的常用门店:`, favoriteStores);
+    
+    this.setData({
+      favoriteStores: favoriteStores
+    });
+  },
+
+  // 保存常用门店 - 修改排序逻辑：最新选中在第二个，旧的在第一个
+  saveFavoriteStore(storeData) {
+    const currentCity = this.data.currentCity;
+    const favoriteStoresKey = `favoriteStores_${currentCity}`;
+    let favoriteStores = wx.getStorageSync(favoriteStoresKey) || [];
+    
+    // 移除已存在的相同门店
+    favoriteStores = favoriteStores.filter(store => store.name !== storeData.name);
+    
+    // 如果已有门店，新门店插入到第二个位置（索引1）
+    if (favoriteStores.length > 0) {
+      favoriteStores.splice(1, 0, storeData);
+    } else {
+      // 如果没有门店，直接添加
+      favoriteStores.push(storeData);
+    }
+    
+    // 只保留最新的两个门店
+    if (favoriteStores.length > 2) {
+      favoriteStores = favoriteStores.slice(0, 2);
+    }
+    
+    // 保存到存储
+    wx.setStorageSync(favoriteStoresKey, favoriteStores);
+    
+    console.log(`保存${currentCity}的常用门店（最新在第二个）:`, favoriteStores);
+    
+    // 更新页面数据
+    this.setData({
+      favoriteStores: favoriteStores
+    });
+  },
+
+  // 滚动到选中的门店位置 - 只在常用门店中选中
+  scrollToSelectedStore() {
+    if (!this.data.selectedStore) return;
+  
+    const areaList = this.data.areaList;
+    let targetAreaIndex = 0;
+    let foundInFavorites = false;
+  
+    // 只检查常用门店
+    if (areaList.length > 0 && areaList[0].name === '常用门店') {
+      const favoriteArea = areaList[0];
+      const foundStore = favoriteArea.stores.find(store => store.name === this.data.selectedStore);
+      if (foundStore) {
+        targetAreaIndex = 0;
+        foundInFavorites = true;
+      }
+    }
+  
+    if (!foundInFavorites) {
+      return;
+    }
+  
+    this.setData({
+      selectedAreaIndex: targetAreaIndex
+    });
+  
+    setTimeout(() => {
+      const targetOffset = this.data.areaOffsets[targetAreaIndex];
+      if (targetOffset !== undefined) {
+        this.setData({
+          scrollTop: targetOffset
+        });
+      }
+    }, 500);
+  },
+
+  onReady() {
+    // 简单延迟初始化，不使用过期的API
+    setTimeout(() => {
+      this.initAreaPositions();
+    }, 800); // 增加延迟时间，确保DOM完全渲染
+  },
+
+  // 新增方法：设置滚动视图高度
+  setScrollViewHeight(availableHeight) {
+    // 通过动态样式设置滚动容器高度
+    const query = wx.createSelectorQuery().in(this);
+    query.select('.store-section').boundingClientRect();
+    
+    query.exec((res) => {
+      if (res[0]) {
+        console.log('门店区域当前高度:', res[0].height);
+        console.log('应该设置的高度:', availableHeight);
+        
+        // 如果需要，可以通过setData设置动态样式
+        // 这里主要是为了调试和确认高度计算
+      }
+    });
   },
 
   // 初始化地图数据
   initMap() {
     const currentCity = this.data.currentCity;
-    console.log("currentCity:",currentCity);
+    console.log("currentCity:", currentCity);
     const amapKey = config.AMAP_KEY;
     if (!currentCity) {
       console.warn('当前城市为空');
@@ -417,13 +355,12 @@ Page({
 
     // 调用查询
     queryCity(currentCity).catch(() => {
-      // 若失败，加上“市”再试一次
+      // 若失败，加上"市"再试一次
       if (!currentCity.endsWith('市')) {
         return queryCity(currentCity + '市');
       }
       throw new Error('城市解析失败');
     }).then(location => {
-      
       const latitude = location.latitude;
       const longitude = location.longitude;
       // 修改 markers 配置
@@ -432,15 +369,12 @@ Page({
           id: 1,
           latitude: latitude + 0.002,
           longitude: longitude + 0.002,
-          // 1. 检查图标路径 - 确保文件存在
-          iconPath: '/assets/marker.png', // 使用绝对路径
+          iconPath: '/assets/marker.png',
           width: 30,
           height: 30,
           title: '门店1',
-          // 2. 添加更多属性确保显示
-          alpha: 1, // 透明度
-          rotate: 0, // 旋转角度
-          // 3. 使用 label 作为备选显示方案
+          alpha: 1,
+          rotate: 0,
           label: {
             content: '门店1',
             color: '#000000',
@@ -472,18 +406,14 @@ Page({
           }
         }
       ];
-      // 设置数据或初始化地图组件
       this.setData({
         latitude: latitude,
         longitude: longitude,
         markers
       });
-      // 你还可以在这里调用 wx.createMapContext 或其他地图渲染逻辑
     }).catch(err => {
       console.error('地图初始化失败:', err);
     });
-
-    
   },
 
   onCityTap() {
@@ -523,108 +453,228 @@ Page({
   onCityChange(e) {
     const city = this.data.cityList[e.detail.value];
     this.setData({ currentCity: city });
-
-    // 可调用腾讯/高德地理编码服务，根据城市更新经纬度
   },
 
+  // 修复：优化区域点击事件
   onAreaTap(e) {
-    const index = e.target.dataset.index;
-    console.log("index:",index);
+    const index = parseInt(e.currentTarget.dataset.index);
+    const currentTime = Date.now();
+    
+    if (index === undefined || index === null || isNaN(index)) {
+      console.error("无效的区域索引");
+      return;
+    }
+    
+    // 防止快速连续点击
+    if (currentTime - this.data.lastClickTime < 300) {
+      return;
+    }
+    
+    console.log(`点击区域: ${index}, 区域名: ${this.data.areaList[index]?.name}`);
+    
+    // 立即设置选中状态和标记为主动滚动
     this.setData({ 
       selectedAreaIndex: index,
-      scrollIntoId: `area-${index}`  // 动态设置 scroll-into-view 的锚点ID 
-    }, () => {
-      // 添加延迟确保滚动生效
-      setTimeout(() => {
-        this.setData({ scrollIntoId: '' }); // 重置以允许重复触发相同ID
-      }, 100);
+      isScrolling: true,
+      lastClickTime: currentTime
     });
-    // wx.pageScrollTo({
-    //   selector: `#area-${index}`,
-    //   duration: 300
-    // });
-  },
-
-  onStoreScroll(e) {
-    // 可加入滚动同步逻辑
-    const scrollTop = e.detail.scrollTop;
-    console.log("scrollTop:",scrollTop);
-    const offsets = this.data.areaOffsets;
-    console.log("offsets:",offsets);
-
-    for (let i = 0; i < offsets.length; i++) {
-      const current = offsets[i];
-      const next = offsets[i + 1] ?? Infinity;
-      console.log("next:",next);
-      if (scrollTop >= current && scrollTop < next && this.data.selectedAreaIndex !== offsets.length-1) {
-        if (this.data.selectedAreaIndex !== i) {
-          this.setData({
-            selectedAreaIndex: i
-          });
-        }
-        break;
+  
+    // 滚动到目标位置
+    const targetOffset = this.data.areaOffsets[index];
+    
+    if (targetOffset !== undefined && targetOffset >= 0) {
+      // 对于最后一个区域，使用特殊处理
+      if (index === this.data.areaList.length - 1) {
+        // 滚动到最底部
+        this.setData({
+          scrollTop: 999999 // 使用一个很大的值确保滚动到底部
+        });
+      } else {
+        this.setData({
+          scrollTop: targetOffset
+        });
       }
     }
+    
+    // 500ms后重置滚动状态，允许滚动监听重新生效
+    setTimeout(() => {
+      this.setData({
+        isScrolling: false
+      });
+    }, 500);
   },
-  onReady() {
-    this.initAreaPositions(); // 页面加载后初始化位置
+
+  // 修复：优化滚动监听事件
+  onStoreScroll(e) {
+    // 如果是主动滚动（点击引起），则不处理
+    if (this.data.isScrolling) {
+      return;
+    }
+    
+    const scrollTop = e.detail.scrollTop;
+    const offsets = this.data.areaOffsets;
+    
+    if (offsets.length === 0) return;
+  
+    let targetIndex = 0;
+    
+    // 改进的区域判断逻辑
+    const threshold = 50; // 阈值，避免频繁切换
+    
+    // 检查是否接近底部
+    const scrollHeight = e.detail.scrollHeight;
+    const clientHeight = e.detail.clientHeight || 400; // 默认高度
+    
+    // 如果滚动接近底部，选中最后一个区域
+    if (scrollTop + clientHeight >= scrollHeight - 50) {
+      targetIndex = offsets.length - 1;
+    } else {
+      // 正常的区域判断
+      for (let i = offsets.length - 1; i >= 0; i--) {
+        if (scrollTop >= offsets[i] - threshold) {
+          targetIndex = i;
+          break;
+        }
+      }
+    }
+  
+    // 防止频繁更新
+    if (this.data.selectedAreaIndex !== targetIndex) {
+      console.log(`滚动切换到区域: ${targetIndex}, 区域名: ${this.data.areaList[targetIndex]?.name}`);
+      this.setData({
+        selectedAreaIndex: targetIndex
+      });
+    }
   },
-  // 初始化区域位置
-  initAreaPositions() {
+
+  // 修复：优化区域位置初始化
+  initAreaPositions(callback) {
     const query = wx.createSelectorQuery().in(this);
-    query.select('.store-list').boundingClientRect();
-    query.selectAll('.area-section').boundingClientRect();
+    
+    // 获取滚动容器信息
+    query.select('#storeScrollView').boundingClientRect();
+    // 获取所有区域标题的位置信息
+    query.selectAll('.area-title').boundingClientRect();
+    
     query.exec((res) => {
-      console.log("res:",res);
-      const containerTop = res[0].top + 10;
-      console.log("containerTop:",containerTop);
-      const sectionRects = res[1];
-      console.log("sectionRects:",sectionRects);
-      const offsets = sectionRects.map(rect => rect.top - containerTop);
+      console.log("位置查询结果:", res);
+      
+      if (!res[0] || !res[1] || res[1].length === 0) {
+        console.warn('无法获取元素位置信息，稍后重试');
+        setTimeout(() => {
+          this.initAreaPositions(callback);
+        }, 500);
+        return;
+      }
+  
+      const scrollViewRect = res[0];
+      const titleRects = res[1];
+      
+      // 计算每个区域标题相对于滚动容器的偏移量
+      const offsets = titleRects.map((rect, index) => {
+        const offset = Math.max(0, rect.top - scrollViewRect.top);
+        console.log(`区域${index} (${this.data.areaList[index]?.name}) 偏移量: ${offset}`);
+        return offset;
+      });
+      
+      console.log("所有偏移量:", offsets);
+      
       this.setData({
         areaOffsets: offsets
       });
+      
+      if (typeof callback === 'function') {
+        callback();
+      }
     });
   },
 
   onCardTap(e) {
-    console.log("222",e.currentTarget.dataset.store.name);
-    const store = e.currentTarget.dataset.store.name
-    if(this.data.sourceUrl === '/pages/index/index') {
-      wx.setStorageSync('selectedStore', store);
-      wx.setStorageSync('currentCity', this.data.currentCity);
-    }
-    console.log("333store,",store);
+    console.log("选择门店:", e.currentTarget.dataset.store.name);
+    const storeData = e.currentTarget.dataset.store;
+    const storeName = storeData.name;
     
-    backPage({ 
-      backUrl: this.data.sourceUrl, 
-      pageData: {
-        currentCity: this.data.currentCity,
-        currentStore: store
-      } 
-    })
+    // 更新页面选中状态
+    this.setData({
+      selectedStore: storeName,
+      currentStore: storeName
+    });
+    
+    // 保存完整门店信息到存储
+    const storeInfo = {
+      name: storeName,
+      address: storeData.address,
+      phone: storeData.phone,
+      id: storeData.id,
+      latitude: storeData.latitude,
+      longitude: storeData.longitude,
+      openTime: storeData.openTime,
+      closeTime: storeData.closeTime,
+      tags: storeData.tags || [],
+      selectedTime: Date.now() // 记录选择时间
+    };
+    
+    // 存储选中的门店信息
+    wx.setStorageSync('selectedStore', storeName);
+    wx.setStorageSync('selectedStoreInfo', storeInfo);
+    wx.setStorageSync('currentCity', this.data.currentCity);
+    
+    // 保存为常用门店
+    this.saveFavoriteStore(storeInfo);
+    
+    console.log('已保存门店信息到存储:', storeInfo);
+    
+    // 显示选择成功提示
+    wx.showToast({
+      title: '已选择门店',
+      icon: 'success',
+      duration: 1000
+    });
+    
+    // 延迟返回，让用户看到选中效果和提示
+    setTimeout(() => {
+      // 触发全局事件，通知其他页面更新
+      getApp().globalData.selectedStore = storeInfo;
+      
+      // 返回上个页面
+      this.backToPreviousPage();
+    }, 1000);
   },
-  onPhoneTap() {
-    wx.makePhoneCall({ phoneNumber: this.data.selectedStore.phone });
+
+  // 返回上个页面
+  backToPreviousPage() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) {
+      wx.navigateBack({
+        delta: 1
+      });
+    } else {
+      // 如果没有上级页面，跳转到首页
+      wx.switchTab({
+        url: '/pages/index/index'
+      });
+    }
   },
-  onGuideTap() {
-    const store = this.data.selectedStore;
+
+  onPhoneTap(e) {
+    const phone = e.currentTarget.dataset.phone;
+    if (phone) {
+      wx.makePhoneCall({ phoneNumber: phone });
+    }
+  },
+
+  onGuideTap(e) {
+    const { lat, lng, name, address } = e.currentTarget.dataset;
     wx.openLocation({
-      latitude: store.latitude,
-      longitude: store.longitude,
-      name: store.name,
-      address: store.address
+      latitude: parseFloat(lat),
+      longitude: parseFloat(lng),
+      name: name,
+      address: address
     });
   },
+
   onBack() {
-    const condition = this.data.sourceUrl === '/pages/index/index';
-    console.log("condition:",condition);
-    backPage({ 
-      backUrl: this.data.sourceUrl ,
-      pageData: condition ? {} : {
-        currentCity: this.data.currentCity,
-        currentStore: this.data.currentStore
-      } 
-    })
+    // 直接返回，不需要传递参数
+    this.backToPreviousPage();
   }
 });

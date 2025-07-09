@@ -47,6 +47,7 @@ Page({
     // 当前选择城市/门店
     currentCity: '',
     currentStore: '',
+    storeInfo: null, // 完整的门店信息
 
     // 时间相关（示例先用字符串，后续从timeSelect页带回）
     pickupDate: null,
@@ -89,8 +90,79 @@ Page({
     this.checkLocationPermission();
     // 拆分金刚区数据，每页4个
     this.initIconPages();
+    // 初始化门店信息
+    this.updateStoreInfoFromStorage();
     
     this.setData({ isLoading: false });
+  },
+
+  onShow() {
+    console.log("index onShow");
+    // 当从其他页面返回时，更新门店和城市信息
+    this.updateStoreInfoFromStorage();
+    this.setDefaultDateTime();
+  },
+
+  // 从存储更新门店和城市信息
+  updateStoreInfoFromStorage() {
+    const selectedStore = wx.getStorageSync('selectedStore');
+    const selectedStoreInfo = wx.getStorageSync('selectedStoreInfo');
+    const currentCity = wx.getStorageSync('currentCity');
+    
+    console.log('从存储获取信息:', {
+      selectedStore,
+      selectedStoreInfo,
+      currentCity
+    });
+    
+    // 更新城市信息
+    if (currentCity) {
+      this.setData({
+        currentCity: currentCity
+      });
+    }
+    
+    // 更新门店信息
+    if (selectedStore) {
+      this.setData({
+        currentStore: selectedStore,
+        storeInfo: selectedStoreInfo
+      });
+      
+      console.log('已更新门店信息:', {
+        store: selectedStore,
+        info: selectedStoreInfo
+      });
+    } else {
+      // 如果没有选中门店，清空相关信息
+      this.setData({
+        currentStore: '',
+        storeInfo: null
+      });
+    }
+  },
+
+  // 获取当前选中的门店详细信息
+  getCurrentStoreInfo() {
+    return this.data.storeInfo || wx.getStorageSync('selectedStoreInfo') || null;
+  },
+
+  // 检查是否已选择门店
+  hasSelectedStore() {
+    return !!this.data.currentStore;
+  },
+
+  // 清除门店选择
+  clearStoreSelection() {
+    wx.removeStorageSync('selectedStore');
+    wx.removeStorageSync('selectedStoreInfo');
+    
+    this.setData({
+      currentStore: '',
+      storeInfo: null
+    });
+    
+    this.showToast('已清除门店选择', 'none');
   },
 
   async checkLocationPermission() {
@@ -218,28 +290,6 @@ Page({
     return weekArr[dateObj.getDay()];
   },
 
-  onShow() {
-    // 当从其他页面返回时，可在这里做数据刷新
-    const store = wx.getStorageSync('selectedStore');
-    const city = wx.getStorageSync('currentCity');
-    if (city) {
-      this.setData({ currentCity: city }, () => {
-        wx.nextTick(() => {
-          console.log("DOM 已更新，可执行渲染后操作");
-        });
-      });
-    }
-    
-    console.log("store555777:",store);
-    this.setData({ currentStore: store }, () => {
-      wx.nextTick(() => {
-        console.log("DOM 已更新，可执行渲染后操作");
-      });
-    });
-      
-    this.setDefaultDateTime();
-  },
-
   // 初始化位置，演示逻辑：不做真实定位，仅设置默认值
   initLocation() {
     wx.getLocation({
@@ -351,14 +401,17 @@ Page({
     });
   },
 
-  // 跳转到门店选择页面
+  // 跳转到门店选择页面 - 优化后的存储方式
   goStoreSelect() {
     this.preventRepeatedTap(() => {
       if (!this.data.currentCity) {
         this.showToast('请先选择城市', 'none');
         return;
       }
-      let sourceUrl = '/pages/index/index'
+      
+      const sourceUrl = '/pages/index/index';
+      
+      // 简化跳转，只传递必要参数
       wx.navigateTo({
         url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${encodeURIComponent(sourceUrl)}`,
       });
@@ -413,20 +466,23 @@ Page({
     });
   },
 
-  // 去选车
+  // 去选车 - 优化门店检查逻辑
   goSelectCar() {
     this.preventRepeatedTap(() => {
-      if(this.data.currentStore){
+      if (this.hasSelectedStore()) {
+        // 有选中门店，直接进入选车页面
         const newPickupTimestamp = this.combineDateTime(this.data.pickupDateTimestamp, this.data.pickupTime);
-        const newReturnTimestamp  = this.combineDateTime(this.data.returnDateTimestamp, this.data.returnTime);
+        const newReturnTimestamp = this.combineDateTime(this.data.returnDateTimestamp, this.data.returnTime);
+        
         wx.navigateTo({ 
           url: `/pages/carSelect/carSelect?pickupDate=${newPickupTimestamp}&returnDate=${newReturnTimestamp}&currentCity=${this.data.currentCity}`,
         });
       } else {
-        let sourceUrl = '/pages/index/index'
-        wx.navigateTo({
-          url: `/pages/storeSelect/storeSelect?city=${this.data.currentCity}&source=${encodeURIComponent(sourceUrl)}`,
-        });
+        // 没有选中门店，先跳转到门店选择页面
+        this.showToast('请先选择门店', 'none');
+        setTimeout(() => {
+          this.goStoreSelect();
+        }, 1000);
       }
     });
   },
@@ -486,14 +542,28 @@ Page({
   },
 
   goStoreNavigation() {
-    if (!this.data.currentStore) {
+    if (!this.hasSelectedStore()) {
       this.showToast('请先选择门店', 'none');
       return;
     }
-    this.showToast('门店导航功能', 'none');
-    // wx.navigateTo({
-    //   url: `/pages/storeDetail/storeDetail?store=${this.data.currentStore}`
-    // });
+    
+    const storeInfo = this.getCurrentStoreInfo();
+    console.log('门店导航 - 当前门店信息:', storeInfo);
+    
+    if (storeInfo && storeInfo.latitude && storeInfo.longitude) {
+      // 打开地图导航
+      wx.openLocation({
+        latitude: storeInfo.latitude,
+        longitude: storeInfo.longitude,
+        name: storeInfo.name,
+        address: storeInfo.address,
+        fail: () => {
+          this.showToast('打开地图失败', 'none');
+        }
+      });
+    } else {
+      this.showToast('门店位置信息不完整', 'none');
+    }
   },
 
   goMemberCenter() {
@@ -583,6 +653,7 @@ Page({
     // 重新获取数据
     setTimeout(() => {
       this.checkLocationPermission();
+      this.updateStoreInfoFromStorage();
       this.setDefaultDateTime();
       this.setData({ isLoading: false });
       wx.stopPullDownRefresh();
